@@ -38,9 +38,10 @@
 - [x] Viết `docs/design.md` — mapping token/component dsvh ↔ project này
 - [x] Commit initial scaffold
 
-### Step 2: Data model (Day 2)
-- [ ] Drizzle schema: `users, seasons, submissions, idea_scores, product_scores, appeals, experience_surveys`
-- [ ] Migration + seed dev (1 season, vài user test theo role candidate/judge/admin, @matbao.com)
+### Step 2: Data model (Day 2) — ✅ DONE
+- [x] Drizzle schema: `users, seasons, submissions, idea_scores, product_scores, appeals, experience_surveys` (+ enum role/board/branch/registration_status/feedback_status/appeal_status/score_source)
+- [x] Migration (`drizzle/0000_marvelous_banshee.sql`) áp dụng vào Postgres local — verify `\dt` đủ 7 bảng
+- [x] Seed dev (`pnpm db:seed`): 1 season, 4 user (admin/judge/candidate×2 board), 2 submission mẫu (1 đang Phase 2 có idea_score, 1 pending CP2)
 
 ### Step 3: Auth (Day 2–3)
 - [ ] Signup (email @matbao.com + password) + login, JWT tự viết trong route handlers (không NextAuth)
