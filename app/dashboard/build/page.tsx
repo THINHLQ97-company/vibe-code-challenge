@@ -59,6 +59,7 @@ export default async function BuildPage() {
             initialVibehostUrl={submission.vibehostUrl ?? ""}
             initialGithubRepoUrl={submission.githubRepoUrl ?? ""}
             githubVerified={!!submission.githubVerifiedAt}
+            initialError={submission.githubVerifyError}
           />
         </CardContent>
       </Card>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { GitBranch, TriangleAlert } from "lucide-react";
 import type { IdeaScore, ProductScore, Submission, User } from "@/lib/db/schema";
 
 export function ScoringRow({
@@ -87,6 +88,20 @@ export function ScoringRow({
         </b>
         <Badge variant="secondary">Phase {submission.currentPhase}</Badge>
       </div>
+
+      {submission.githubRepoUrl && (
+        <div className="mt-1 flex items-center gap-1.5 text-sm">
+          <GitBranch size={13} className="text-muted-foreground" />
+          {submission.githubVerifiedAt ? (
+            <span className="text-success">Đã verify collaborator</span>
+          ) : (
+            <span className="flex items-center gap-1 text-warning">
+              <TriangleAlert size={13} />
+              Chưa verify{submission.githubVerifyError ? `: ${submission.githubVerifyError}` : ""}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-border bg-card p-3">

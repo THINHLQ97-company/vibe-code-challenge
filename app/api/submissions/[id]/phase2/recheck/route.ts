@@ -1,20 +1,15 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { requireSession } from "@/lib/api-auth";
 import {
   getSubmissionById,
-  updatePhase2Info,
   markGithubVerified,
   markGithubVerifyFailed,
 } from "@/lib/db/queries/submissions";
 import { verifyGithubAccess } from "@/lib/github";
 
-const schema = z.object({
-  vibehostUrl: z.string().url("Link Vibe Host không hợp lệ"),
-  githubRepoUrl: z.string().url("Link GitHub không hợp lệ"),
-});
-
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+// Kiểm tra lại verify GitHub mà KHÔNG cần nhập lại link — thí sinh thường sửa quyền
+// collaborator trên GitHub rồi quay lại bấm "kiểm tra lại" thay vì gõ lại cả form.
+export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireSession(["candidate"]);
   if ("error" in auth) return auth.error;
 
@@ -23,22 +18,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!submission || submission.userId !== auth.session.userId) {
     return NextResponse.json({ error: "Không tìm thấy bài dự thi" }, { status: 404 });
   }
-
-  const body = await req.json().catch(() => null);
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
+  if (!submission.githubRepoUrl) {
+    return NextResponse.json({ error: "Chưa có link GitHub để kiểm tra" }, { status: 400 });
   }
 
-  await updatePhase2Info(submission.id, parsed.data);
-  const verify = await verifyGithubAccess(parsed.data.githubRepoUrl);
+  const verify = await verifyGithubAccess(submission.githubRepoUrl);
   if (verify.ok) {
     const row = await markGithubVerified(submission.id);
     return NextResponse.json({ submission: row, githubVerified: true });
   }
-  // Lưu lại lý do thất bại — phải sống sót qua reload để cả thí sinh lẫn BTC/BGK
-  // đều thấy được tại sao bài đang kẹt ở Phase 2, không chỉ hiện tạm trên UI lúc bấm nút
-  // (tham khảo pattern validation status của hackclub/podium).
   const row = await markGithubVerifyFailed(submission.id, verify.reason ?? "Không xác định được lỗi");
   return NextResponse.json({ submission: row, githubVerified: false, githubError: verify.reason });
 }

@@ -15,6 +15,13 @@
       "when": 1788930030072,
       "tag": "0001_bouncy_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788941822126,
+      "tag": "0002_furry_ghost_rider",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, RefreshCw } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,17 +13,20 @@ export function BuildForm({
   initialVibehostUrl,
   initialGithubRepoUrl,
   githubVerified,
+  initialError,
 }: {
   submissionId: number;
   initialVibehostUrl: string;
   initialGithubRepoUrl: string;
   githubVerified: boolean;
+  initialError: string | null;
 }) {
   const router = useRouter();
   const [vibehostUrl, setVibehostUrl] = useState(initialVibehostUrl);
   const [githubRepoUrl, setGithubRepoUrl] = useState(initialGithubRepoUrl);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
+  const [rechecking, setRechecking] = useState(false);
   const [verified, setVerified] = useState(githubVerified);
 
   async function onSubmit(e: FormEvent) {
@@ -51,6 +54,26 @@ export function BuildForm({
     }
   }
 
+  async function onRecheck() {
+    setError(null);
+    setRechecking(true);
+    try {
+      const res = await fetch(`/api/submissions/${submissionId}/phase2/recheck`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Kiểm tra lại thất bại");
+        return;
+      }
+      setVerified(!!data.githubVerified);
+      if (!data.githubVerified) {
+        setError(data.githubError ?? "Chưa verify được GitHub");
+      }
+      router.refresh();
+    } finally {
+      setRechecking(false);
+    }
+  }
+
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
@@ -75,13 +98,19 @@ export function BuildForm({
           required
         />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Badge variant={verified ? "default" : "secondary"} className="gap-1">
           {verified && <CheckCircle2 size={12} />}
           {verified ? "Đã verify GitHub" : "Chưa verify"}
         </Badge>
-        {error && <span className="text-sm text-destructive">{error}</span>}
+        {!verified && githubRepoUrl && (
+          <Button type="button" size="sm" variant="outline" onClick={onRecheck} disabled={rechecking} className="gap-1">
+            <RefreshCw size={13} className={rechecking ? "animate-spin" : ""} />
+            {rechecking ? "Đang kiểm tra..." : "Kiểm tra lại"}
+          </Button>
+        )}
       </div>
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" disabled={loading} className="w-fit">
         {loading ? "Đang kiểm tra..." : "Gửi & verify"}
       </Button>

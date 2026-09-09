@@ -104,7 +104,7 @@ export async function updatePhase2Info(
 ) {
   const [row] = await db
     .update(submissions)
-    .set({ ...data, githubVerifiedAt: null, updatedAt: new Date() })
+    .set({ ...data, githubVerifiedAt: null, githubVerifyError: null, updatedAt: new Date() })
     .where(eq(submissions.id, id))
     .returning();
   return row;
@@ -113,7 +113,21 @@ export async function updatePhase2Info(
 export async function markGithubVerified(id: number) {
   const [row] = await db
     .update(submissions)
-    .set({ githubVerifiedAt: new Date(), updatedAt: new Date() })
+    .set({
+      githubVerifiedAt: new Date(),
+      githubVerifyError: null,
+      githubLastCheckedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(submissions.id, id))
+    .returning();
+  return row;
+}
+
+export async function markGithubVerifyFailed(id: number, reason: string) {
+  const [row] = await db
+    .update(submissions)
+    .set({ githubVerifyError: reason, githubLastCheckedAt: new Date(), updatedAt: new Date() })
     .where(eq(submissions.id, id))
     .returning();
   return row;

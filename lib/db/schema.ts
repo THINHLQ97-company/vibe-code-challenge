@@ -119,6 +119,11 @@ export const submissions = pgTable("submissions", {
   vibehostUrl: text("vibehost_url"),
   githubRepoUrl: text("github_repo_url"),
   githubVerifiedAt: timestamp("github_verified_at"),
+  // Lưu lại lý do lần verify gần nhất thất bại — tham khảo pattern "validation status
+  // pending/valid/warning" của hackclub/podium: lỗi phải sống sót qua reload, cả thí
+  // sinh lẫn BTC/BGK đều cần thấy tại sao bài đang kẹt, không chỉ hiện tạm trên UI lúc bấm nút.
+  githubVerifyError: text("github_verify_error"),
+  githubLastCheckedAt: timestamp("github_last_checked_at"),
 
   // CP4 — cổng rà soát an toàn (7 điều cấm), điền từ hệ chấm ngoài hoặc admin
   securityStatus: securityStatusEnum("security_status").notNull().default("pending"),
