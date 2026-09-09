@@ -6,8 +6,11 @@ import { listPublishedByBoard } from "@/lib/db/queries/submissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState } from "@/components/empty-state";
+import { Trophy, Medal } from "lucide-react";
 
-const MEDALS = ["🥇", "🥈", "🥉"];
+// Top 3 = icon Medal tô màu token sẵn có (không hardcode hex mới — DESIGN.md mục 2);
+// hạng 1 dùng --ds-warning (vàng ấm sẵn có), hạng 2-3 dùng --ds-fg-mute.
+const MEDAL_CLASS = ["text-warning", "text-muted-foreground", "text-muted-foreground"];
 
 export default async function LeaderboardPage() {
   const session = await getSession();
@@ -24,7 +27,7 @@ export default async function LeaderboardPage() {
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (
-          <EmptyState icon="🏆" title="Chưa có bài nào được công bố" desc="Khi BTC công bố kết quả, bảng xếp hạng của bảng bạn sẽ hiện ở đây." />
+          <EmptyState icon={Trophy} title="Chưa có bài nào được công bố" desc="Khi BTC công bố kết quả, bảng xếp hạng của bảng bạn sẽ hiện ở đây." />
         ) : (
           <Table>
             <TableHeader>
@@ -37,8 +40,14 @@ export default async function LeaderboardPage() {
             </TableHeader>
             <TableBody>
               {rows.map((r, i) => (
-                <TableRow key={r.id} className={r.userName === me?.name ? "bg-cream-100" : ""}>
-                  <TableCell>{MEDALS[i] ?? i + 1}</TableCell>
+                <TableRow key={r.id} className={r.userName === me?.name ? "bg-accent" : ""}>
+                  <TableCell>
+                    {i < 3 ? (
+                      <Medal size={18} className={MEDAL_CLASS[i]} strokeWidth={2} />
+                    ) : (
+                      <span className="text-muted-foreground">{i + 1}</span>
+                    )}
+                  </TableCell>
                   <TableCell>{r.userName === me?.name ? <b>Bạn</b> : r.userName}</TableCell>
                   <TableCell>{r.productName}</TableCell>
                   <TableCell className="text-right font-bold">{r.finalScore}</TableCell>

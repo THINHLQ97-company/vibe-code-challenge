@@ -4,38 +4,19 @@
 
 /*
  * Design system CHÍNH THỨC của dự án — "Mắt Bão Mockup Kit" (Indigo, SaaS admin).
- * Nguồn: docs/reference/design-system.css (bản gốc do BA/user cung cấp trong
- * docs/reference/DESIGN.md). KHÔNG dùng token/màu nào ngoài file này — luật cứng
- * trong DESIGN.md mục 2: "Không hex/px thô. Mọi màu/khoảng cách đi qua token."
+ * Nguồn: docs/reference/design-system.css (bản gốc do user cung cấp, xem
+ * docs/reference/DESIGN.md). Import y nguyên, không sửa giá trị token.
+ * tailwind.config.ts trỏ THẲNG các key màu/chữ/bo góc vào biến --ds-* bên dưới —
+ * không có lớp alias đổi tên nào ở giữa.
  */
 @import "./design-system.css";
 
-/* Alias ngữ nghĩa shadcn/ui — map lên đúng token --ds-* ở trên, để các component
- * (Button/Card/Input/Badge/Table) dùng chung 1 nguồn màu, không tự chế palette khác. */
-:root {
-  --background: var(--ds-bg);
-  --foreground: var(--ds-fg);
-  --card: var(--ds-surface);
-  --card-foreground: var(--ds-fg);
-  --popover: var(--ds-surface-overlay);
-  --popover-foreground: var(--ds-fg);
-  --primary: var(--ds-primary);
-  --primary-foreground: #ffffff;
-  --secondary: var(--ds-surface-raised);
-  --secondary-foreground: var(--ds-fg);
-  --muted: var(--ds-bg);
-  --muted-foreground: var(--ds-fg-mute);
-  --accent: var(--ds-primary-light);
-  --accent-foreground: var(--ds-primary);
-  --destructive: var(--ds-danger);
-  --destructive-foreground: #ffffff;
-  --border: var(--ds-border);
-  --input: var(--ds-border);
-  --ring: var(--ds-primary-mute);
-  --radius: var(--ds-radius-md);
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
+@layer base {
+  * {
+    border-color: var(--ds-border);
+  }
+  body {
+    background: var(--ds-bg);
+    color: var(--ds-fg);
+  }
 }

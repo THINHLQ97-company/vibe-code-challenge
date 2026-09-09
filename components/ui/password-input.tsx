@@ -36,15 +36,15 @@ export function PasswordInput({ label, hint, error, className, id, ...rest }: Pa
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-caption font-medium text-ink-3 hover:text-ink-2"
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-medium text-subtle hover:text-muted-foreground"
         >
           {visible ? "Ẩn" : "Hiện"}
         </button>
       </div>
       {error ? (
-        <p className="text-caption text-destructive">{error}</p>
+        <p className="text-sm text-destructive">{error}</p>
       ) : hint ? (
-        <p className="text-caption text-ink-3">{hint}</p>
+        <p className="text-sm text-subtle">{hint}</p>
       ) : null}
     </div>
   );

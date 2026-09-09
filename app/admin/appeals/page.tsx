@@ -1,3 +1,4 @@
+import { Scale } from "lucide-react";
 import { listAppealsWithSubmission } from "@/lib/db/queries/appeals";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
@@ -13,7 +14,7 @@ export default async function AppealsAdminPage() {
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {appeals.length === 0 && (
-          <EmptyState icon="⚖️" title="Chưa có phản biện nào" desc="Thí sinh gửi phản biện trong 48h sau khi có điểm — danh sách sẽ hiện ở đây." />
+          <EmptyState icon={Scale} title="Chưa có phản biện nào" desc="Thí sinh gửi phản biện trong 48h sau khi có điểm — danh sách sẽ hiện ở đây." />
         )}
         {appeals.map((a) => (
           <AppealRow key={a.id} appeal={a} />

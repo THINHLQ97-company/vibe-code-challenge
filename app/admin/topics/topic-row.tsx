@@ -51,18 +51,18 @@ export function TopicRow({ submission }: { submission: Submission & { user: User
   }
 
   return (
-    <div className="rounded-card border border-stroke bg-surface-2 p-4">
+    <div className="rounded-card border border-border bg-muted p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <b className="text-ink">
+          <b className="text-foreground">
             {submission.user.name} · {submission.user.department}
           </b>
-          <span className="ml-2 text-caption text-ink-2">{submission.productName}</span>
+          <span className="ml-2 text-sm text-muted-foreground">{submission.productName}</span>
         </div>
         <Badge variant="secondary">{submission.topicGroup}</Badge>
       </div>
-      <div className="mt-2 text-caption text-ink-2">{submission.problemDesc}</div>
-      <ul className="mt-2 list-disc pl-5 text-caption text-ink-2">
+      <div className="mt-2 text-sm text-muted-foreground">{submission.problemDesc}</div>
+      <ul className="mt-2 list-disc pl-5 text-sm text-muted-foreground">
         {submission.features.map((f, i) => (
           <li key={i}>{f}</li>
         ))}
@@ -83,7 +83,7 @@ export function TopicRow({ submission }: { submission: Submission & { user: User
           </Button>
         </div>
       )}
-      {error && <p className="mt-2 text-caption text-destructive">{error}</p>}
+      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
     </div>
   );
 }

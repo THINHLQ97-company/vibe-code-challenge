@@ -1,10 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
 
-export type NavItem = { href: string; label: string; icon: string };
+// icon: ReactNode (JSX đã dựng sẵn, vd <Home size={16}/>) — KHÔNG dùng component
+// reference (LucideIcon) vì Server Component (các layout) không serialize được
+// function khi truyền prop sang Client Component (AppShell) — lỗi RSC runtime.
+export type NavItem = { href: string; label: string; icon: ReactNode };
 
 export function AppShell({
   brand,
@@ -28,7 +33,12 @@ export function AppShell({
         style={{ background: "var(--ds-sidebar-bg)" }}
       >
         <div className="flex items-center gap-2 px-4 py-4 text-white">
-          <span className="text-xl">🌀</span>
+          <span
+            className="flex size-8 items-center justify-center rounded-lg"
+            style={{ background: "var(--ds-sidebar-accent)" }}
+          >
+            <Sparkles size={16} strokeWidth={2.5} />
+          </span>
           <div>
             <div className="text-sm font-bold leading-tight">{brand}</div>
             <div className="text-[11px] leading-tight" style={{ color: "var(--ds-sidebar-fg)" }}>
@@ -60,7 +70,7 @@ export function AppShell({
           className="flex items-center justify-between border-b px-6 py-3"
           style={{ background: "var(--ds-surface)", borderColor: "var(--ds-border)" }}
         >
-          <div className="text-caption font-medium" style={{ color: "var(--ds-fg-mute)" }}>
+          <div className="text-sm font-medium" style={{ color: "var(--ds-fg-mute)" }}>
             {userLine}
           </div>
           <LogoutButton />

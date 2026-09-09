@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const FACTS = [
@@ -12,24 +13,26 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-        <p className="text-caption font-bold uppercase tracking-widest text-teal-strong">
+        <p className="text-sm font-bold uppercase tracking-widest text-success">
           Mắt Bão · Toàn công ty
         </p>
-        <h1 className="mt-3 text-hero font-bold tracking-tight text-ink">
-          Cuộc thi <span className="text-orange">Vibe Coding</span> Nội bộ
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground">
+          Cuộc thi <span className="text-primary">Vibe Coding</span> Nội bộ
         </h1>
-        <p className="mx-auto mt-4 max-w-xl text-body text-ink-2">
+        <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
           Tự tay làm ra một sản phẩm và đưa lên Vibe Host — hiểu để tư vấn, bán và hỗ trợ
           khách tốt hơn. Đăng nhập để đăng ký đề tài, theo dõi tiến độ và xem kết quả của bạn.
         </p>
 
         <div className="mt-8 flex flex-col items-center gap-3">
           <Link href="/login">
-            <Button size="lg">Đăng nhập →</Button>
+            <Button size="lg" className="gap-1.5">
+              Đăng nhập <ArrowRight size={16} />
+            </Button>
           </Link>
-          <p className="text-caption text-ink-3">
+          <p className="text-sm text-subtle">
             Chưa có tài khoản?{" "}
-            <Link href="/signup" className="text-link hover:text-link-hover">
+            <Link href="/signup" className="text-primary hover:text-primary-hover">
               Đăng ký tài khoản
             </Link>
           </p>
@@ -37,9 +40,9 @@ export default function LandingPage() {
 
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           {FACTS.map((f) => (
-            <div key={f.label} className="rounded-card border border-stroke bg-surface px-4 py-2.5">
-              <div className="text-title font-bold text-teal-strong">{f.value}</div>
-              <div className="text-caption text-ink-2">{f.label}</div>
+            <div key={f.label} className="rounded-card border border-border bg-card px-4 py-2.5">
+              <div className="text-lg font-bold text-success">{f.value}</div>
+              <div className="text-sm text-muted-foreground">{f.label}</div>
             </div>
           ))}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { CheckCircle2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,12 +36,16 @@ export function AppealForm({ submissionId }: { submissionId: number }) {
   }
 
   if (sent) {
-    return <p className="text-body text-teal-strong">✓ Đã gửi phản biện — BTC phản hồi trong ≤48h.</p>;
+    return (
+      <p className="flex items-center gap-1.5 text-base text-success">
+        <CheckCircle2 size={16} /> Đã gửi phản biện — BTC phản hồi trong ≤48h.
+      </p>
+    );
   }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      <p className="text-caption text-ink-2">
+      <p className="text-sm text-muted-foreground">
         Chỉ 1 lần, phải có bằng chứng kiểm chứng được (link chức năng chạy, commit, video, ảnh
         màn hình). Điểm chủ quan (Giá trị ứng dụng/Lan tỏa) chỉ nhận nếu có bằng chứng mới.
       </p>
@@ -65,7 +70,7 @@ export function AppealForm({ submissionId }: { submissionId: number }) {
           required
         />
       </div>
-      {error && <p className="text-caption text-destructive">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" disabled={loading} className="w-fit">
         {loading ? "Đang gửi..." : "Gửi phản biện"}
       </Button>

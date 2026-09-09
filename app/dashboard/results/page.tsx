@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/empty-state";
 import { AppealForm } from "./appeal-form";
+import { BarChart3, Clock } from "lucide-react";
 
 export default async function ResultsPage() {
   const session = await getSession();
@@ -15,7 +16,7 @@ export default async function ResultsPage() {
   if (!submission) {
     return (
       <EmptyState
-        icon="📊"
+        icon={BarChart3}
         title="Bạn chưa có đề tài"
         desc="Đăng ký đề tài để bắt đầu hành trình dự thi."
         action={
@@ -35,7 +36,7 @@ export default async function ResultsPage() {
         </CardHeader>
         <CardContent>
           <div className="ds-alert ds-alert-warning">
-            <span>⏳</span>
+            <Clock size={16} className="mt-0.5 shrink-0" />
             <span>
               Đang chờ hội đồng xác nhận & công bố điểm. Điểm chỉ hiển thị sau khi BTC bấm công bố.
             </span>
@@ -61,10 +62,10 @@ export default async function ResultsPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-baseline gap-2">
-            <span className="text-hero font-bold text-teal-strong">{submission.finalScore}</span>
-            <span className="text-body text-ink-2">/100</span>
+            <span className="text-2xl font-bold text-success">{submission.finalScore}</span>
+            <span className="text-base text-muted-foreground">/100</span>
           </div>
-          <div className="flex flex-col gap-2 text-caption">
+          <div className="flex flex-col gap-2 text-sm">
             <ScoreLine label="Chất lượng kỹ thuật" value={technical} max={technicalCap} />
             <ScoreLine label="Hoàn thiện & nội dung riêng" value={completion} max={15} />
             <ScoreLine label="Giá trị ứng dụng" value={applicationValue} max={25} />
@@ -93,13 +94,13 @@ function ScoreLine({ label, value, max }: { label: string; value: number; max: n
   return (
     <div>
       <div className="flex justify-between">
-        <span className="text-ink-2">{label}</span>
-        <b className="text-ink">
+        <span className="text-muted-foreground">{label}</span>
+        <b className="text-foreground">
           {value}/{max}
         </b>
       </div>
-      <div className="mt-1 h-2 overflow-hidden rounded-full bg-stroke-soft">
-        <div className="h-full rounded-full bg-teal" style={{ width: `${pct}%` }} />
+      <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
+        <div className="h-full rounded-full bg-success" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );

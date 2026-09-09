@@ -45,7 +45,7 @@ export default function LoginPage() {
       footer={
         <span>
           Chưa có tài khoản?{" "}
-          <Link href="/signup" className="text-link hover:text-link-hover">
+          <Link href="/signup" className="text-primary hover:text-primary-hover">
             Đăng ký
           </Link>
         </span>
@@ -69,7 +69,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && <p className="text-caption text-destructive">{error}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" disabled={loading} className="mt-1 w-full">
           {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </Button>

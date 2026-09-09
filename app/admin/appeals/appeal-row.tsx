@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -31,16 +32,21 @@ export function AppealRow({
   }
 
   return (
-    <div className="rounded-card border border-stroke bg-surface-2 p-4">
+    <div className="rounded-card border border-border bg-muted p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <b className="text-ink">
+        <b className="text-foreground">
           {appeal.submission.user.name} · {appeal.submission.productName}
         </b>
         <Badge variant={appeal.status === "pending" ? "secondary" : "default"}>{appeal.status}</Badge>
       </div>
-      <div className="mt-2 text-caption text-ink-2">{appeal.criteria}</div>
-      <a href={appeal.evidenceUrl} target="_blank" rel="noreferrer" className="text-caption text-link">
-        Xem bằng chứng ↗
+      <div className="mt-2 text-sm text-muted-foreground">{appeal.criteria}</div>
+      <a
+        href={appeal.evidenceUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="flex w-fit items-center gap-1 text-sm text-primary"
+      >
+        Xem bằng chứng <ExternalLink size={13} />
       </a>
       {appeal.status === "pending" && (
         <div className="mt-3 flex flex-col gap-2">
@@ -56,7 +62,7 @@ export function AppealRow({
         </div>
       )}
       {appeal.resolutionNote && (
-        <div className="mt-2 text-caption text-ink-3">Ghi chú: {appeal.resolutionNote}</div>
+        <div className="mt-2 text-sm text-subtle">Ghi chú: {appeal.resolutionNote}</div>
       )}
     </div>
   );

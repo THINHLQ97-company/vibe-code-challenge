@@ -1,59 +1,77 @@
 # Design System — "Mắt Bão Mockup Kit" (chính thức)
 
-> ⚠️ **Sửa lại 2026-09-09**: bản đầu của file này (Step 1) đã dùng nhầm design system
-> `dsvh` (design system nội bộ của chính sản phẩm Vibe Host, tông Teal/Orange) trong khi
-> user đã chuẩn bị sẵn 1 bộ RIÊNG cho dự án này — `docs/reference/design-system.css` +
-> `docs/reference/DESIGN.md` (tông Indigo, "Mắt Bão Mockup Kit", clean SaaS admin). Đã port
-> lại toàn bộ token sang đúng bộ này — xem lịch sử git để biết chi tiết sửa.
+> **Lịch sử sửa (2026-09-09, 2 lần)**:
+> 1. Bản đầu (Step 1) dùng nhầm `dsvh` (design system nội bộ của Vibe Host, tông
+>    Teal/Orange) thay vì bộ user chuẩn bị riêng cho dự án này.
+> 2. Sửa lần 1 chuyển sang `design-system.css` nhưng qua một LỚP ALIAS trung gian
+>    (đổi tên `orange`→trỏ indigo, `teal`→trỏ success...) — user phản hồi đây vẫn
+>    KHÔNG PHẢI "dùng y chang": một class tên `text-orange` mà render ra màu indigo
+>    là gây hiểu lầm, không truy vết được về token gốc. Đã sửa lần 2: bỏ hẳn lớp
+>    alias, `tailwind.config.ts` trỏ THẲNG vào biến `--ds-*`, đặt tên class đúng
+>    nghĩa gốc (`text-success`, không phải `text-teal`).
+> 3. Đồng thời thay toàn bộ icon emoji (🏠📝🧩...) bằng SVG thật (`lucide-react`) —
+>    DESIGN.md không nói rõ bộ icon nhưng "dùng icon có sẵn không phải .svg" bị
+>    đánh giá là "dơ", nhất quán với tinh thần "clean SaaS admin" của kit.
 
-## Nguồn
+## Nguồn — KHÔNG có bản sao/alias nào khác
 
-- `docs/reference/design-system.css` — bản gốc do user cung cấp, copy nguyên vào
-  `app/design-system.css` và `@import` trong `app/globals.css`. **Không sửa tay** file
-  này trừ khi bản gốc cũng đổi — giữ đồng bộ.
-- `docs/reference/DESIGN.md` — luật cứng: không hex/px thô (mọi màu/khoảng cách qua
-  token `--ds-*`), mockup trước khi code (chưa áp dụng nghiêm ngặt cho các màn đã dựng
-  trước khi phát hiện nhầm design system — ghi nhận là nợ thiết kế), responsive 3 cỡ,
-  wording qua BA (chưa áp dụng — chưa có BA review).
+- `docs/reference/design-system.css` — bản gốc do user cung cấp. Copy nguyên văn
+  vào `app/design-system.css`, `@import` trong `app/globals.css`. **Không sửa giá
+  trị token.**
+- `docs/reference/DESIGN.md` — luật cứng: không hex/px thô, mockup trước khi code
+  (nợ thiết kế — các màn đã dựng trước khi phát hiện nhầm hệ, chưa qua bước mockup
+  riêng), responsive 3 cỡ, wording qua BA (chưa có BA review).
+- `lucide-react` — bộ icon SVG dùng cho TOÀN BỘ icon trong app (sidebar nav, empty
+  state, badge, nút bấm, checklist...). Không còn icon nào là emoji/ký tự Unicode
+  giả icon (✓ ○ ↗ → 🌀 🏆 v.v. đều đã thay bằng component SVG tương ứng).
 
-## Cách dùng trong Next.js/Tailwind
+## Cách dùng trong Next.js/Tailwind — trỏ THẲNG, không đổi tên
 
-`design-system.css` viết cho dùng "song song với Tailwind CDN" (thuần class `.ds-*`),
-khác với stack Next.js + Tailwind PostCSS của dự án này. Cách tích hợp:
+`tailwind.config.ts` — mỗi key màu/chữ/bo góc/đổ bóng trỏ **trực tiếp** vào 1 biến
+`--ds-*`, tên key giữ nguyên hoặc rất sát nghĩa gốc:
 
-1. **Token** (`--ds-primary`, `--ds-fg`, `--ds-border`...): map vào alias ngữ nghĩa
-   shadcn/ui (`--background`, `--foreground`, `--primary`...) trong `app/globals.css`,
-   rồi `tailwind.config.ts` trỏ `colors.background` v.v. vào các alias đó → component
-   port từ dsvh trước đây (Button/Card/Input/Badge/Table — dùng class Tailwind
-   `bg-primary`, `text-foreground`...) tự động lên đúng màu Indigo, không cần sửa JSX.
-2. **Class `.ds-*` thuần** (`.ds-btn`, `.ds-card`, `.ds-badge`, `.ds-table`, `.ds-empty`,
-   `.ds-alert`, `.kpi`/`.kpirow`/`.kcard`, `.panel`, `.barlist`, `.ds-nav`...): dùng trực
-   tiếp làm `className` trong JSX khi cần đúng pattern trong file gốc (dashboard KPI,
-   sidebar nav, empty/error state) — xem `app/admin/page.tsx`, `components/app-shell.tsx`,
-   `components/empty-state.tsx` làm ví dụ.
-3. Tailwind utility (`flex`, `gap-4`, `grid-cols-2`...) vẫn dùng bình thường cho layout —
-   chỉ MÀU/RADIUS/SHADOW/FONT-SIZE phải qua token, không tự chế hex/px.
+| Tailwind key | Biến `--ds-*` | Ghi chú |
+|---|---|---|
+| `background` | `--ds-bg` | |
+| `foreground` | `--ds-fg` | |
+| `muted-foreground` | `--ds-fg-mute` | |
+| `subtle` | `--ds-fg-subtle` | tên mới, TRUNG THỰC theo `fg-subtle` gốc, không tái dùng tên khác |
+| `card` | `--ds-surface` | |
+| `primary` / `primary-hover` | `--ds-primary` / `--ds-primary-hover` | |
+| `secondary` | `--ds-surface-raised` | đúng nền `.ds-btn` mặc định trong kit |
+| `accent` | `--ds-primary-light` | đúng hover-state `.ds-btn-ghost` trong kit |
+| `destructive` | `--ds-danger` | |
+| `success` / `warning` / `info` (+ `-bg`) | `--ds-success` / `--ds-warning` / `--ds-info` | tên MỚI trung thực, không tái dùng `teal`/`amber` |
+| `border` / `border-strong` | `--ds-border` / `--ds-border-strong` | |
+| `ring` | `--ds-primary-mute` | |
 
-## Component đã dựng theo pattern design-system.css
+Thang chữ dùng ĐÚNG tên chuẩn Tailwind (`text-xs/sm/base/md/lg/xl/2xl`), chỉ đổi
+GIÁ TRỊ theo `--ds-font-size-*` — không còn vocabulary tự chế (`text-hero`,
+`text-kpi`...).
 
-- `components/app-shell.tsx` — sidebar app-shell dùng `.ds-nav`/`.ds-nav-item` +
-  `--ds-sidebar-bg`, thay cho layout top-nav đơn giản ban đầu (chưa đúng tinh thần kit).
-- `components/empty-state.tsx` — wrapper `.ds-empty`, dùng ở mọi danh sách rỗng
-  (topics/posts/appeals/scoring/leaderboard/các trang guard "chưa có đề tài") — DESIGN.md
-  bắt buộc empty state có thật, không phải màn trắng.
-- `app/admin/page.tsx` — `.kpirow`/`.kcard` cho dải KPI + `.panel`/`.barlist` cho biểu đồ
-  phân bổ nhóm chủ đề, đúng pattern "DASHBOARD" (mục 19) trong file gốc.
-- `app/dashboard/results/page.tsx` — `.ds-alert-warning` cho trạng thái chờ công bố.
+Class `.ds-*` thuần (`.ds-btn`, `.ds-card`, `.ds-badge`, `.ds-table`, `.ds-empty`,
+`.ds-alert`, `.kpi`/`.kpirow`/`.kcard`, `.panel`, `.barlist`, `.ds-nav`) dùng trực
+tiếp làm `className` khi cần đúng pattern trong file gốc — xem `app/admin/page.tsx`,
+`components/app-shell.tsx`, `components/empty-state.tsx`.
+
+## Icon
+
+Import trực tiếp từ `lucide-react`, `size` theo ngữ cảnh (16px sidebar/inline,
+18-22px tiêu đề/logo, 36px empty state). **Lưu ý RSC**: `NavItem.icon` trong
+`components/app-shell.tsx` nhận `ReactNode` (JSX đã dựng, vd `<Home size={16}/>`),
+KHÔNG nhận component reference (`icon: Home`) — vì `AppShell` là Client Component
+("use client") còn nav được định nghĩa ở Server Component (`layout.tsx`); truyền
+thẳng function qua ranh giới Server→Client Component sẽ lỗi runtime "Functions
+cannot be passed directly to Client Components". `EmptyState` không bị giới hạn
+này (component reference `icon: LucideIcon` OK) vì cả nó lẫn nơi gọi đều là Server
+Component, không qua ranh giới nào.
 
 ## Component shadcn cũ (Button/Card/Input/Label/Badge/Table/Textarea/Stepper)
 
-Giữ nguyên cấu trúc (copy từ `docs/reference/dsvh-source/ui/`), chỉ đổi NGUỒN MÀU qua
-bước 1 ở trên. Đã xoá `components/ui/stat-tile.tsx` (dsvh StatTile) vì không còn call
-site nào sau khi đổi dashboard sang `.kpirow`/`.kcard` — tránh code chết. `Stepper` vẫn
-giữ (dùng ở `app/dashboard/page.tsx` cho thanh tiến độ 3-phase), màu đã tự đổi Indigo qua
-bước 1 vì chỉ dùng Tailwind alias (`bg-orange`→primary), không hardcode hex.
+Giữ cấu trúc gốc (copy từ `docs/reference/dsvh-source/ui/`), chỉ dùng token màu ở
+trên — không còn tên biến nào gợi nhớ tới `dsvh`.
 
 ## Dark mode
 
-`design-system.css` hỗ trợ cả `prefers-color-scheme: dark` VÀ `[data-theme="dark"]` —
-project hiện **chưa bật toggle** (nội bộ, ít giá trị ưu tiên với iMVP).
+`design-system.css` hỗ trợ cả `prefers-color-scheme: dark` và `[data-theme="dark"]`
+— project hiện **chưa bật toggle** (nội bộ, ít giá trị ưu tiên với iMVP).

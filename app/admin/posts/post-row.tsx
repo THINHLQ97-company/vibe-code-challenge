@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -49,19 +50,26 @@ export function PostRow({ submission }: { submission: Submission & { user: User 
   }
 
   return (
-    <div className="rounded-card border border-stroke bg-surface-2 p-4">
+    <div className="rounded-card border border-border bg-muted p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <b className="text-ink">
+        <b className="text-foreground">
           {submission.user.name} · {submission.productName}
         </b>
-        <a href={submission.facebookPostUrl!} target="_blank" rel="noreferrer" className="text-caption text-link">
-          Xem bài đăng ↗
+        <a
+          href={submission.facebookPostUrl!}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-1 text-sm text-primary"
+        >
+          Xem bài đăng <ExternalLink size={13} />
         </a>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
         {submission.facebookApprovedAt ? (
-          <Badge>✓ Đã duyệt bài</Badge>
+          <Badge>
+            <CheckCircle2 size={12} /> Đã duyệt bài
+          </Badge>
         ) : (
           <Button size="sm" onClick={approvePost} disabled={loading}>
             Duyệt bài đăng
@@ -92,7 +100,11 @@ export function PostRow({ submission }: { submission: Submission & { user: User 
             Xác nhận & công bố kết quả
           </Button>
         )}
-        {submission.publishedAt && <Badge>✓ Đã công bố · {submission.finalScore}/100</Badge>}
+        {submission.publishedAt && (
+          <Badge>
+            <CheckCircle2 size={12} /> Đã công bố · {submission.finalScore}/100
+          </Badge>
+        )}
       </div>
     </div>
   );

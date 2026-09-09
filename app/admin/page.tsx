@@ -1,5 +1,7 @@
+import { FolderOpen } from "lucide-react";
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
+import { EmptyState } from "@/components/empty-state";
 
 const BAR_COLORS = ["var(--ds-c1)", "var(--ds-c2)", "var(--ds-c3)", "var(--ds-c4)", "var(--ds-c5)", "var(--ds-c6)"];
 
@@ -53,11 +55,11 @@ export default async function AdminDashboardPage() {
         </div>
         <div className="panel-body">
           {topicEntries.length === 0 ? (
-            <div className="ds-empty">
-              <div className="ds-empty-icon">🗂️</div>
-              <div className="ds-empty-title">Chưa có đăng ký nào</div>
-              <div className="ds-empty-desc">Khi thí sinh đăng ký đề tài, phân bổ theo nhóm chủ đề sẽ hiện ở đây.</div>
-            </div>
+            <EmptyState
+              icon={FolderOpen}
+              title="Chưa có đăng ký nào"
+              desc="Khi thí sinh đăng ký đề tài, phân bổ theo nhóm chủ đề sẽ hiện ở đây."
+            />
           ) : (
             <div className="barlist">
               {topicEntries.map(([group, count], i) => (

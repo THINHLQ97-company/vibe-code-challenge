@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -75,10 +76,11 @@ export function BuildForm({
         />
       </div>
       <div className="flex items-center gap-2">
-        <Badge variant={verified ? "default" : "secondary"}>
-          {verified ? "✓ Đã verify GitHub" : "Chưa verify"}
+        <Badge variant={verified ? "default" : "secondary"} className="gap-1">
+          {verified && <CheckCircle2 size={12} />}
+          {verified ? "Đã verify GitHub" : "Chưa verify"}
         </Badge>
-        {error && <span className="text-caption text-destructive">{error}</span>}
+        {error && <span className="text-sm text-destructive">{error}</span>}
       </div>
       <Button type="submit" disabled={loading} className="w-fit">
         {loading ? "Đang kiểm tra..." : "Gửi & verify"}

@@ -4,6 +4,7 @@ import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import { ShareForm } from "./share-form";
+import { Megaphone, Clock } from "lucide-react";
 
 export default async function SharePage() {
   const session = await getSession();
@@ -12,7 +13,7 @@ export default async function SharePage() {
   if (!submission) {
     return (
       <EmptyState
-        icon="📣"
+        icon={Megaphone}
         title="Bạn chưa có đề tài"
         desc="Đăng ký đề tài trước khi chia sẻ & lan tỏa."
         action={
@@ -26,7 +27,7 @@ export default async function SharePage() {
   if (submission.currentPhase < 3) {
     return (
       <EmptyState
-        icon="⏳"
+        icon={Clock}
         title="Chưa tới bước chia sẻ"
         desc="Bạn cần được BTC duyệt Phase 2 (sản phẩm & mã nguồn) trước khi sang bước này."
       />
@@ -39,7 +40,7 @@ export default async function SharePage() {
         <CardTitle>Chia sẻ & lan tỏa</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <p className="text-caption text-ink-2">
+        <p className="text-sm text-muted-foreground">
           Đăng bài <b>ẩn danh</b> lên nhóm &quot;Vibe Coding chưa?&quot; (không lộ nick chính /
           không lộ đang làm ở Mắt Bão, không đặt link bấm được trong thân bài). Dán link bài đăng
           bên dưới — BGK sẽ kiểm tra rồi tick duyệt, sau đó đếm tương tác 7 ngày ra điểm lan tỏa

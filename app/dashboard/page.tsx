@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle2, Circle } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
 import { getLatestIdeaScore } from "@/lib/db/queries/scores";
@@ -24,7 +25,7 @@ export default async function DashboardOverviewPage() {
         <CardHeader>
           <CardTitle>Bạn chưa đăng ký đề tài</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4 text-body text-ink-2">
+        <CardContent className="flex flex-col gap-4 text-base text-muted-foreground">
           <p>
             Đăng ký đề tài để BTC duyệt cuốn chiếu — mỗi người một sản phẩm, có database,
             deploy lên Vibe Host.
@@ -54,7 +55,7 @@ export default async function DashboardOverviewPage() {
           <CardTitle>{submission.productName}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-center gap-2 text-caption text-ink-2">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <Badge>{submission.registrationStatus}</Badge>
             <span>
               Nhánh {submission.branch} · {submission.topicGroup}
@@ -68,7 +69,7 @@ export default async function DashboardOverviewPage() {
           </div>
 
           {submission.registrationStatus === "returned" && (
-            <div className="rounded-card border border-destructive/30 bg-destructive/5 p-3 text-caption text-destructive">
+            <div className="rounded-card border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
               Đề tài bị trả về: {submission.registrationNote}.{" "}
               <Link href="/dashboard/register" className="underline">
                 Sửa & nộp lại
@@ -82,19 +83,19 @@ export default async function DashboardOverviewPage() {
             {checklist.map((c) => (
               <div
                 key={c.label}
-                className="flex items-center gap-2 rounded-lg border border-stroke bg-surface-2 px-3 py-2 text-caption"
+                className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-sm"
               >
-                <span className={c.done ? "text-teal-strong" : "text-ink-3"}>
-                  {c.done ? "✓" : "○"}
+                <span className={c.done ? "text-success" : "text-subtle"}>
+                  {c.done ? <CheckCircle2 size={16} /> : <Circle size={16} />}
                 </span>
-                <span className={c.done ? "text-ink" : "text-ink-3"}>{c.label}</span>
+                <span className={c.done ? "text-foreground" : "text-subtle"}>{c.label}</span>
               </div>
             ))}
           </div>
 
           {ideaScore && (
-            <div className="rounded-card border border-stroke bg-cream-100 p-3 text-caption text-ink-2">
-              <b className="text-ink">Điểm ý tưởng (Phase 1):</b>{" "}
+            <div className="rounded-card border border-border bg-accent p-3 text-sm text-muted-foreground">
+              <b className="text-foreground">Điểm ý tưởng (Phase 1):</b>{" "}
               {ideaScore.moduleScores.giaTriUngDung ?? "—"}/25 — {ideaScore.summary}
             </div>
           )}

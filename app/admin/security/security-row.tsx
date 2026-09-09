@@ -34,9 +34,9 @@ export function SecurityRow({ submission }: { submission: Submission & { user: U
         : "secondary";
 
   return (
-    <div className="rounded-card border border-stroke bg-surface-2 p-4">
+    <div className="rounded-card border border-border bg-muted p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <b className="text-ink">
+        <b className="text-foreground">
           {submission.user.name} · {submission.productName}
         </b>
         <Badge variant={badgeVariant}>{submission.securityStatus}</Badge>

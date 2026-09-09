@@ -3,6 +3,7 @@ import { getLatestIdeaScore, getLatestProductScore } from "@/lib/db/queries/scor
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import { ScoringRow } from "./scoring-row";
+import { Bot } from "lucide-react";
 
 export default async function ScoringPage() {
   const all = await listSubmissionsWithUser();
@@ -20,14 +21,14 @@ export default async function ScoringPage() {
     <Card>
       <CardHeader>
         <CardTitle>Chấm điểm & feedback Phase 1/2</CardTitle>
-        <p className="text-caption text-ink-2">
+        <p className="text-sm text-muted-foreground">
           Điểm Phase 1 (ý tưởng) + Phase 2 (kỹ thuật) đến từ hệ chấm điểm ngoài qua API — nếu
           chưa có, dùng form &quot;Nhập tay&quot; bên dưới để không chặn tiến độ demo.
         </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {rows.length === 0 && (
-          <EmptyState icon="🤖" title="Chưa có đề tài nào đã duyệt" desc="Duyệt đề tài ở mục 'Duyệt đề tài' trước, sau đó chấm điểm sẽ hiện ở đây." />
+          <EmptyState icon={Bot} title="Chưa có đề tài nào đã duyệt" desc="Duyệt đề tài ở mục 'Duyệt đề tài' trước, sau đó chấm điểm sẽ hiện ở đây." />
         )}
         {rows.map((r) => (
           <ScoringRow key={r.submission.id} {...r} />

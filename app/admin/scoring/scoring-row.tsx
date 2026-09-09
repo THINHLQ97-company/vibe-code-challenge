@@ -80,19 +80,19 @@ export function ScoringRow({
   }
 
   return (
-    <div className="rounded-card border border-stroke bg-surface-2 p-4">
+    <div className="rounded-card border border-border bg-muted p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <b className="text-ink">
+        <b className="text-foreground">
           {submission.user.name} · {submission.productName}
         </b>
         <Badge variant="secondary">Phase {submission.currentPhase}</Badge>
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-stroke bg-surface p-3">
-          <div className="text-caption font-bold text-ink">Phase 1 · Ý tưởng (/25)</div>
+        <div className="rounded-lg border border-border bg-card p-3">
+          <div className="text-sm font-bold text-foreground">Phase 1 · Ý tưởng (/25)</div>
           {ideaScore ? (
-            <div className="mt-1 text-caption text-ink-2">
+            <div className="mt-1 text-sm text-muted-foreground">
               {ideaScore.moduleScores.giaTriUngDung}/25 — {ideaScore.source}
             </div>
           ) : (
@@ -112,10 +112,10 @@ export function ScoringRow({
           )}
         </div>
 
-        <div className="rounded-lg border border-stroke bg-surface p-3">
-          <div className="text-caption font-bold text-ink">Phase 2 · Kỹ thuật (/40) + Hoàn thiện (/15)</div>
+        <div className="rounded-lg border border-border bg-card p-3">
+          <div className="text-sm font-bold text-foreground">Phase 2 · Kỹ thuật (/40) + Hoàn thiện (/15)</div>
           {productScore ? (
-            <div className="mt-1 text-caption text-ink-2">
+            <div className="mt-1 text-sm text-muted-foreground">
               KT: {productScore.moduleScores.chatLuongKyThuat}/40 · HT: {productScore.moduleScores.hoanThien}/15
               <br />
               Feedback status: <b>{productScore.feedbackStatus}</b>
@@ -163,7 +163,7 @@ export function ScoringRow({
           </div>
         </div>
       )}
-      {error && <p className="mt-2 text-caption text-destructive">{error}</p>}
+      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
     </div>
   );
 }

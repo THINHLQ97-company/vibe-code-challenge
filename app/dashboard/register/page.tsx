@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -105,11 +106,13 @@ export default function RegisterPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>📝 Đăng ký đề tài dự thi</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <FileText size={18} /> Đăng ký đề tài dự thi
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="flex flex-col gap-5">
-          <div className="text-caption font-bold uppercase tracking-wide text-teal-strong">
+          <div className="text-sm font-bold uppercase tracking-wide text-success">
             Đề tài
           </div>
           <div className="flex flex-col gap-1.5">
@@ -172,7 +175,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="mt-2 text-caption font-bold uppercase tracking-wide text-teal-strong">
+          <div className="mt-2 text-sm font-bold uppercase tracking-wide text-success">
             Kỹ thuật & an toàn
           </div>
           <div className="flex flex-col gap-1.5">
@@ -258,8 +261,8 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="mt-2 flex flex-col gap-2 rounded-card border border-stroke bg-surface-2 p-4">
-            <label className="flex items-start gap-2 text-caption">
+          <div className="mt-2 flex flex-col gap-2 rounded-card border border-border bg-muted p-4">
+            <label className="flex items-start gap-2 text-sm">
               <input
                 type="checkbox"
                 checked={confirmFakeData}
@@ -268,7 +271,7 @@ export default function RegisterPage() {
               />
               Xác nhận toàn bộ dữ liệu là <b>dữ liệu giả</b> do tôi tự tạo.
             </label>
-            <label className="flex items-start gap-2 text-caption">
+            <label className="flex items-start gap-2 text-sm">
               <input
                 type="checkbox"
                 checked={confirmNoMatbaoInfo}
@@ -277,7 +280,7 @@ export default function RegisterPage() {
               />
               Cam kết <b>không thể hiện thông tin/thương hiệu Mắt Bão</b> trong sản phẩm & bài đăng.
             </label>
-            <label className="flex items-start gap-2 text-caption">
+            <label className="flex items-start gap-2 text-sm">
               <input
                 type="checkbox"
                 checked={confirmTemplateConsent}
@@ -288,7 +291,7 @@ export default function RegisterPage() {
             </label>
           </div>
 
-          {error && <p className="text-caption text-destructive">{error}</p>}
+          {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={loading} className="w-full sm:w-auto">
             {loading ? "Đang gửi..." : "Gửi đăng ký"}
           </Button>

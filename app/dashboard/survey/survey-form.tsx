@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -73,12 +74,16 @@ export function SurveyForm({
   }
 
   if (done) {
-    return <p className="text-body text-teal-strong">✓ Bạn đã nộp phiếu trải nghiệm.</p>;
+    return (
+      <p className="flex items-center gap-1.5 text-base text-success">
+        <CheckCircle2 size={16} /> Bạn đã nộp phiếu trải nghiệm.
+      </p>
+    );
   }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
-      <div className="text-caption font-bold uppercase tracking-wide text-teal-strong">
+      <div className="text-sm font-bold uppercase tracking-wide text-success">
         Phần chung
       </div>
       {COMMON_QUESTIONS.map((q, i) => (
@@ -90,7 +95,7 @@ export function SurveyForm({
           />
         </div>
       ))}
-      <div className="mt-2 text-caption font-bold uppercase tracking-wide text-teal-strong">
+      <div className="mt-2 text-sm font-bold uppercase tracking-wide text-success">
         Phần riêng — {board === "ky_thuat" ? "Bảng Kỹ thuật" : "Bảng Văn phòng"}
       </div>
       {boardQuestions.map((q, i) => (
@@ -102,7 +107,7 @@ export function SurveyForm({
           />
         </div>
       ))}
-      {error && <p className="text-caption text-destructive">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" disabled={loading} className="w-fit">
         {loading ? "Đang gửi..." : "Nộp phiếu"}
       </Button>

@@ -1,16 +1,18 @@
 import { eq } from "drizzle-orm";
+import { LayoutDashboard, CheckSquare, Bot, ShieldAlert, Megaphone, Scale } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { AppShell, type NavItem } from "@/components/app-shell";
 
+const ICON_PROPS = { size: 16, strokeWidth: 2 } as const;
 const NAV: NavItem[] = [
-  { href: "/admin", label: "Dashboard", icon: "📊" },
-  { href: "/admin/topics", label: "Duyệt đề tài", icon: "✅" },
-  { href: "/admin/scoring", label: "Chấm điểm & feedback", icon: "🤖" },
-  { href: "/admin/security", label: "An toàn (CP4)", icon: "🛡️" },
-  { href: "/admin/posts", label: "Bài đăng & lan tỏa", icon: "📣" },
-  { href: "/admin/appeals", label: "Phản biện", icon: "⚖️" },
+  { href: "/admin", label: "Dashboard", icon: <LayoutDashboard {...ICON_PROPS} /> },
+  { href: "/admin/topics", label: "Duyệt đề tài", icon: <CheckSquare {...ICON_PROPS} /> },
+  { href: "/admin/scoring", label: "Chấm điểm & feedback", icon: <Bot {...ICON_PROPS} /> },
+  { href: "/admin/security", label: "An toàn (CP4)", icon: <ShieldAlert {...ICON_PROPS} /> },
+  { href: "/admin/posts", label: "Bài đăng & lan tỏa", icon: <Megaphone {...ICON_PROPS} /> },
+  { href: "/admin/appeals", label: "Phản biện", icon: <Scale {...ICON_PROPS} /> },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

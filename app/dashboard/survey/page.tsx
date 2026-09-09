@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import { SurveyForm } from "./survey-form";
+import { ClipboardList } from "lucide-react";
 
 export default async function SurveyPage() {
   const session = await getSession();
@@ -16,7 +17,7 @@ export default async function SurveyPage() {
   if (!submission) {
     return (
       <EmptyState
-        icon="📋"
+        icon={ClipboardList}
         title="Bạn chưa có đề tài"
         desc="Đăng ký đề tài trước khi nộp phiếu trải nghiệm."
         action={

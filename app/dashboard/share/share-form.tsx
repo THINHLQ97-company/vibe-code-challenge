@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -64,14 +65,15 @@ export function ShareForm({
           {loading ? "Đang gửi..." : "Gửi link bài"}
         </Button>
       </form>
-      {error && <p className="text-caption text-destructive">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <div className="flex items-center gap-2 text-caption">
+      <div className="flex items-center gap-2 text-sm">
         <Badge variant={approved ? "default" : "secondary"}>
-          {approved ? "✓ BGK đã duyệt bài" : "Chờ BGK duyệt"}
+          {approved && <CheckCircle2 size={12} />}
+          {approved ? "BGK đã duyệt bài" : "Chờ BGK duyệt"}
         </Badge>
         {engagementCount != null && (
-          <span className="text-ink-2">
+          <span className="text-muted-foreground">
             Tương tác: {engagementCount} · Bậc điểm: {engagementTier ?? "—"}/4
           </span>
         )}

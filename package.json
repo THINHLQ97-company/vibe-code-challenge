@@ -27,7 +27,8 @@
     "class-variance-authority": "0.7.1",
     "radix-ui": "1.6.7",
     "bcryptjs": "3.0.3",
-    "jose": "6.2.9"
+    "jose": "6.2.9",
+    "lucide-react": "1.39.0"
   },
   "pnpm": {
     "overrides": {
