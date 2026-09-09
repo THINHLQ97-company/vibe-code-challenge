@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "matbao-vibe-challenge",
-  description: "Mắt Bão project",
+  title: "Matbao Vibe Code Challenge",
+  description: "Cuộc thi Vibe Coding nội bộ Mắt Bão",
 };
 
 export default function RootLayout({

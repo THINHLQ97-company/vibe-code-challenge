@@ -43,10 +43,12 @@
 - [x] Migration (`drizzle/0000_marvelous_banshee.sql`) áp dụng vào Postgres local — verify `\dt` đủ 7 bảng
 - [x] Seed dev (`pnpm db:seed`): 1 season, 4 user (admin/judge/candidate×2 board), 2 submission mẫu (1 đang Phase 2 có idea_score, 1 pending CP2)
 
-### Step 3: Auth (Day 2–3)
-- [ ] Signup (email @matbao.com + password) + login, JWT tự viết trong route handlers (không NextAuth)
-- [ ] Landing công khai (giới thiệu + thể lệ) + trang login/signup dùng AuthCard của dsvh
-- [ ] Middleware phân quyền theo role (candidate/judge/admin)
+### Step 3: Auth (Day 2–3) — ✅ DONE
+- [x] Signup (email @matbao.com + password, zod validate) + login — JWT ký/verify bằng `jose` (không dùng `jsonwebtoken` vì middleware chạy Edge runtime không có Node crypto; tách `lib/auth/password.ts` Node-only khỏi `lib/auth/session.ts` Edge-safe để middleware bundle gọn)
+- [x] Landing công khai (`app/page.tsx`, giới thiệu + nút Đăng nhập, không form đăng ký công khai) + trang `/login`, `/signup` dùng AuthCard + PasswordInput phỏng theo dsvh
+- [x] Middleware bảo vệ `/dashboard` + `/admin`, redirect candidate ra khỏi `/admin`
+- [x] Test thủ công qua curl: login/signup/logout, sai mật khẩu, email trùng, email sai domain, role-based redirect — tất cả đúng kỳ vọng
+- [ ] Thể lệ đầy đủ trên landing — hiện chỉ có bản tóm tắt, nội dung thể lệ chi tiết (docs/reference/the-le-v3.html) sẽ đưa vào 1 trang riêng ở step polish (Step 10) hoặc khi BA yêu cầu
 
 ### Step 4: Đăng ký & duyệt đề tài — CP1/CP2 (Day 3–4)
 - [ ] API: tạo/xem submission của tôi; admin list + approve/reject cuốn chiếu
