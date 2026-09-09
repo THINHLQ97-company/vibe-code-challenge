@@ -1,6 +1,14 @@
 import bcrypt from "bcryptjs";
 import { db } from "./index";
-import { users, seasons, submissions, ideaScores, departmentToBoard } from "./schema";
+import {
+  users,
+  seasons,
+  submissions,
+  ideaScores,
+  productScores,
+  appeals,
+  departmentToBoard,
+} from "./schema";
 
 const DEV_PASSWORD = "Test@1234";
 
@@ -18,6 +26,7 @@ async function main() {
       role: "admin",
     })
     .returning();
+  void admin;
 
   const [judge] = await db
     .insert(users)
@@ -31,7 +40,7 @@ async function main() {
     })
     .returning();
 
-  const [candidateTech] = await db
+  const [candTS] = await db
     .insert(users)
     .values({
       email: "thisinh.ts@matbao.com",
@@ -44,7 +53,7 @@ async function main() {
     })
     .returning();
 
-  const [candidateOffice] = await db
+  const [candMK] = await db
     .insert(users)
     .values({
       email: "thisinh.mk@matbao.com",
@@ -53,6 +62,45 @@ async function main() {
       employeeCode: "NV002",
       department: "MK",
       board: departmentToBoard.MK,
+      role: "candidate",
+    })
+    .returning();
+
+  const [candDE] = await db
+    .insert(users)
+    .values({
+      email: "thisinh.de@matbao.com",
+      name: "Lê Văn C",
+      passwordHash,
+      employeeCode: "NV003",
+      department: "DE",
+      board: departmentToBoard.DE,
+      role: "candidate",
+    })
+    .returning();
+
+  const [candSales] = await db
+    .insert(users)
+    .values({
+      email: "thisinh.sales@matbao.com",
+      name: "Phạm Thị D",
+      passwordHash,
+      employeeCode: "NV004",
+      department: "SALES",
+      board: departmentToBoard.SALES,
+      role: "candidate",
+    })
+    .returning();
+
+  const [candHR] = await db
+    .insert(users)
+    .values({
+      email: "thisinh.hr@matbao.com",
+      name: "Hoàng Văn E",
+      passwordHash,
+      employeeCode: "NV005",
+      department: "HR",
+      board: departmentToBoard.HR,
       role: "candidate",
     })
     .returning();
@@ -67,11 +115,11 @@ async function main() {
     })
     .returning();
 
-  // Submission 1: đã qua Phase 1, đang làm Phase 2
+  // 1) TS — đã duyệt, đang ở Phase 2 (đã có điểm ý tưởng, đang chờ nộp/chấm sản phẩm)
   const [sub1] = await db
     .insert(submissions)
     .values({
-      userId: candidateTech.id,
+      userId: candTS.id,
       seasonId: season.id,
       productName: "Chẩn đoán lỗi website mini",
       branch: "A",
@@ -97,7 +145,6 @@ async function main() {
       vibehostUrl: "https://demo-chuandoan-loi.vibehost.vn",
     })
     .returning();
-
   await db.insert(ideaScores).values({
     submissionId: sub1.id,
     moduleScores: { giaTriUngDung: 22 },
@@ -105,9 +152,9 @@ async function main() {
     source: "external_ai",
   });
 
-  // Submission 2: mới đăng ký, chờ duyệt (CP2)
+  // 2) MK — mới đăng ký, chờ duyệt CP2
   await db.insert(submissions).values({
-    userId: candidateOffice.id,
+    userId: candMK.id,
     seasonId: season.id,
     productName: "Lịch nội dung Marketing mini",
     branch: "B",
@@ -129,11 +176,161 @@ async function main() {
     registrationStatus: "pending",
   });
 
+  // 3) DE — đã công bố kết quả đầy đủ (demo trọn luồng CP1-CP6 + BXH)
+  const [sub3] = await db
+    .insert(submissions)
+    .values({
+      userId: candDE.id,
+      seasonId: season.id,
+      productName: "Trợ lý báo giá nhanh",
+      branch: "A",
+      topicGroup: "Kinh doanh / bán hàng",
+      problemDesc: "Sales mất nhiều thời gian soạn báo giá thủ công cho từng khách.",
+      targetUsers: "Đội Sales, ~10 người dùng thường xuyên.",
+      features: ["Chọn gói dịch vụ", "Tự tính giá theo combo", "Xuất PDF báo giá"],
+      databasePlan: "Bảng gói dịch vụ + lịch sử báo giá, lưu Postgres",
+      hasWorkflow: true,
+      workflowDesc: "Tự gửi email báo giá sau khi tạo",
+      deployMethod: "Tự dựng mới trong kỳ thi",
+      isPrebuiltRepo: false,
+      aiTool: "Claude Code",
+      googleAiPro: true,
+      dataUsed: "Dữ liệu gói dịch vụ giả lập",
+      confirmFakeData: true,
+      confirmNoMatbaoInfo: true,
+      confirmTemplateConsent: true,
+      registrationStatus: "approved",
+      approvedAt: new Date(Date.now() - 12 * 24 * 3600 * 1000),
+      submissionDeadline: new Date(Date.now() - 5 * 24 * 3600 * 1000),
+      currentPhase: 4,
+      vibehostUrl: "https://tro-ly-bao-gia.vibehost.vn",
+      githubRepoUrl: "https://github.com/levanc/tro-ly-bao-gia",
+      githubVerifiedAt: new Date(Date.now() - 9 * 24 * 3600 * 1000),
+      securityStatus: "clean",
+      facebookPostUrl: "https://facebook.com/groups/vibecodingchua/posts/demo-3",
+      facebookApprovedAt: new Date(Date.now() - 6 * 24 * 3600 * 1000),
+      engagementCount: 95,
+      engagementTier: 4,
+      surveySubmittedAt: new Date(Date.now() - 5 * 24 * 3600 * 1000),
+      finalScore: 88,
+      publishedAt: new Date(Date.now() - 4 * 24 * 3600 * 1000),
+    })
+    .returning();
+  await db.insert(ideaScores).values({
+    submissionId: sub3.id,
+    moduleScores: { giaTriUngDung: 24 },
+    summary: "Bài toán rất sát nghiệp vụ Sales hằng ngày.",
+    source: "external_ai",
+  });
+  await db.insert(productScores).values({
+    submissionId: sub3.id,
+    moduleScores: { chatLuongKyThuat: 38, hoanThien: 14 },
+    summary: "Chạy tốt, database dùng thật, workflow tự động chạy ổn định.",
+    btcFeedback: "Không cần sửa gì thêm.",
+    feedbackStatus: "approved",
+    kpi3pFlag: true,
+    source: "external_ai",
+  });
+
+  // 4) SALES — đã công bố, điểm thấp hơn (demo bảng xếp hạng có thứ hạng)
+  const [sub4] = await db
+    .insert(submissions)
+    .values({
+      userId: candSales.id,
+      seasonId: season.id,
+      productName: "CRM cá nhân mini",
+      branch: "B",
+      topicGroup: "Kinh doanh / bán hàng",
+      problemDesc: "Khó theo dõi khách đang chăm tới đâu, hay quên follow-up.",
+      targetUsers: "Chính bản thân, nhiều Sales khác cũng gặp.",
+      features: ["Ghi chú theo khách", "Nhắc lịch follow-up", "Lọc theo trạng thái"],
+      databasePlan: "Bảng khách hàng + lịch sử liên hệ, lưu Postgres",
+      hasWorkflow: false,
+      deployMethod: "Deploy từ Git-repo / mẫu có sẵn trước đó",
+      isPrebuiltRepo: true,
+      aiTool: "Cursor",
+      googleAiPro: false,
+      dataUsed: "Dữ liệu khách hàng giả lập",
+      confirmFakeData: true,
+      confirmNoMatbaoInfo: true,
+      confirmTemplateConsent: true,
+      registrationStatus: "approved",
+      approvedAt: new Date(Date.now() - 10 * 24 * 3600 * 1000),
+      submissionDeadline: new Date(Date.now() - 3 * 24 * 3600 * 1000),
+      currentPhase: 4,
+      vibehostUrl: "https://crm-mini.vibehost.vn",
+      githubRepoUrl: "https://github.com/phamthid/crm-mini",
+      githubVerifiedAt: new Date(Date.now() - 8 * 24 * 3600 * 1000),
+      securityStatus: "clean",
+      facebookPostUrl: "https://facebook.com/groups/vibecodingchua/posts/demo-4",
+      facebookApprovedAt: new Date(Date.now() - 6 * 24 * 3600 * 1000),
+      engagementCount: 40,
+      engagementTier: 2,
+      surveySubmittedAt: new Date(Date.now() - 4 * 24 * 3600 * 1000),
+      finalScore: 62,
+      publishedAt: new Date(Date.now() - 3 * 24 * 3600 * 1000),
+    })
+    .returning();
+  await db.insert(ideaScores).values({
+    submissionId: sub4.id,
+    moduleScores: { giaTriUngDung: 20 },
+    summary: "Ý tưởng ổn, khá phổ biến trong nhóm chủ đề này.",
+    source: "external_ai",
+  });
+  await db.insert(productScores).values({
+    submissionId: sub4.id,
+    // Deploy từ repo có sẵn -> trần kỹ thuật 20 (dù chấm gốc có thể cao hơn)
+    moduleScores: { chatLuongKyThuat: 20, hoanThien: 10 },
+    summary: "Dùng lại repo mẫu, có chỉnh sửa nhưng chưa nhiều.",
+    btcFeedback: "Đạt yêu cầu.",
+    feedbackStatus: "approved",
+    kpi3pFlag: true,
+    source: "judge",
+  });
+
+  // 5) HR — bị trả về, minh hoạ cơ chế sửa & nộp lại
+  await db.insert(submissions).values({
+    userId: candHR.id,
+    seasonId: season.id,
+    productName: "Checklist onboarding",
+    branch: "A",
+    topicGroup: "Văn phòng / Nhân sự",
+    problemDesc: "Onboarding nhân viên mới còn thủ công, dễ sót bước.",
+    targetUsers: "Nhân viên mới + quản lý trực tiếp.",
+    features: ["Tạo checklist theo phòng ban", "Tick tiến độ", "Nhắc hạn"],
+    databasePlan: "Bảng checklist + tiến độ, lưu Postgres",
+    hasWorkflow: false,
+    deployMethod: "Tự dựng mới trong kỳ thi",
+    isPrebuiltRepo: false,
+    aiTool: "ChatGPT",
+    googleAiPro: false,
+    dataUsed: "Dữ liệu nhân sự giả lập",
+    confirmFakeData: true,
+    confirmNoMatbaoInfo: true,
+    confirmTemplateConsent: true,
+    registrationStatus: "returned",
+    registrationNote: "Chưa nêu rõ 3 chức năng cụ thể để chấm ngưỡng sàn — bổ sung chi tiết hơn.",
+  });
+
+  // Phản biện mẫu cho sub4 (đã xử lý) — demo màn /admin/appeals
+  await db.insert(appeals).values({
+    submissionId: sub4.id,
+    criteria: "Điểm kỹ thuật bị trần 20 dù đã chỉnh sửa nhiều so với repo gốc",
+    evidenceUrl: "https://github.com/phamthid/crm-mini/commits/main",
+    status: "rejected",
+    resolutionNote: "Lịch sử commit cho thấy phần tự viết thêm chưa đủ đáng kể để bỏ trần.",
+    resolvedBy: judge.id,
+    resolvedAt: new Date(Date.now() - 2 * 24 * 3600 * 1000),
+  });
+
   console.log("✓ Seed xong:");
-  console.log(`  admin: admin@matbao.com / ${DEV_PASSWORD}`);
-  console.log(`  judge: giamkhao@matbao.com / ${DEV_PASSWORD}`);
-  console.log(`  candidate (TS, Phase 2): thisinh.ts@matbao.com / ${DEV_PASSWORD}`);
-  console.log(`  candidate (MK, pending): thisinh.mk@matbao.com / ${DEV_PASSWORD}`);
+  console.log(`  admin:            admin@matbao.com / ${DEV_PASSWORD}`);
+  console.log(`  judge:            giamkhao@matbao.com / ${DEV_PASSWORD}`);
+  console.log(`  candidate TS      thisinh.ts@matbao.com / ${DEV_PASSWORD}     (Phase 2, chưa nộp Vibe Host)`);
+  console.log(`  candidate MK      thisinh.mk@matbao.com / ${DEV_PASSWORD}     (chờ duyệt CP2)`);
+  console.log(`  candidate DE      thisinh.de@matbao.com / ${DEV_PASSWORD}     (đã công bố · 88đ)`);
+  console.log(`  candidate SALES   thisinh.sales@matbao.com / ${DEV_PASSWORD}  (đã công bố · 62đ, repo có sẵn)`);
+  console.log(`  candidate HR      thisinh.hr@matbao.com / ${DEV_PASSWORD}     (bị trả về CP2)`);
   process.exit(0);
 }
 

@@ -30,6 +30,11 @@ export const appealStatusEnum = pgEnum("appeal_status", [
   "rejected",
 ]);
 export const scoreSourceEnum = pgEnum("score_source", ["external_ai", "judge"]);
+export const securityStatusEnum = pgEnum("security_status", [
+  "pending",
+  "clean",
+  "flagged",
+]);
 
 // Phòng ban → tự xếp bảng thi theo thể lệ mục Q
 export const departmentToBoard: Record<string, "ky_thuat" | "van_phong"> = {
@@ -80,7 +85,7 @@ export const submissions = pgTable("submissions", {
   topicGroup: text("topic_group").notNull(),
   problemDesc: text("problem_desc").notNull(),
   targetUsers: text("target_users").notNull(),
-  features: jsonb("features").notNull().default([]), // string[]
+  features: jsonb("features").$type<string[]>().notNull().default([]),
 
   // Phần 3 — Kỹ thuật & an toàn
   databasePlan: text("database_plan").notNull(),
@@ -103,6 +108,7 @@ export const submissions = pgTable("submissions", {
     .notNull()
     .default("pending"),
   registrationNote: text("registration_note"),
+  requestedDeadlineDays: integer("requested_deadline_days").notNull().default(15),
   approvedAt: timestamp("approved_at"),
   submissionDeadline: timestamp("submission_deadline"),
 
@@ -114,13 +120,21 @@ export const submissions = pgTable("submissions", {
   githubRepoUrl: text("github_repo_url"),
   githubVerifiedAt: timestamp("github_verified_at"),
 
+  // CP4 — cổng rà soát an toàn (7 điều cấm), điền từ hệ chấm ngoài hoặc admin
+  securityStatus: securityStatusEnum("security_status").notNull().default("pending"),
+  securityNote: text("security_note"),
+
   // Phase 3 — lan tỏa
   facebookPostUrl: text("facebook_post_url"),
   facebookApprovedAt: timestamp("facebook_approved_at"),
   engagementCount: integer("engagement_count"),
   engagementTier: integer("engagement_tier"), // 1-4
 
+  // CP6
+  surveySubmittedAt: timestamp("survey_submitted_at"),
+
   // Công bố
+  finalScore: integer("final_score"),
   publishedAt: timestamp("published_at"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -132,7 +146,7 @@ export const ideaScores = pgTable("idea_scores", {
   submissionId: integer("submission_id")
     .notNull()
     .references(() => submissions.id),
-  moduleScores: jsonb("module_scores").notNull(), // { giaTriUngDung: number, ... }
+  moduleScores: jsonb("module_scores").$type<Record<string, number>>().notNull(), // { giaTriUngDung: number, ... }
   summary: text("summary"),
   source: scoreSourceEnum("source").notNull().default("external_ai"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -143,7 +157,7 @@ export const productScores = pgTable("product_scores", {
   submissionId: integer("submission_id")
     .notNull()
     .references(() => submissions.id),
-  moduleScores: jsonb("module_scores").notNull(), // { chatLuongKyThuat: number, hoanThien: number }
+  moduleScores: jsonb("module_scores").$type<Record<string, number>>().notNull(), // { chatLuongKyThuat: number, hoanThien: number }
   summary: text("summary"),
   btcFeedback: text("btc_feedback"),
   feedbackStatus: feedbackStatusEnum("feedback_status").notNull().default("pending"),
@@ -173,7 +187,7 @@ export const experienceSurveys = pgTable(
     submissionId: integer("submission_id")
       .notNull()
       .references(() => submissions.id),
-    answers: jsonb("answers").notNull(), // { common: string[], boardSpecific: string[] }
+    answers: jsonb("answers").$type<{ common: string[]; boardSpecific: string[] }>().notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [unique().on(table.submissionId)]

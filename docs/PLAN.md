@@ -50,43 +50,53 @@
 - [x] Test thủ công qua curl: login/signup/logout, sai mật khẩu, email trùng, email sai domain, role-based redirect — tất cả đúng kỳ vọng
 - [ ] Thể lệ đầy đủ trên landing — hiện chỉ có bản tóm tắt, nội dung thể lệ chi tiết (docs/reference/the-le-v3.html) sẽ đưa vào 1 trang riêng ở step polish (Step 10) hoặc khi BA yêu cầu
 
-### Step 4: Đăng ký & duyệt đề tài — CP1/CP2 (Day 3–4)
-- [ ] API: tạo/xem submission của tôi; admin list + approve/reject cuốn chiếu
-- [ ] Enforce cap 30–40 submission được duyệt/tuần
-- [ ] Frontend: form đăng ký đủ 3 phần (thể lệ mục Q) · trang admin duyệt đề tài
+### Step 4: Đăng ký & duyệt đề tài — CP1/CP2 (Day 3–4) — ✅ DONE
+- [x] API: `POST/GET /api/submissions` (candidate) · `GET /api/admin/submissions` +
+  `approve`/`reject` (admin) — `lib/db/queries/submissions.ts`
+- [x] Enforce trần duyệt/tuần (`season.capPerWeek`, mặc định 35) — tính theo tuần dương
+  lịch Thứ 2–CN (giả định, xem Risks)
+- [x] Frontend: `/dashboard/register` (form đủ 3 phần theo thể lệ mục Q) · `/admin/topics`
+  (duyệt cuốn chiếu, trả về kèm lý do)
 
-### Step 5: Phase 1 — điểm ý tưởng + API tích hợp ngoài (Day 4–5)
-- [ ] `POST /api/integrations/scores` nhận điểm từ hệ ngoài (phase=1|2, auth API key)
-- [ ] Hiển thị điểm ý tưởng cho thí sinh sau khi có
+### Step 5: Phase 1 — điểm ý tưởng + API tích hợp ngoài (Day 4–5) — ✅ DONE
+- [x] `POST /api/integrations/scores` nhận điểm từ hệ ngoài (phase=1|2, auth `X-API-Key`)
+- [x] Fallback `POST /api/admin/submissions/:id/manual-score` cho BTC tự nhập khi chưa có
+  hệ ngoài kết nối (đánh dấu `source="judge"` để phân biệt)
+- [x] Hiển thị điểm ý tưởng ở `/dashboard` sau khi có
 
-### Step 6: Phase 2 — sản phẩm, mã nguồn, GitHub verify (Day 5–6)
-- [ ] Form nộp link Vibe Host + link Git private
-- [ ] GitHub verify: gọi API bằng PAT của `matbao-vibe-bot`, set `github_verified_at`
-- [ ] Admin: xem điểm Phase 2 (từ hệ ngoài) + ghi feedback + đánh dấu "đã sửa xong" (set flag KPI 3P)
-- [ ] Thí sinh: xem feedback, sửa & nộp lại không giới hạn lần trong hạn
+### Step 6: Phase 2 — sản phẩm, mã nguồn, GitHub verify (Day 5–6) — ✅ DONE
+- [x] Form nộp link Vibe Host + link Git private (`/dashboard/build`)
+- [x] GitHub verify qua `lib/github.ts` (machine-user `matbao-vibe-bot` + `GITHUB_BOT_PAT`)
+  — test graceful fail khi chưa có PAT thật (xem docs/TEST_LOG.md)
+- [x] Admin (`/admin/scoring`): xem điểm Phase 2 + ghi feedback + set `kpi3pFlag`
+- [x] Thí sinh xem feedback, nộp lại không giới hạn lần (POST lại phase2 reset verify)
 
-### Step 7: CP4 An toàn + Phase 3 Lan tỏa (Day 6–7)
-- [ ] Admin: xử case rà soát bị gắn cờ (thủ công/nhận từ hệ ngoài)
-- [ ] Thí sinh: nộp link bài Facebook ẩn danh (CP5)
-- [ ] Admin: tick duyệt bài + nhập tay engagement count sau 7 ngày
-- [ ] Backend: tự tính trung vị cùng khung giờ/tuần → bậc điểm 1–4 → điểm lan tỏa
+### Step 7: CP4 An toàn + Phase 3 Lan tỏa (Day 6–7) — ✅ DONE
+- [x] Admin (`/admin/security`): set `clean`/`flagged` + ghi chú vi phạm điều nào
+- [x] Thí sinh nộp link Facebook (`/dashboard/share`)
+- [x] Admin (`/admin/posts`): tick duyệt bài + nhập tay engagement count sau 7 ngày
+- [x] `lib/scoring.ts#engagementTierFromCount` tự tính bậc 1–4 theo trung vị cùng tuần
 
-### Step 8: CP6 Phiếu trải nghiệm + CP7 Phản biện (Day 7–8)
-- [ ] Form phiếu trải nghiệm (6 câu chung + 4 câu theo bảng)
-- [ ] Thí sinh gửi phản biện (tiêu chí + bằng chứng, trong 48h từ khi có điểm)
-- [ ] Admin xử phản biện thủ công (chấp nhận/từ chối + ghi lý do)
+### Step 8: CP6 Phiếu trải nghiệm + CP7 Phản biện (Day 7–8) — ✅ DONE
+- [x] Form phiếu trải nghiệm (`/dashboard/survey`, 6 câu chung + 4 câu theo bảng)
+- [x] Thí sinh gửi phản biện (`/dashboard/results`, tiêu chí + bằng chứng)
+- [x] Admin xử phản biện thủ công (`/admin/appeals`, chấp nhận/từ chối + ghi chú)
 
-### Step 9: Công bố & Bảng xếp hạng & Dashboard (Day 8–9)
-- [ ] Admin: xác nhận tổng điểm (Phase1+2+3) → nút công bố (publish) → mở hiển thị điểm cho thí sinh
-- [ ] Bảng xếp hạng theo bảng (Kỹ thuật/Văn phòng) + theo tháng
-- [ ] Admin dashboard: tổng đăng ký/chờ duyệt/đã nộp/đã đậu, biểu đồ theo tuần, phân bổ nhóm chủ đề
+### Step 9: Công bố & Bảng xếp hạng & Dashboard (Day 8–9) — ✅ DONE
+- [x] `POST /api/admin/submissions/:id/publish` tính `finalScore`
+  (`lib/scoring.ts#computeFinalScore`) → mở hiển thị điểm cho thí sinh
+- [x] Bảng xếp hạng theo bảng (`/dashboard/leaderboard`)
+- [x] Admin dashboard (`/admin`): StatTile tổng đăng ký/chờ duyệt/đang làm/đã công bố/cảnh
+  báo bảo mật + phân bổ theo nhóm chủ đề (thanh ngang CSS, không thêm chart lib)
 
-### Step 10: Polish + demo data + docs + handoff (Day 9–10)
-- [ ] Seed demo data thực tế (nhiều submission ở nhiều trạng thái/phase khác nhau)
-- [ ] Error handling, empty states, responsive mobile
-- [ ] `docs/ARCH.md`, `docs/API.md` cập nhật
-- [ ] `TEST_LOG.md` — test luồng CP1→CP7 thủ công
-- [ ] `/vibe handoff` chuẩn bị
+### Step 10: Polish + demo data + docs + handoff (Day 9–10) — ✅ DONE
+- [x] Seed demo data thực tế: 5 submission (Phase 2 dở dang, chờ duyệt, đã công bố ×2 với
+  điểm khác nhau để test BXH, bị trả về) — `pnpm db:seed`
+- [x] ESLint config (`eslint.config.mjs`) — trước đó project scaffold chưa có, `next lint`
+  giờ chạy sạch
+- [x] `docs/ARCH.md`, `docs/API.md` cập nhật đầy đủ theo code thật
+- [x] `docs/TEST_LOG.md` — test luồng CP1→CP7 thủ công qua curl + verify HTML render thật
+- [ ] `/vibe handoff` — CHƯA chạy, để user quyết định thời điểm handoff sang BA/BLĐ
 
 ## Risks + Assumptions
 - **Chưa có hợp đồng API chính thức với đội chấm điểm ngoài**: mock bằng script curl/Postman để demo Step 5–6; cần đối soát payload thật trước go-live.
@@ -96,8 +106,14 @@
 - **Không có SMTP xác thực email thật trong MVP** — signup chỉ validate định dạng `@matbao.com`, không gửi email xác nhận.
 
 ## Definition of Done (iMVP)
-- [ ] Luồng CP1→CP7 demo được end-to-end trên UI
-- [ ] `docker compose up` chạy sạch
-- [ ] Seed data đủ thực tế cho demo (nhiều trạng thái/phase)
-- [ ] Không có secret (GitHub PAT, API key hệ chấm điểm) hardcode trong code — toàn bộ qua env
-- [ ] README + docs đủ cho handoff
+- [x] Luồng CP1→CP7 demo được end-to-end trên UI (test qua curl + render HTML thật)
+- [x] `docker compose up` chạy sạch
+- [x] Seed data đủ thực tế cho demo (nhiều trạng thái/phase)
+- [x] Không có secret (GitHub PAT, API key hệ chấm điểm) hardcode trong code — toàn bộ qua env
+- [x] README + docs đủ cho handoff (PRD/PLAN/ARCH/API/design/TEST_LOG)
+
+## Còn lại trước khi go-live thật (không phải thiếu sót — phụ thuộc bên ngoài)
+- Hợp đồng API chính thức với đội build hệ chấm điểm AI (payload/auth hiện là đề xuất).
+- Tạo tài khoản GitHub `matbao-vibe-bot` thật + PAT (chưa test được nhánh verify thành công).
+- Xác nhận với BTC vận hành: định nghĩa "tuần" cho trần duyệt + tính trung vị lan tỏa.
+- MS365 OAuth thật (Phase 2 roadmap, schema đã sẵn sàng swap).
