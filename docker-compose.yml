@@ -1,0 +1,34 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://app:app@db:5432/matbao-vibe-challenge
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      SCORING_API_KEY: ${SCORING_API_KEY:-dev-scoring-key}
+      GITHUB_BOT_PAT: ${GITHUB_BOT_PAT:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: matbao-vibe-challenge
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d matbao-vibe-challenge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  db-data:

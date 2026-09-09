@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thể lệ — Cuộc thi Vibe Coding Nội bộ · Mắt Bão</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#22C55E;--green-d:#16A34A;--green-l:#DCFCE7;--amber:#F59E0B;--amber-l:#FEF3C7;--amber-d:#B45309;
+  --violet:#8B5CF6;--info:#3B82F6;--info-l:#DBEAFE;--red:#EF4444;--red-l:#FEE2E2;
+  --bg:#F4F9EF;--surface:#fff;--line:#E4EFE0;--ink:#16192C;--ink2:#5A607F;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:15px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+a{color:var(--green-d)}
+.hero{background:linear-gradient(160deg,#fff,#eef8ea);border-bottom:1px solid var(--line)}
+.hero .wrap{padding:44px 20px 34px}
+.kick{color:var(--green-d);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:12px}
+h1{font-size:clamp(30px,5vw,46px);letter-spacing:-.02em;margin:10px 0 8px;line-height:1.08}
+h1 span{color:var(--green-d)}
+.lede{font-size:17px;color:var(--ink2);max-width:74ch}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.fact{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 15px}
+.fact b{display:block;font-size:20px;font-weight:800;color:var(--green-d);line-height:1.1}
+.fact span{font-size:12.5px;color:var(--ink2)}
+nav.toc{position:sticky;top:0;z-index:20;background:rgba(244,249,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:5px;overflow-x:auto;padding:9px 20px}
+nav.toc a{white-space:nowrap;font-size:12.5px;font-weight:700;color:var(--ink2);text-decoration:none;padding:6px 11px;border-radius:8px;border:1px solid transparent}
+nav.toc a:hover{color:var(--green-d);background:#fff;border-color:var(--line)}
+section{padding:36px 0 6px}
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 28px;margin-bottom:20px;box-shadow:0 6px 20px rgba(20,80,40,.05)}
+h2{font-size:23px;display:flex;align-items:center;margin-bottom:6px;letter-spacing:-.01em}
+h2 .bar{display:inline-block;width:28px;height:5px;background:var(--green);border-radius:3px;margin-right:12px;flex:none}
+h2 .no{font-size:13px;font-weight:800;color:var(--green-d);margin-right:10px;background:var(--green-l);padding:2px 9px;border-radius:7px}
+h3{font-size:16px;margin:18px 0 8px;color:var(--green-d)}
+.lead{color:var(--ink2);margin:6px 0 14px;max-width:84ch}
+p{margin:0 0 12px}
+ul.list{list-style:none;display:flex;flex-direction:column;gap:8px;margin:8px 0 12px}
+ul.list li{font-size:14.3px;padding-left:22px;position:relative}
+ul.list li::before{content:"";position:absolute;left:0;top:8px;width:9px;height:9px;border-radius:3px;background:var(--green)}
+ul.list li.a::before{background:var(--amber)}ul.list li.i::before{background:var(--info)}ul.list li.p::before{background:var(--violet)}ul.list li.r::before{background:var(--red)}
+ol.num{margin:8px 0 12px 20px;display:flex;flex-direction:column;gap:7px}
+ol.num li{font-size:14.3px;padding-left:4px}
+table{width:100%;border-collapse:collapse;font-size:13.7px;margin:10px 0 14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--green-d);color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+tr:last-child td{border-bottom:none}
+td.r,th.r{text-align:right}
+.box{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.box.green{background:var(--green-l);border-color:#b9ecc8}
+.box.amber{background:var(--amber-l);border-color:#f3d999}
+.box.red{background:var(--red-l);border-color:#f4b8b8}
+.box.info{background:var(--info-l);border-color:#bcd8f5}
+.box.violet{background:#F3EEFE;border-color:#d9c9fb}
+.box .t{font-weight:800;margin-bottom:6px}
+.box.green .t{color:var(--green-d)}.box.amber .t{color:var(--amber-d)}.box.red .t{color:#b91c1c}.box.info .t{color:#1d4ed8}.box.violet .t{color:#6d28d9}
+.pill{display:inline-block;background:var(--green-l);color:var(--green-d);font-weight:700;font-size:12px;padding:3px 11px;border-radius:999px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.card{border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h4{font-size:15px;margin-bottom:6px}
+.tag{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:var(--green);padding:2px 8px;border-radius:6px}
+.tag.a{background:var(--amber)}.tag.v{background:var(--violet)}.tag.i{background:var(--info)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.step{flex:1 1 150px;min-width:150px;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:10px;padding:11px 13px;background:#fbfefa}
+.step b{display:block;font-size:12px;color:var(--green-d);margin-bottom:3px}
+.step span{font-size:13px;color:var(--ink)}
+.foot{text-align:center;color:var(--ink2);font-size:12.5px;padding:16px 0 40px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}.sec{padding:20px 18px}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kick">Mắt Bão · Toàn công ty</div>
+    <h1>Cuộc thi <span>Vibe Coding</span> Nội bộ</h1>
+    <p class="lede">Tự tay làm ra một sản phẩm và đưa lên Vibe Host — để thật sự hiểu và làm chủ sản phẩm. Thi <b>cá nhân</b>, chia <b>2 bảng</b> (Kỹ thuật &amp; Văn phòng). Chương trình chạy <b>4 tháng</b> (~200–250 bài, nhận 30–40 bài/tuần). Đề tài <b>mở rộng</b>: công việc, giải pháp cá nhân hay cho SME đều được. Đậu là <b>được hoàn phí công cụ AI qua lương</b> và <b>tính luôn Năng lực AI tháng đó</b>. Đây là bản thể lệ dành cho người tham gia.</p>
+    <div class="facts">
+      <div class="fact"><b>Toàn CT</b><span>7 phòng · 2 bảng thi</span></div>
+      <div class="fact"><b>4 tháng</b><span>~200–250 bài · 30–40 bài/tuần</span></div>
+      <div class="fact"><b>Cá nhân</b><span>mỗi người một sản phẩm</span></div>
+      <div class="fact"><b>Đậu → hoàn phí AI</b><span>qua lương + 110% Năng lực AI</span></div>
+      <div class="fact"><b>Chấm tự động</b><span>người tối thiểu · có phản biện</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#muctieu">Mục tiêu</a>
+    <a href="#bang">Hai bảng thi</a>
+    <a href="#vanhanh">Cách vận hành</a>
+    <a href="#luat">Luật chơi</a>
+    <a href="#congcu">Công cụ AI &amp; Vibe Host</a>
+    <a href="#quyenloi">Quyền lợi</a>
+    <a href="#hoanthanh">Hoàn thành</a>
+    <a href="#nhanh">Hai nhánh</a>
+    <a href="#barem">Barem điểm</a>
+    <a href="#phanbien">Phản biện</a>
+    <a href="#congnhan">Công nhận &amp; Giải</a>
+    <a href="#lich">Lịch chương trình</a>
+    <a href="#dangbai">Đăng bài</a>
+    <a href="#antoan">Cổng an toàn</a>
+    <a href="#sua">Sửa &amp; nộp lại</a>
+    <a href="#giai">Giải thưởng &amp; Ngân sách</a>
+    <a href="#template">Repo → Template</a>
+    <a href="#moc">Các mốc</a>
+    <a href="#btc">BTC &amp; Công bố</a>
+    <a href="#form">Form đăng ký</a>
+    <a href="#nganhang">Ngân hàng đề tài</a>
+    <a href="#phieu">Phiếu trải nghiệm</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section id="muctieu"><div class="sec">
+  <h2><span class="bar"></span>Mục tiêu &amp; tổng quan</h2>
+  <p class="lead">Để nhân sự công ty thật sự hiểu và làm chủ Vibe Host bằng cách <b>tự tay làm ra một sản phẩm và đưa lên Vibe Host</b> — chỉ khi tự làm mới đủ kiến thức để tư vấn, bán và hỗ trợ khách. Sản phẩm tốt còn được góp vào <b>kho Template Vibe Host</b> để phục vụ người dùng thật. Chương trình <b>triển khai cho toàn công ty</b>, thi <b>cá nhân</b>, chia <b>2 bảng</b> theo khối để so tài công bằng.</p>
+  <div class="grid2">
+    <div class="card">
+      <h4>Ai tham gia</h4>
+      <ul class="list">
+        <li><b>Toàn bộ nhân sự công ty</b> — 7 phòng, chia 2 bảng: Kỹ thuật (TS, DE) &amp; Văn phòng (OP, MK, FI, HR, Kinh Doanh)</li>
+        <li><b>Thi cá nhân</b> — mỗi người tự làm một sản phẩm, có database, deploy lên Vibe Host và đăng bài chia sẻ</li>
+        <li class="i"><b>Quy mô:</b> ~200–250 bài trong <b>4 tháng</b>, nhận tối đa 30–40 bài/tuần để giữ chất lượng &amp; tải chấm</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Cấu trúc</h4>
+      <ul class="list">
+        <li class="i"><b>Kick-off</b> — công bố thể lệ &amp; ngưỡng sàn + hướng dẫn tạo tài khoản công cụ AI + phát ngân hàng đề tài + mở đăng ký</li>
+        <li class="i"><b>Đăng ký cuốn chiếu</b> theo tuần; mỗi người tự chọn hạn nộp <b>≤15 ngày</b> kể từ khi chủ đề được duyệt</li>
+        <li class="i"><b>Chấm tự động</b> theo bộ tiêu chí chất lượng + rà bảo mật tự động; hội đồng chỉ spot-check, xử phản biện &amp; tranh chấp</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="bang"><div class="sec">
+  <h2><span class="no">★</span>Hai bảng thi — theo khối</h2>
+  <p class="lead">Dân kỹ thuật và dân văn phòng có nền tảng rất khác nhau, nên thi <b>chung một sân là không công bằng</b>. Chương trình chia <b>2 bảng</b>, mỗi bảng có <b>bảng xếp hạng và giải thưởng riêng</b>. Cùng một barem, cùng ngưỡng sàn — chỉ tách nhóm để so tài với người cùng xuất phát điểm.</p>
+  <div class="grid2">
+    <div class="card"><span class="tag i">Bảng Kỹ thuật</span><h4 style="margin-top:8px">Khối làm kỹ thuật</h4>
+      <ul class="list" style="margin-top:6px">
+        <li class="i"><b>TS</b> — Hỗ trợ Kỹ thuật · <b>DE</b> — Lập trình / Dev</li>
+        <li class="i">Nền tảng tốt → kỳ vọng khai thác sâu database &amp; workflow tự động của Vibe Host.</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag">Bảng Văn phòng</span><h4 style="margin-top:8px">Khối văn phòng &amp; kinh doanh</h4>
+      <ul class="list" style="margin-top:6px">
+        <li><b>OP</b> — Vận hành · <b>MK</b> — Marketing · <b>FI</b> — Tài chính/Kế toán · <b>HR</b> — Nhân sự · <b>Kinh Doanh (Sales)</b></li>
+        <li>Không cần biết code trước — vibe coding + AI giúp dựng sản phẩm giải đúng việc mình hay làm.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box info"><div class="t">Xếp hạng &amp; giải tách theo bảng</div>Giải tháng và Giải yêu thích trao riêng cho <b>từng bảng</b>; cuối chương trình chọn thêm <b>Quán quân chung</b> giữa hai bảng. Barem, ngưỡng sàn, cổng an toàn &amp; yêu cầu bắt buộc (có database, đăng bài) áp dụng <b>như nhau cho cả hai bảng</b>.</div>
+</div></section>
+
+<section id="vanhanh"><div class="sec">
+  <h2><span class="no">★</span>Cách vận hành — đăng ký cuốn chiếu, theo tuần</h2>
+  <p class="lead">Chương trình kéo dài <b>4 tháng</b>. Mở đăng ký liên tục theo tuần, nhưng <b>nhận tối đa 30–40 bài/tuần</b> để hội đồng &amp; hệ thống kham nổi và giữ chất lượng. Ai đăng ký &amp; được duyệt chủ đề trước thì bắt đầu trước; mỗi người tự chọn <b>hạn nộp trong vòng 15 ngày</b> kể từ khi chủ đề được duyệt.</p>
+  <div class="flow">
+    <div class="step"><b>1 · Đăng ký chủ đề</b><span>Nộp form; mỗi tuần chốt tối đa 30–40 người bắt đầu (đăng ký trước duyệt trước)</span></div>
+    <div class="step"><b>2 · Duyệt &amp; khoá</b><span>Hội đồng duyệt cuốn chiếu; chủ đề được duyệt là mốc bắt đầu tính giờ</span></div>
+    <div class="step"><b>3 · Chọn hạn nộp</b><span>Tự chọn một ngày nộp trong vòng <b>15 ngày</b> kể từ khi duyệt</span></div>
+    <div class="step"><b>4 · Làm &amp; deploy</b><span>Làm sản phẩm (có database) + deploy Vibe Host + chuẩn bị bài đăng</span></div>
+    <div class="step"><b>5 · Nộp &amp; chấm tự động</b><span>Nộp link → hệ thống chấm chất lượng + rà bảo mật tự động</span></div>
+    <div class="step"><b>6 · Đăng bài &amp; lên bảng</b><span>Đăng bài lên Group (được ẩn danh) → tính điểm lan tỏa → lên bảng xếp hạng tháng</span></div>
+  </div>
+  <div class="box info"><div class="t">Ví dụ một tuần đăng ký</div>Mở đăng ký đầu tuần, chốt 30–40 người có chủ đề được duyệt. Bạn được duyệt ngày 6 → chọn hạn nộp bất kỳ ngày nào <b>đến hết ngày 21</b> (15 ngày sau). Nộp sớm thì được chấm sớm và còn thời gian sửa nếu bị trả về.</div>
+  <div class="box amber"><div class="t">Nếu lịch đăng bài trùng nhau quá nhiều</div>Vì mỗi người một hạn nộp khác nhau, có thể nhiều bài dồn đăng cùng lúc lên Group. Khi đó <b>BTC sẽ sắp xếp lại lịch đăng</b> cho mọi người trên trang Group cộng đồng (giãn theo khung giờ/ngày) để không bài nào bị chìm.</div>
+</div></section>
+
+<section id="luat"><div class="sec">
+  <h2><span class="no">A</span>Luật chơi — những điều đã chốt</h2>
+  <table>
+    <tr><th>Nội dung</th><th>Quy định</th></tr>
+    <tr><td>Hình thức thi</td><td><b>Cá nhân</b> — mỗi người một sản phẩm</td></tr>
+    <tr><td>Chia bảng</td><td><b>Kỹ thuật</b> (TS, DE) · <b>Văn phòng</b> (OP, MK, FI, HR, Kinh Doanh)</td></tr>
+    <tr><td>Làm sản phẩm &amp; deploy lên Vibe Host</td><td><b>Bắt buộc 100%</b></td></tr>
+    <tr><td>Database trong sản phẩm</td><td><b>Bắt buộc mọi bài</b> — sản phẩm phải có &amp; dùng thật một database</td></tr>
+    <tr><td>Chủ đề đề tài</td><td><b>Mở rộng</b>: việc công ty, giải pháp cá nhân (vd thu chi cá nhân) hay cho SME/cộng đồng đều được · <b>không làm chủ đề Game</b></td></tr>
+    <tr><td>Công cụ AI</td><td><b>Tự do chọn</b> (Google AI Pro, Claude, Cursor…). Khuyến nghị đăng ký <b>Google AI Pro</b> — đậu sẽ được hoàn phí (xem mục Quyền lợi)</td></tr>
+    <tr><td>Đăng ký &amp; hạn nộp</td><td><b>Cuốn chiếu</b> theo tuần (30–40 bài/tuần); tự chọn hạn nộp <b>≤15 ngày</b> kể từ khi chủ đề được duyệt</td></tr>
+    <tr><td>Đăng bài chia sẻ lên Group</td><td><b>Bắt buộc</b> — được <b>đăng ẩn danh</b>, không cần dùng nick Facebook chính</td></tr>
+    <tr><td>Nơi đăng bài</td><td>Nhóm "Vibe Coding chưa?"</td></tr>
+    <tr><td>Dữ liệu trong sản phẩm</td><td><b>Chỉ dùng dữ liệu giả — tuyệt đối, không ngoại lệ</b></td></tr>
+    <tr><td>Deploy từ Git/repo có sẵn</td><td>Được phép nhưng <b>chấm ở thang kỹ thuật riêng, thấp hơn</b> bài tự dựng mới; nếu dùng repo nền ngoài phải có nghiên cứu &amp; chỉnh sửa rõ ràng</td></tr>
+    <tr><td>Bản địa hoá</td><td>Khuyến khích hướng người dùng Việt — <b>giao diện &amp; nội dung tiếng Việt</b></td></tr>
+    <tr><td>Repo dùng làm Template Vibe Host</td><td><b>Đăng ký dự thi = đồng ý</b> cho Mắt Bão dùng repo làm Template (có ghi tên tác giả) — xem mục Repo → Template</td></tr>
+    <tr><td>Nếu bị chặn đăng</td><td>Không mất trắng — được sửa và nộp lại</td></tr>
+  </table>
+  <div class="box green"><div class="t">Điều kiện tối thiểu để được xét</div>Phải <b>có sản phẩm đạt ngưỡng sàn</b> (gồm có database), <b>qua cổng rà bảo mật</b> và <b>có đăng bài</b> lên Group. Thiếu một trong ba → chưa hoàn thành nghĩa vụ.</div>
+</div></section>
+
+<section id="congcu"><div class="sec">
+  <h2><span class="no">B</span>Công cụ AI &amp; Vibe Host</h2>
+  <div class="box green"><div class="t">Công cụ AI — tự do chọn, khuyến nghị Google AI Pro</div>Bạn được <b>tự do dùng bất kỳ công cụ AI nào</b> để sinh mã. Công ty khuyến nghị đăng ký <b>Google AI Pro (tài khoản mới, ưu đãi ~122.000đ/tháng)</b> — <b>hướng dẫn tạo tài khoản chi tiết trong buổi kick-off</b>. Chỉ chi phí Google AI Pro được hoàn khi bạn đậu (mục Quyền lợi); các công cụ khác dùng bằng chi phí của bạn.</div>
+  <div class="box green"><div class="t">Vibe Host miễn phí cho người tham gia</div>Bạn được cấp tài khoản Vibe Host miễn phí trong suốt cuộc thi — <b>không phải tự bỏ tiền</b>.</div>
+  <ul class="list">
+    <li>Deploy sản phẩm lên Vibe Host → tự kiểm theo checklist → nộp link → hệ thống chấm &amp; rà soát tự động.</li>
+    <li class="i">Gói cơ bản có <b>2 suất chạy nền</b> = <b>1 website + 1 database</b> — vừa đủ cho yêu cầu bắt buộc "sản phẩm phải có database". Cần nhiều hơn phải khai trước trong form đăng ký.</li>
+  </ul>
+</div></section>
+
+<section id="quyenloi"><div class="sec">
+  <h2><span class="no">C</span>Quyền lợi khi tham gia &amp; khi đậu</h2>
+  <p class="lead">"Đậu" = hoàn thành đủ nghĩa vụ, qua hai cổng (ngưỡng sàn + rà bảo mật) và <b>bài được BGK chấp thuận đạt</b>. Đậu là được hai quyền lợi lớn dưới đây — đây là <b>chính sách do HR công bố</b>.</p>
+  <div class="grid2">
+    <div class="card"><span class="tag">💸 Hoàn phí công cụ AI</span>
+      <ul class="list" style="margin-top:8px">
+        <li>Đậu → được <b>hoàn 130.000đ</b> (phần đăng ký Google AI Pro) <b>qua kỳ lương tháng kế tiếp</b>.</li>
+        <li class="i">Chỉ hoàn phần Google AI Pro; công cụ khác không nằm trong diện hoàn.</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag i">🎯 Tính Năng lực AI tháng đó</span>
+      <ul class="list" style="margin-top:8px">
+        <li>Bài thi đạt <b>được tính là kết quả Năng lực AI của tháng</b>.</li>
+        <li class="i"><b>Được miễn bài kiểm tra Năng lực AI</b> trong 4 tuần của tháng đó và <b>vẫn đạt 110%</b>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box green"><div class="t">Quyền lợi thêm cho mọi người hoàn thành</div>
+    <ul class="list" style="margin-top:4px">
+      <li>Chứng nhận tham gia + quà mốc cho người đạt ngưỡng sàn.</li>
+      <li>Sản phẩm tốt được lên website / fanpage làm <b>case study</b> (không ghi tên tác giả) và/hoặc đưa vào <b>kho Template Vibe Host</b> (ghi tên tác giả).</li>
+    </ul>
+  </div>
+</div></section>
+
+<section id="hoanthanh"><div class="sec">
+  <h2><span class="no">D</span>Định nghĩa "hoàn thành" — ngưỡng sàn kỹ thuật</h2>
+  <p class="lead">Đạt <b>cả 6 tiêu chí</b> (nhị phân: đạt / không đạt) thì được coi là hoàn thành nghĩa vụ bắt buộc. Ngưỡng này <b>máy chấm được phần lớn tự động</b>.</p>
+  <ol class="num">
+    <li><b>Link mở được và hiện ra nội dung.</b> Trang trắng không tính là hoàn thành.</li>
+    <li><b>Có ít nhất 3 chức năng chạy được</b> đúng như mô tả trong form đăng ký đề tài.</li>
+    <li><b>Có database hoạt động thật</b> — dữ liệu được lưu/đọc/ghi thật, không phải dữ liệu gắn cứng trong mã.</li>
+    <li><b>Mở được trên điện thoại</b>, không vỡ giao diện tới mức không dùng được.</li>
+    <li><b>Không còn chữ mẫu, nút bấm không làm gì</b>, hay phần chưa hoàn thiện lộ ra ngoài.</li>
+    <li><b>Có nội dung riêng</b>, không phải một mẫu có sẵn chỉ đổi tên.</li>
+  </ol>
+  <div class="box info">Ngưỡng này <b>công bố ngay từ kick-off</b> — để bạn biết đích ở đâu, không phải để loại người. Chưa đạt thì được sửa và nộp lại.</div>
+</div></section>
+
+<section id="nhanh"><div class="sec">
+  <h2><span class="no">E</span>Hai nhánh đề tài</h2>
+  <p class="lead">Khai báo ở form đăng ký, <b>không đổi được</b> sau khi hội đồng duyệt. Hai nhánh chấm chung một thang 100, trần điểm bằng nhau. Dùng chung cho cả hai bảng thi.</p>
+  <div class="grid2">
+    <div class="card"><span class="tag">Nhánh A</span><h4 style="margin-top:8px">Công cụ cho người khác dùng</h4><p style="font-size:14px;color:var(--ink2);margin:0">Sản phẩm giải một bài toán có thật của <b>người dùng ngoài</b> — khách hàng, đồng nghiệp/phòng ban khác, chủ cửa hàng, SME, cộng đồng — có thể đưa cho họ dùng ngay.</p></div>
+    <div class="card"><span class="tag a">Nhánh B</span><h4 style="margin-top:8px">Giải bài toán của chính mình</h4><p style="font-size:14px;color:var(--ink2);margin:0">Công cụ giải quyết đúng một việc <b>bạn hay làm</b> (kể cả việc cá nhân như quản lý thu chi) — đo được tiết kiệm thời gian, có khả năng nhân rộng cho người khác cùng nhu cầu.</p></div>
+  </div>
+</div></section>
+
+<section id="barem"><div class="sec">
+  <h2><span class="no">F</span>Barem điểm — thang 100, chấm tự động là chính</h2>
+  <p class="lead">Bộ tiêu chí thiết kế để <b>máy chấm được phần lớn</b>. Trước khi tính điểm, mọi bài qua <b>một lớp cổng tự động</b> (đạt/không đạt); qua cổng rồi mới vào thang 100.</p>
+
+  <div class="box green" style="margin:0 0 14px"><div class="t">Lớp cổng — tự động, đạt/không đạt (bắt buộc qua)</div>
+    <ul class="list" style="margin-top:4px">
+      <li>Link chạy thật, không trang trắng · <b>có database hoạt động</b> · qua rà bảo mật 7 điều cấm · đã đăng bài lên Group. Thiếu một mục → chưa vào bảng xếp hạng.</li>
+    </ul>
+  </div>
+
+  <table>
+    <tr><th>Module chấm</th><th class="r">Điểm</th><th>Chấm bằng gì</th></tr>
+    <tr><td><b>Chất lượng kỹ thuật</b> — chức năng chạy (15) · database dùng thật, có CRUD (10) · có workflow tự động chạy (10) · mở tốt trên mobile (5)</td><td class="r">40</td><td>Máy chấm tự động</td></tr>
+    <tr><td><b>Độ hoàn thiện &amp; nội dung riêng</b> — không chữ mẫu/nút chết; nội dung riêng, không phải template đổi tên</td><td class="r">15</td><td>Máy + AI đối chiếu</td></tr>
+    <tr><td><b>Giá trị ứng dụng</b> — bài toán thật, sản phẩm giải được (chấm từ form + bản trả lời viết)</td><td class="r">25</td><td>AI chấm theo rubric · người spot-check</td></tr>
+    <tr><td><b>Lan tỏa cộng đồng</b> — tương tác bài đăng so trung vị (chấm theo bậc)</td><td class="r">20</td><td>Máy đếm tự động</td></tr>
+    <tr><td><b>Tổng</b></td><td class="r"><b>100</b></td><td></td></tr>
+  </table>
+
+  <div class="box amber"><div class="t">Deploy từ Git/repo có sẵn — thang kỹ thuật riêng</div>Bài <b>tự dựng mới trong kỳ thi</b>: chấm full 40 điểm mục Chất lượng kỹ thuật. Bài <b>deploy từ Git/repo đã có từ trước</b> (không tự viết trong kỳ thi): mục kỹ thuật tính <b>trần 50% (tối đa 20 điểm)</b> vì phần "tự dựng" ít; các module còn lại giữ nguyên. Bạn khai cách deploy trong form và hệ thống đối chiếu lịch sử commit.</div>
+
+  <h3>Bản trả lời viết về sản phẩm — nộp cùng bài (đầu vào chấm Giá trị ứng dụng)</h3>
+  <p>Ba câu bắt buộc, áp dụng cho tất cả:</p>
+  <ol class="num">
+    <li>Chỗ nào của Vibe Host làm bạn khó chịu / mất thời gian nhất khi làm?</li>
+    <li>Nếu giới thiệu Vibe Host cho một người ngoài, bạn kẹt ở câu hỏi nào mà chưa trả lời được?</li>
+    <li>Nếu phải giải thích Vibe Host khác các nền tảng nước ngoài chỗ nào, bạn nói gì?</li>
+  </ol>
+
+  <h3>Lan tỏa cộng đồng — 20 điểm (chấm theo bậc, máy đếm)</h3>
+  <p>Điểm bậc so với <b>trung vị</b> của các bài dự thi đăng cùng khung giờ, cùng tuần.</p>
+  <table>
+    <tr><th>Bậc</th><th>Điều kiện (so trung vị cùng khung giờ)</th><th class="r">Điểm</th></tr>
+    <tr><td>4</td><td>Trên 200% trung vị, có thảo luận chuyên môn</td><td class="r">20</td></tr>
+    <tr><td>3</td><td>120% – 200% trung vị</td><td class="r">15</td></tr>
+    <tr><td>2</td><td>70% – 119% trung vị</td><td class="r">10</td></tr>
+    <tr><td>1</td><td>Dưới 70% trung vị</td><td class="r">5</td></tr>
+  </table>
+  <div class="box red"><div class="t">Quy tắc chống gian lận</div>
+    <ul class="list" style="margin-top:4px">
+      <li class="r">Cửa sổ đếm cố định 7 ngày kể từ giờ bài được duyệt hiển thị; chỉ tính đúng một bài đã đăng ký.</li>
+      <li class="r">Không tính tương tác từ nhân viên Mắt Bão hay tài khoản vận hành của nhóm.</li>
+      <li class="r">Một bình luận có nội dung thật (hệ thống + người duyệt) = 5 lượt cảm xúc.</li>
+      <li class="r"><b>Mua like, thuê seeding, lập tài khoản ảo → loại khỏi cuộc thi, không cảnh cáo trước.</b></li>
+    </ul>
+  </div>
+</div></section>
+
+<section id="phanbien"><div class="sec">
+  <h2><span class="no">G</span>Cơ chế phản biện — gọn, không tốn thời gian hội đồng</h2>
+  <p class="lead">Thí sinh được quyền phản biện kết quả chấm, nhưng theo cơ chế <b>một vòng, bằng văn bản, có bằng chứng</b> — <b>không họp trực tiếp</b>, đa số case do hệ thống/AI tự xử, người chỉ chạm vào những ca thật sự mơ hồ.</p>
+  <div class="flow">
+    <div class="step"><b>1 · Có điểm tự động</b><span>Hệ thống công bố điểm từng module trên sheet</span></div>
+    <div class="step"><b>2 · Gửi phản biện (≤48h)</b><span>Một lần duy nhất, qua form — chọn tiêu chí + đính bằng chứng</span></div>
+    <div class="step"><b>3 · AI sàng lọc</b><span>Đối chiếu bằng chứng với sản phẩm; rõ ràng thì tự điều chỉnh</span></div>
+    <div class="step"><b>4 · Người duyệt case mờ (≤48h)</b><span>Chỉ ca AI không tự quyết mới cần 1 giám khảo — chung cuộc</span></div>
+  </div>
+  <ul class="list">
+    <li><b>Phải có bằng chứng kiểm chứng được</b>: link chức năng chạy, commit, video, ảnh màn hình. Phản biện cảm tính ("em thấy xứng đáng hơn") <b>bị bỏ qua tự động</b>.</li>
+    <li class="i"><b>Phạm vi</b>: phản biện các điểm máy chấm (chức năng, database, workflow, mobile) và kết quả rà bảo mật. Điểm chủ quan (Giá trị ứng dụng, Lan tỏa) chỉ nhận nếu <b>bổ sung bằng chứng mới</b>, không nhận tranh luận suông.</li>
+    <li class="a"><b>Một vòng duy nhất</b>, mỗi bài một lần; kết quả sau phản biện là <b>chung cuộc</b>.</li>
+    <li class="p"><b>SLA rõ</b>: phản hồi ≤48h. Vì có bằng chứng chuẩn hóa nên phần lớn AI tự đối chiếu — tải lên người rất nhỏ.</li>
+  </ul>
+  <div class="box violet"><div class="t">Vì sao cơ chế này không làm nghẽn hội đồng</div>Bằng chứng bắt buộc + AI đối chiếu tự động giải quyết hầu hết phản biện "máy chấm sót" (vd một chức năng thật ra có chạy → tự cộng lại). Người chỉ đọc số ít ca ranh giới, mỗi ca vài phút.</div>
+</div></section>
+
+<section id="congnhan"><div class="sec">
+  <h2><span class="no">H</span>Công nhận hoàn thành &amp; Xếp hạng giải</h2>
+  <p class="lead">Vì đăng bài đã là <b>nghĩa vụ bắt buộc</b> (được đăng ẩn danh nên không còn lý do ngại lộ danh tính), cuộc thi <b>không tách hai thang</b>: ai hoàn thành đủ nghĩa vụ đều được công nhận (và hưởng quyền lợi), điểm quyết định thứ hạng tranh giải.</p>
+  <table>
+    <tr><th>Trường hợp</th><th>Công nhận (đậu)</th><th>Vào bảng xếp hạng</th></tr>
+    <tr><td>SP đạt ngưỡng sàn (có DB) · qua cổng bảo mật · có đăng bài · BGK duyệt</td><td>Có (hoàn phí AI + 110% Năng lực AI + quà mốc)</td><td>Có — xếp theo điểm</td></tr>
+    <tr><td>SP đạt ngưỡng sàn · bị chặn đăng, đang sửa</td><td>Chờ — sửa &amp; nộp lại</td><td>Sau khi qua cổng</td></tr>
+    <tr><td>SP chưa đạt ngưỡng sàn (thiếu DB / chức năng…)</td><td>Chưa</td><td>Không</td></tr>
+  </table>
+  <div class="box green">Bị chặn <b>không phải dấu chấm hết</b>: được sửa và nộp lại trong hạn của bạn; nếu qua cổng kịp thì vẫn tranh giải bình thường.</div>
+</div></section>
+
+<section id="lich"><div class="sec">
+  <h2><span class="no">I</span>Lịch chương trình — 4 tháng</h2>
+  <table>
+    <tr><th>Giai đoạn</th><th>Nội dung chính</th></tr>
+    <tr><td><b>Kick-off</b></td><td>Công bố thể lệ &amp; ngưỡng sàn tại 2 điểm cầu (TP.HCM &amp; Hà Nội) · hướng dẫn tạo tài khoản Google AI Pro · phát ngân hàng đề tài · mở đăng ký. <b>Marketing công bố thể lệ · HR công bố chính sách.</b></td></tr>
+    <tr><td><b>Tháng 1 → 4 (thi)</b></td><td>Mở đăng ký &amp; duyệt chủ đề theo tuần (30–40 bài/tuần) — mỗi người ≤15 ngày kể từ khi duyệt để làm → deploy (có DB) → nộp</td></tr>
+    <tr><td><b>Chấm &amp; rà soát</b></td><td>Cuốn chiếu ngay khi nhận bài — chấm chất lượng + rà bảo mật tự động (người spot-check); mở cửa phản biện ≤48h</td></tr>
+    <tr><td><b>Đăng bài &amp; đếm tương tác</b></td><td>Đăng lên Group theo lịch (BTC giãn nếu trùng) · đếm tương tác 7 ngày</td></tr>
+    <tr><td><b>Chốt &amp; trao giải tháng</b></td><td>Cuối mỗi tháng: chốt bảng xếp hạng từng bảng + trao giải tháng (4 đợt)</td></tr>
+    <tr><td><b>Tổng kết cuối kỳ</b></td><td>Sau 4 tháng: chọn Quán quân chung + tôn vinh, tổng hợp repo vào kho Template</td></tr>
+  </table>
+  <div class="box amber"><div class="t">Lưu ý</div>Nộp bài <b>càng sớm trong hạn của bạn</b> thì càng có thời gian sửa nếu bị trả về, và được cấp lịch đăng bài sớm hơn.</div>
+</div></section>
+
+<section id="dangbai"><div class="sec">
+  <h2><span class="no">J</span>Cơ chế đăng bài vào Group</h2>
+  <p class="lead"><b>Bắt buộc với mọi thí sinh.</b> Trần 15 bài/ngày chia 3 khung giờ, mỗi khung 5 bài — để bài buổi tối không có lợi thế áp đảo. Khi số bài dồn quá nhiều, BTC sắp xếp lại lịch đăng cho mọi người trên trang Group.</p>
+  <div class="box green"><div class="t">Được đăng ẩn danh — bắt buộc phải có bài, nhưng không lộ danh tính</div>Bạn <b>không cần dùng nick Facebook chính</b>. Có thể đăng ẩn danh qua chế độ ẩn danh của Group, dùng tài khoản phụ, hoặc gửi BTC đăng hộ ẩn danh. Vì vậy "ngại lộ mặt" không còn là lý do để không đăng bài.</div>
+  <table>
+    <tr><th>Khung</th><th>Giờ</th><th class="r">Số bài</th><th>Loại nội dung</th></tr>
+    <tr><td>Sáng</td><td>8h30 – 12h00</td><td class="r">5</td><td>Kiến thức, đánh giá công cụ</td></tr>
+    <tr><td>Chiều</td><td>13h00 – 17h30</td><td class="r">5</td><td>Nội dung nhẹ, hỏi đáp</td></tr>
+    <tr><td>Tối</td><td>18h00 – 22h00</td><td class="r">5</td><td>Showcase, thảo luận mở</td></tr>
+  </table>
+  <ul class="list">
+    <li><b>Ngày đăng</b> cấp theo thứ tự qua cổng rà soát — ai xong trước được đăng sớm.</li>
+    <li><b>Khung giờ</b> bốc thăm công khai; nếu trùng dồn thì BTC giãn lịch trên Group.</li>
+    <li class="a">Đến lịch mà chưa đăng thì mất lượt, xuống cuối hàng đợi.</li>
+  </ul>
+  <div class="box red"><div class="t">Ràng buộc nội dung bài đăng — bắt buộc</div>
+    <ul class="list" style="margin-top:4px">
+      <li class="r">Không nhắc Mắt Bão, không dùng email/danh xưng công ty, không để lộ đang làm ở Mắt Bão.</li>
+      <li class="r">Không đặt link bấm được trong thân bài — đưa link xuống bình luận.</li>
+      <li class="r">Bài phải kể được quá trình làm, chỗ vấp, cách xử lý — không phải một dòng khoe kèm link.</li>
+      <li class="r">Dùng bộ 3 mẫu bố cục bài do ban tổ chức cấp.</li>
+    </ul>
+  </div>
+</div></section>
+
+<section id="antoan"><div class="sec">
+  <h2><span class="no">K</span>Cổng rà soát an toàn — tự động + 7 điều cấm</h2>
+  <p class="lead">Bạn tự kiểm theo checklist rồi nộp kèm sản phẩm. Hệ thống <b>rà bảo mật tự động</b> trước; <b>con người chỉ duyệt những trường hợp máy gắn cờ</b> và xử tranh chấp (cuốn chiếu ngay khi nhận bài).</p>
+  <div class="box info" style="margin:0 0 12px"><div class="t">Máy quét tự động những gì</div>Quét <b>khoá API / mật khẩu / chuỗi kết nối</b> trong mã · dò <b>dữ liệu cá nhân thật (PII)</b> · nhận diện <b>logo / tên miền / hình ảnh thương hiệu Mắt Bão</b> · kiểm dấu hiệu dữ liệu thật thay vì dữ liệu giả. Bài sạch đi thẳng; bài bị gắn cờ mới chuyển người duyệt.</div>
+  <p><b>Bảy điều kiện bắt buộc để được đăng:</b></p>
+  <ol class="num">
+    <li><b>Không chứa dữ liệu khách hàng thật</b> — bắt buộc dùng dữ liệu giả, tuyệt đối không ngoại lệ.</li>
+    <li>Không có khoá API, mật khẩu, chuỗi kết nối nằm trong mã nguồn.</li>
+    <li>Không thu thập thông tin cá nhân người dùng cuối nếu chưa có nơi lưu hợp lệ.</li>
+    <li>Không dùng logo, bộ nhận diện, tên miền hay hình ảnh thương hiệu Mắt Bão.</li>
+    <li>Không tuyên bố / gợi ý đây là sản phẩm chính thức của Mắt Bão.</li>
+    <li>Bài đăng và sản phẩm không để lộ bạn đang làm việc tại Mắt Bão.</li>
+    <li>Không đưa tài liệu nội bộ, bảng giá chưa công bố, thông tin đối tác vào sản phẩm.</li>
+  </ol>
+  <div class="box red"><div class="t">⚠ Cảnh báo kỹ thuật — đọc kỹ</div>Vibe Host bản v2 có cơ chế <b>AI tự sửa mã nguồn</b>, tự chạy mỗi khi triển khai thất bại (không đợi bạn bấm). Khi chạy, mã nguồn được gửi tới nhà cung cấp AI nước ngoài — nghĩa là <b>bất kỳ dữ liệu nội bộ hay dữ liệu khách hàng nào nằm trong mã đều có thể đi ra ngoài mà bạn không bấm nút nào</b>. Đây là lý do điều cấm số 1 và số 7 là tuyệt đối.</div>
+</div></section>
+
+<section id="sua"><div class="sec">
+  <h2><span class="no">L</span>Cơ chế cho sửa &amp; nộp lại</h2>
+  <p class="lead">Áp dụng cho cả hai cổng (ngưỡng sàn kỹ thuật và rà soát an toàn) — biến một lần trượt thành một lần học.</p>
+  <table>
+    <tr><th>Bước</th><th>Thời hạn cam kết</th></tr>
+    <tr><td>Hệ thống + BGK ra nhận xét, ghi rõ vi phạm điều nào &amp; chỗ cụ thể</td><td>≤48 giờ từ khi nhận</td></tr>
+    <tr><td>Bạn sửa và nộp lại</td><td>Trong hạn nộp của bạn (càng sớm càng tốt)</td></tr>
+    <tr><td>Rà lại (tự động + spot-check)</td><td>≤48 giờ từ khi nhận</td></tr>
+  </table>
+  <ul class="list">
+    <li>Nhận xét phải chỉ rõ vi phạm điều nào — nhận xét chung chung "chưa đạt yêu cầu" không hợp lệ.</li>
+    <li class="a"><b>Nộp sớm</b> thì còn kịp sửa &amp; qua cổng trong hạn. Sát hạn mà chưa kịp qua cổng thì được <b>gia hạn ngắn</b> để hoàn thành nghĩa vụ (nhưng thứ hạng &amp; lịch đăng tính theo thời điểm qua cổng).</li>
+    <li>Hệ quả tự nhiên khi phải sửa: lịch đăng bài cấp lại theo thời điểm qua cổng (xuống cuối hàng đợi).</li>
+  </ul>
+</div></section>
+
+<section id="giai"><div class="sec">
+  <h2><span class="no">M</span>Giải thưởng &amp; Ngân sách</h2>
+  <p class="lead">Mỗi tháng chốt giải cho <b>từng bảng</b>; cuối 4 tháng chọn Quán quân chung. Tổng chi phí tổ chức <b>trong trần 100 triệu</b>, ưu tiên dồn vào giải thưởng, có tính riêng khoản hoàn phí AI. <i>Cơ cấu &amp; mức giải dưới đây là đề xuất để BLĐ chốt.</i></p>
+  <h3>Giải mỗi tháng — trao cho <b>từng bảng</b> (Kỹ thuật &amp; Văn phòng)</h3>
+  <table>
+    <tr><th>Giải</th><th>Phần thưởng</th></tr>
+    <tr><td>🥇 Top 1 của bảng</td><td>1.000.000đ</td></tr>
+    <tr><td>🥈 Top 2 của bảng</td><td>500.000đ</td></tr>
+    <tr><td>🥉 Top 3 của bảng</td><td>300.000đ</td></tr>
+    <tr><td>❤️ Giải yêu thích của bảng (tương tác cao nhất)</td><td>300.000đ</td></tr>
+  </table>
+  <p style="font-size:13px;color:var(--ink2)">≈2,1tr/bảng × 2 bảng = <b>~4,2tr/tháng</b> × 4 tháng = <b>~16,8tr</b>.</p>
+  <h3>Giải chung cuối chương trình (giữa hai bảng)</h3>
+  <table>
+    <tr><th>Giải</th><th>Phần thưởng</th></tr>
+    <tr><td>🏆 Quán quân chung</td><td>3.000.000đ</td></tr>
+    <tr><td>🥈 Á quân chung</td><td>2.000.000đ</td></tr>
+    <tr><td>🥉 Quý quân chung</td><td>1.000.000đ</td></tr>
+  </table>
+
+  <h3>Dự trù ngân sách tổng (trần 100tr)</h3>
+  <table>
+    <tr><th>Khoản</th><th class="r">Dự kiến</th><th>Ghi chú</th></tr>
+    <tr><td>Giải tháng (4 tháng × 2 bảng)</td><td class="r">~16,8tr</td><td>Top 1/2/3 + Yêu thích mỗi bảng</td></tr>
+    <tr><td>Giải chung cuối kỳ</td><td class="r">6,0tr</td><td>Quán/Á/Quý quân</td></tr>
+    <tr><td>Hoàn phí Google AI Pro</td><td class="r">~26–33tr</td><td>~200–250 người đậu × 130.000đ, qua lương</td></tr>
+    <tr><td>Quà mốc + chứng nhận</td><td class="r">~6,0tr</td><td>Người đạt ngưỡng sàn</td></tr>
+    <tr><td>Vận hành · kick-off · truyền thông</td><td class="r">~8,0tr</td><td>2 điểm cầu, mẫu bài, sheet</td></tr>
+    <tr><td>Bồi dưỡng team vận hành &amp; BTC</td><td class="r">10,0tr</td><td>Ghi nhận công team tổ chức &amp; chấm</td></tr>
+    <tr><td><b>Tổng dự kiến</b></td><td class="r"><b>~73–80tr</b></td><td>Trong trần 100tr, còn dư địa điều chỉnh</td></tr>
+  </table>
+  <div class="box green"><div class="t">Thưởng thêm (phi tiền mặt)</div>
+    <ul class="list" style="margin-top:4px">
+      <li>Sản phẩm thắng giải lên website / fanpage làm <b>case study</b> (không ghi tên tác giả).</li>
+      <li>Repo tốt được đưa vào <b>kho Template Vibe Host</b> (ghi tên tác giả) — xem mục Repo → Template.</li>
+    </ul>
+  </div>
+  <p style="font-size:12.5px;color:var(--ink2)"><i>Cơ cấu, mức giải và ngân sách có thể điều chỉnh khi công bố chính thức.</i></p>
+</div></section>
+
+<section id="template"><div class="sec">
+  <h2><span class="no">N</span>Repo → Template Vibe Host</h2>
+  <p class="lead">Một mục tiêu quan trọng của cuộc thi là góp repo vào <b>kho Template ứng dụng của Vibe Host</b> để phục vụ người dùng thật. Điều này được ghi rõ ngay trong thể lệ.</p>
+  <div class="box violet"><div class="t">Đăng ký dự thi = đồng ý</div>Khi đăng ký, bạn <b>đồng ý cho Mắt Bão sử dụng repo của bạn làm Template trên Vibe Host</b>, có <b>ghi tên tác giả</b>. (Bạn xác nhận điều này bằng ô tích trong form đăng ký.)</div>
+  <p>Repo được chọn đưa vào kho sẽ chuẩn hóa theo <b>Tiêu chuẩn Template Vibe Host</b> (do Team AI quy định), gồm:</p>
+  <ul class="list">
+    <li class="p"><b>Bản địa hóa</b>: hướng người dùng Việt — giao diện &amp; nội dung tiếng Việt, phù hợp bối cảnh sử dụng.</li>
+    <li class="p"><b>Có câu chuyện sử dụng rõ ràng</b>: vấn đề thật → giải pháp → đối tượng dùng → giá trị mang lại.</li>
+    <li class="p"><b>Phân loại theo nhóm chủ đề</b> (khai ngay từ đầu): Website · Kinh doanh · Marketing · Quản lý · Pháp lý · Giáo dục · Văn phòng… <b>Không nhận chủ đề Game.</b></li>
+    <li class="p"><b>Tài liệu kỹ thuật tối thiểu</b>: framework/loại mã nguồn · ngôn ngữ · database · thành phần phụ thuộc · yêu cầu môi trường · hướng dẫn cài đặt &amp; sử dụng.</li>
+    <li class="p"><b>Đưa lên GitHub tổ chức Mắt Bão AI</b> (tạo tài khoản bằng email công ty), đặt tên theo quy chuẩn <b><code>[MBC-&lt;Phòng&gt;-&lt;Team&gt;] tên-ứng-dụng</code></b> (vd <code>[MBC-TS-H] wpress-extractor</code>).</li>
+    <li class="p"><b>Có bài Wiki trên wiki.matbao.net</b>: giới thiệu &amp; mục đích · hướng dẫn dùng · chức năng chính · ảnh minh họa (video nếu có).</li>
+  </ul>
+  <div class="box info">Repo dùng nền có sẵn thì phải có <b>nghiên cứu, triển khai và chỉnh sửa mang bản sắc riêng</b>, không chỉ sao chép rồi đưa lên. Việc chuẩn hóa Template (GitHub tổ chức, đặt tên, Wiki) do Team AI hướng dẫn sau khi repo được chọn — thí sinh không phải tự lo hết ngay trong kỳ thi.</div>
+</div></section>
+
+<section id="moc"><div class="sec">
+  <h2><span class="no">O</span>Các mốc bạn phải hoàn thành</h2>
+  <table>
+    <tr><th>Mốc</th><th>Hoàn thành</th><th>Bắt buộc</th></tr>
+    <tr><td>CP1</td><td>Dự kick-off (hoặc xem lại bản ghi) &amp; đăng ký trong tuần</td><td>Có</td></tr>
+    <tr><td>CP2</td><td>Nộp form đăng ký đề tài, được duyệt &amp; chọn hạn nộp (≤15 ngày)</td><td>Có</td></tr>
+    <tr><td>CP3</td><td>Sản phẩm chạy thật, có database &amp; đạt đủ 6 tiêu chí ngưỡng sàn</td><td>Có</td></tr>
+    <tr><td>CP4</td><td>Qua cổng rà soát an toàn (tự động + spot-check)</td><td>Có</td></tr>
+    <tr><td>CP5</td><td>Đăng bài vào Group theo lịch được cấp (được ẩn danh)</td><td>Có</td></tr>
+    <tr><td>CP6</td><td>Nộp phiếu trải nghiệm sản phẩm</td><td>Có</td></tr>
+    <tr><td>CP7</td><td>Gửi phản biện (nếu có) — một vòng, ≤48h sau khi có điểm</td><td>Không</td></tr>
+  </table>
+  <p style="font-size:13.5px;color:var(--ink2)">CP1–CP6 bắt buộc — hoàn thành đủ &amp; được BGK duyệt mới "đậu" (nhận quyền lợi &amp; vào bảng xếp hạng). CP7 là quyền, không bắt buộc.</p>
+</div></section>
+
+<section id="btc"><div class="sec">
+  <h2><span class="no">P</span>Ban tổ chức, Hội đồng &amp; Công bố</h2>
+  <div class="box info"><div class="t">Phân vai công bố</div><b>Marketing công bố thể lệ</b> (luật chơi, barem, lịch, ngân hàng đề tài, cơ chế đăng bài). <b>HR công bố chính sách</b> (hoàn phí công cụ AI qua lương, tính Năng lực AI 110%, quyền lợi nhân sự).</div>
+  <h3>Thành phần mở rộng — không chỉ kỹ thuật</h3>
+  <p style="font-size:14px;color:var(--ink2)">Vì đây là chương trình liên phòng ban, BTC &amp; hội đồng gồm đại diện nhiều khối để chấm công bằng và bao quát cả giá trị nghiệp vụ, thương hiệu, chính sách:</p>
+  <table>
+    <tr><th>Vai trò</th><th>Ai / khối</th><th>Phụ trách</th></tr>
+    <tr><td>Trưởng BTC · Chủ tịch hội đồng</td><td>Đại diện BLĐ</td><td>Chốt kết quả, xử tranh chấp cuối</td></tr>
+    <tr><td>Ban Thư ký &amp; Hệ thống</td><td>Marketing + IT</td><td>Vận hành chấm tự động, giữ sheet công khai, công bố</td></tr>
+    <tr><td>Hội đồng kỹ thuật (×2)</td><td>TS / DE / Team AI</td><td>Duyệt case máy gắn cờ (ngưỡng sàn, bảo mật), chuẩn Template</td></tr>
+    <tr><td>Giám khảo giá trị ứng dụng</td><td>Sản phẩm + đại diện nghiệp vụ (Sales/CSKH)</td><td>Đối chiếu điểm "Giá trị ứng dụng" do AI chấm với thực tế</td></tr>
+    <tr><td>Đại diện Marketing</td><td>Marketing</td><td>Rủi ro thương hiệu, chất lượng bài đăng, lan tỏa</td></tr>
+  </table>
+  <div class="box info">Con người can thiệp <b>ở mức tối thiểu</b>: chỉ những bài máy gắn cờ, ca sát ranh giới, phản biện AI không tự quyết, và khiếu nại. Toàn bộ điểm &amp; log <b>công khai trên sheet</b> để kiểm tra chéo; người vận hành nhóm không dự thi và không can thiệp module tương tác.</div>
+</div></section>
+
+<section id="form"><div class="sec">
+  <h2><span class="no">Q</span>Form đăng ký đề tài</h2>
+  <p class="lead">Nộp khi đăng ký trong tuần. Duyệt cuốn chiếu; đề tài bị trả về được sửa và nộp lại tối đa 2 lần (không loại ai).</p>
+  <h3>Phần 1 — Định danh</h3>
+  <ol class="num">
+    <li>Họ tên, mã nhân viên, <b>phòng</b> (TS / DE / OP / MK / FI / HR / Kinh Doanh) — hệ thống tự xếp bạn vào bảng Kỹ thuật hay Văn phòng</li>
+    <li>Nơi làm việc: TP.HCM hoặc Hà Nội · email công ty</li>
+    <li><b>Hạn nộp bạn chọn</b> (một ngày trong vòng 15 ngày kể từ khi chủ đề được duyệt)</li>
+  </ol>
+  <h3>Phần 2 — Đề tài</h3>
+  <ol class="num" start="4">
+    <li>Tên sản phẩm dự kiến</li>
+    <li>Nhánh đề tài: A (cho người khác dùng) hoặc B (bài toán của chính mình) — không đổi được sau khi duyệt</li>
+    <li><b>Nhóm chủ đề</b>: Website / Kinh doanh / Marketing / Quản lý / Pháp lý / Giáo dục / Văn phòng / Cá nhân… <span style="color:var(--red)">(không nhận chủ đề Game)</span></li>
+    <li>Bài toán đang giải là gì (mô tả tình huống thật 3–5 câu: ai gặp, bao nhiêu lần/tuần, đang xử lý ra sao, mất bao lâu) — có thể là việc công ty, cá nhân hay cho SME/cộng đồng</li>
+    <li>Người dùng của sản phẩm là ai (nhánh B: ghi rõ là chính mình + ước lượng còn bao nhiêu người gặp đúng bài toán)</li>
+    <li>Sản phẩm làm được gì — liệt kê 3–5 chức năng (người dùng làm gì → nhận được gì). Ba trong số này dùng chấm ngưỡng sàn.</li>
+    <li>Màn hình chính dự kiến (mô tả bằng chữ hoặc vẽ tay chụp ảnh)</li>
+  </ol>
+  <h3>Phần 3 — Kỹ thuật &amp; an toàn</h3>
+  <ol class="num" start="11">
+    <li><b>Database sẽ dùng</b> (bắt buộc): loại dữ liệu lưu &amp; dùng để làm gì trong sản phẩm</li>
+    <li><b>Có workflow tự động chạy không?</b> (cron / tự động gửi / xử lý nền…) — mô tả nếu có (cộng điểm chất lượng)</li>
+    <li><b>Cách đưa lên Vibe Host</b>: tự dựng mới trong kỳ thi / deploy từ Git-repo có sẵn / dán HTML / GitHub / Git URL / mẫu có sẵn <span style="color:var(--amber-d)">(deploy từ repo có sẵn chấm thang kỹ thuật riêng)</span></li>
+    <li><b>Công cụ AI dự định dùng</b> để sinh mã · <b>có đăng ký Google AI Pro để được hoàn phí khi đậu không?</b> (Có / Không)</li>
+    <li>Dữ liệu sản phẩm cần dùng — liệt kê từng loại</li>
+    <li><b>Xác nhận toàn bộ dữ liệu là dữ liệu giả do tôi tự tạo</b> (bắt buộc tích)</li>
+    <li>Số thành phần chạy nền cần dùng (1 website = 1 suất, mỗi DB thêm 1 suất; gói cơ bản có 2 suất = 1 web + 1 DB)</li>
+    <li><b>Tự đánh giá rủi ro</b>: có chạm dữ liệu khách thật / thông tin nội bộ / bảng giá chưa công bố / thương hiệu Mắt Bão không? Nếu có, ghi rõ chạm ở đâu.</li>
+    <li><b>Cam kết không thể hiện thông tin Mắt Bão</b> trong sản phẩm &amp; bài đăng (bắt buộc tích)</li>
+    <li><b>Đồng ý cho Mắt Bão dùng repo làm Template Vibe Host</b>, có ghi tên tác giả (bắt buộc tích)</li>
+  </ol>
+  <div class="box info"><div class="t">Tiêu chí duyệt đề tài (công bố trước)</div>Có bài toán thật · phạm vi làm được trong hạn với thời gian ngoài giờ · 3 chức năng đủ cụ thể để chấm đạt/không đạt · <b>có phương án database</b> · <b>đã phân nhóm chủ đề, không phải Game</b> · không chạm 7 điều cấm · không trùng đề tài quá mức.</div>
+</div></section>
+
+<section id="nganhang"><div class="sec">
+  <h2><span class="no">R</span>Ngân hàng đề tài — theo nhóm chủ đề</h2>
+  <p class="lead">Phát ngay tại kick-off cho người chưa nghĩ ra chỗ bắt đầu. Đề tài <b>mở rộng</b>: không bó trong việc nội bộ Mắt Bão — bạn có thể làm giải pháp <b>cá nhân, cho SME, cho cộng đồng</b>. Khuyến khích hướng người dùng Việt (giao diện tiếng Việt). Chọn từ ngân hàng <b>không cộng, không trừ điểm</b>; ai ở phòng nào cũng chọn chủ đề nào cũng được. Mọi sản phẩm phải có database; <b>không làm chủ đề Game</b>.</p>
+  <div class="grid3">
+    <div class="card"><span class="tag">💰 Tài chính cá nhân &amp; DN</span>
+      <ul class="list" style="margin-top:8px">
+        <li>Sổ thu chi cá nhân, tự vẽ biểu đồ theo tháng</li>
+        <li>Công cụ chia tiền nhóm / quỹ chung</li>
+        <li>Theo dõi công nợ mini cho cửa hàng/SME</li>
+        <li>Máy tính lãi vay / tiết kiệm mục tiêu</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag">🛒 Kinh doanh / bán hàng</span>
+      <ul class="list" style="margin-top:8px">
+        <li>Quản lý đơn hàng nhỏ cho chủ shop online</li>
+        <li>Bảng giá / báo giá nhanh gửi khách bằng link</li>
+        <li>Quản lý tồn kho mini, cảnh báo hết hàng</li>
+        <li>CRM cá nhân theo dõi khách đang chăm</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag">📣 Marketing / Sales / CSKH</span>
+      <ul class="list" style="margin-top:8px">
+        <li>Lên lịch nội dung theo kênh, nhắc hạn đăng</li>
+        <li>Soạn nhanh caption / tin nhắn CSKH từ mẫu</li>
+        <li>Landing khảo sát nhu cầu / thu lead (dữ liệu giả)</li>
+        <li>Tổng hợp số liệu chiến dịch, tự vẽ biểu đồ</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag i">🌐 Website / Kỹ thuật</span>
+      <ul class="list" style="margin-top:8px">
+        <li class="i">Trang chẩn đoán nhanh lỗi website theo triệu chứng</li>
+        <li class="i">Công cụ tính &amp; so sánh chi phí hosting/gói dịch vụ</li>
+        <li class="i">Dashboard theo dõi uptime / deploy (dữ liệu giả)</li>
+        <li class="i">Trang tra cứu snippet / tài liệu kỹ thuật, tìm kiếm được</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag">🗂️ Quản lý / Vận hành</span>
+      <ul class="list" style="margin-top:8px">
+        <li>Checklist quy trình, tick từng bước, xuất file</li>
+        <li>Theo dõi tiến độ đơn/việc theo trạng thái</li>
+        <li>Bảng phân công ca trực, tự nhắc &amp; tổng hợp</li>
+        <li>Quản lý tài sản / thiết bị mini</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag">🏢 Văn phòng / Nhân sự</span>
+      <ul class="list" style="margin-top:8px">
+        <li>Checklist onboarding nhân viên mới</li>
+        <li>Trang tra cứu chính sách / nội quy, tìm kiếm được</li>
+        <li>Công cụ đăng ký nghỉ / chấm công mini</li>
+        <li>Khảo sát nội bộ, tổng hợp ra biểu đồ</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag">⚖️ Pháp lý</span>
+      <ul class="list" style="margin-top:8px">
+        <li>Lịch nhắc hạn thuế / tờ khai, đánh dấu đã nộp</li>
+        <li>Trang tra cứu biểu mẫu / quy trình pháp lý hay dùng</li>
+        <li>Công cụ soạn hợp đồng đơn giản từ mẫu (dữ liệu giả)</li>
+        <li>Checklist tuân thủ theo loại hình DN</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag">🎓 Giáo dục / học tập</span>
+      <ul class="list" style="margin-top:8px">
+        <li>Bộ flashcard ôn tập, tự chấm điểm</li>
+        <li>Trình theo dõi mục tiêu học tập theo tuần</li>
+        <li>Ngân hàng câu hỏi trắc nghiệm tự tạo đề</li>
+        <li>Trang tổng hợp tài liệu học, tìm kiếm được</li>
+      </ul>
+    </div>
+    <div class="card"><span class="tag a">👤 Cá nhân / đời sống</span>
+      <ul class="list" style="margin-top:8px">
+        <li class="a">Quản lý thói quen / mục tiêu cá nhân</li>
+        <li class="a">Lên kế hoạch bữa ăn / đi chợ theo tuần</li>
+        <li class="a">Nhắc lịch việc nhà / hóa đơn định kỳ</li>
+        <li class="a">Sổ tay ghi chú tra cứu nhanh theo thẻ</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="phieu"><div class="sec">
+  <h2><span class="no">S</span>Phiếu trải nghiệm sản phẩm</h2>
+  <p class="lead">Bắt buộc với tất cả người tham gia (CP6). 6 câu chung, 4 câu cuối theo đúng bảng của bạn.</p>
+  <h3>Phần chung — cho tất cả</h3>
+  <ol class="num">
+    <li>Bước nào bạn bị kẹt lâu nhất, và kẹt bao lâu?</li>
+    <li>Bạn có phải hỏi ai không, hỏi cái gì?</li>
+    <li>Chữ nào trên giao diện bạn không hiểu nghĩa?</li>
+    <li>Bạn gặp lỗi gì, hệ thống báo lỗi ra sao, bạn có hiểu thông báo lỗi không?</li>
+    <li>Có lúc nào bạn định bỏ cuộc không, ở bước nào?</li>
+    <li>Bạn dùng công cụ AI nào để sinh mã, mất bao lâu mới ra bản chạy được?</li>
+  </ol>
+  <div class="grid2" style="margin-top:6px">
+    <div class="card"><span class="tag i">Phần riêng — Bảng Kỹ thuật</span>
+      <ol class="num" start="7" style="margin-top:8px">
+        <li>Nếu khách gặp đúng bước khó / lỗi này, bạn sẽ hướng dẫn họ vượt qua thế nào?</li>
+        <li>Ba câu hỏi kỹ thuật bạn nghĩ khách sẽ hỏi về Vibe Host mà bạn chưa chắc cách trả lời.</li>
+        <li>Thông báo lỗi nào của Vibe Host khó hiểu nhất — nên viết lại thế nào cho dễ hiểu?</li>
+        <li>Một điều bạn muốn đội sản phẩm sửa ngay để <b>giảm số ticket hỗ trợ</b>.</li>
+      </ol>
+    </div>
+    <div class="card"><span class="tag">Phần riêng — Bảng Văn phòng</span>
+      <ol class="num" start="7" style="margin-top:8px">
+        <li>Nếu giới thiệu Vibe Host cho một đồng nghiệp không rành kỹ thuật, bạn nói gì để họ hiểu nhanh?</li>
+        <li>Ba câu bạn nghĩ người ngoài sẽ hỏi về Vibe Host mà bạn chưa biết trả lời.</li>
+        <li>Việc nào của phòng bạn (hoặc việc cá nhân) có thể tự làm một công cụ nhỏ để đỡ mất thời gian hơn?</li>
+        <li>Một điều bạn muốn đội sản phẩm sửa ngay để <b>người không rành kỹ thuật cũng dùng được</b>.</li>
+      </ol>
+    </div>
+  </div>
+</div></section>
+
+<div class="foot">Cuộc thi Vibe Coding Nội bộ · Toàn công ty · 2 bảng: Kỹ thuật &amp; Văn phòng · 4 tháng · Mắt Bão · Bản thể lệ dành cho người tham gia</div>
+
+</main>
+</body>
+</html>

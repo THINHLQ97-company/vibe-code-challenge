@@ -1,0 +1,13 @@
+{
+  "project": "matbao-vibe-challenge",
+  "team": "mk",
+  "template": "next-fullstack-starter",
+  "current_phase": "discovery",
+  "phases": {
+    "discovery": { "status": "in_progress" },
+    "gate1": { "status": "pending" },
+    "productization": { "status": "pending" },
+    "gate2": { "status": "pending" },
+    "production": { "status": "pending" }
+  }
+}
