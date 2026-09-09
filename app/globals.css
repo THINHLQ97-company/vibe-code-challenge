@@ -3,20 +3,105 @@
 @tailwind utilities;
 
 /*
- * Design system CHÍNH THỨC của dự án — "Mắt Bão Mockup Kit" (Indigo, SaaS admin).
- * Nguồn: docs/reference/design-system.css (bản gốc do user cung cấp, xem
- * docs/reference/DESIGN.md). Import y nguyên, không sửa giá trị token.
- * tailwind.config.ts trỏ THẲNG các key màu/chữ/bo góc vào biến --ds-* bên dưới —
- * không có lớp alias đổi tên nào ở giữa.
+ * DSVH — token của Design system VAYS Panel (Vibe Host). NGUỒN SỰ THẬT: DSVH.html.
+ * Luật #1: token-only, KHÔNG hardcode hex ở bất kỳ đâu trong code UI.
+ * Luật #10: component chỉ dùng semantic token nên tự đổi theo [data-theme].
+ * Thêm/đổi bậc nào ở đây thì PHẢI khai lại ở tailwind.config.ts + lib/tv.ts + lib/utils.ts
+ * (luật #21 — thang tự đặt không khai thì tailwind-merge đè mất class màu).
  */
-@import "./design-system.css";
+:root {
+  /* Surfaces */
+  --color-canvas: #212230;
+  --color-surface: #ffffff;
+  --color-surface-2: #fcfeff;
+  --color-surface-hover: #e4eaea;
+
+  /* Ink / text */
+  --color-ink: #001d21;
+  --color-ink-2: #334a4d;
+  --color-ink-3: #64797c;
+
+  /* Lines */
+  --color-stroke: #dfe6e6;
+  --color-stroke-soft: #eef2f2;
+  --color-stroke-hover: #d3dede;
+  --color-stroke-strong: #cdd7d7;
+  --color-stroke-focus: #c3d0d0;
+
+  /* Cream — không đảo theo theme */
+  --color-cream: #fff3e0;
+  --color-cream-100: #fbf3e6;
+  --color-cream-200: #f7ecda;
+  --color-cream-300: #f0e6d8;
+  --color-cream-ink: #001d21;
+
+  /* Brand + data accents — brand/accent giữ nguyên hue ở cả 2 theme */
+  --color-orange: #de4400;
+  --color-orange-bright: #f5872a;
+  --color-orange-strong: #cf3e00;
+  --color-red: #d92d20;
+  --color-red-strong: #b42318;
+  --color-amber: #f59e0b;
+  --color-amber-strong: #b45309;
+  --color-peach: #ffd8a8;
+  --color-yellow: #ffc84c;
+  --color-teal: #21b37a;
+  --color-teal-strong: #0f7a52;
+  --color-mint: #86f2c8;
+  --color-magenta: #e879c7;
+  --color-link: #0b6bcb;
+  --color-link-hover: #08529c;
+
+  /* Thang chữ — ĐÚNG 8 bậc có tên (luật #13) */
+  --text-micro: 10px;
+  --text-meta: 11px;
+  --text-caption: 12px;
+  --text-body: 14px;
+  --text-title: 16px;
+  --text-page: 24px;
+  --text-kpi: 28px;
+  --text-hero: 34px;
+
+  /* Bo góc */
+  --radius-card: 16px;
+}
+
+[data-theme="dark"] {
+  --color-canvas: #0e0f14;
+  --color-surface: #1a1b23;
+  --color-surface-2: #22232e;
+  --color-surface-hover: #2c2e3a;
+
+  --color-ink: #eef1f2;
+  --color-ink-2: #aeb6b8;
+  --color-ink-3: #78838a;
+
+  --color-stroke: #2d2f3d;
+  --color-stroke-soft: #24252f;
+  --color-stroke-hover: #3a3d4d;
+  --color-stroke-strong: #454859;
+  --color-stroke-focus: #565a78;
+
+  --color-link: #6bb6ff;
+  --color-link-hover: #9acbff;
+}
+
+html {
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
 
 @layer base {
   * {
-    border-color: var(--ds-border);
+    border-color: var(--color-stroke);
   }
   body {
-    background: var(--ds-bg);
-    color: var(--ds-fg);
+    background: var(--color-surface-2);
+    color: var(--color-ink);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
 }

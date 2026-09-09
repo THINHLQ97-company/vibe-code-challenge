@@ -2,11 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, RefreshCw } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/dsvh/ui/Input";
+import { Button } from "@/components/dsvh/ui/Button";
+import { Badge } from "@/components/dsvh/ui/Badge";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { ArrowsClockwiseIcon } from "@/components/dsvh/icons";
 
 export function BuildForm({
   submissionId,
@@ -14,12 +14,14 @@ export function BuildForm({
   initialGithubRepoUrl,
   githubVerified,
   initialError,
+  lastCheckedAt,
 }: {
   submissionId: number;
   initialVibehostUrl: string;
   initialGithubRepoUrl: string;
   githubVerified: boolean;
   initialError: string | null;
+  lastCheckedAt: string | null;
 }) {
   const router = useRouter();
   const [vibehostUrl, setVibehostUrl] = useState(initialVibehostUrl);
@@ -29,15 +31,14 @@ export function BuildForm({
   const [rechecking, setRechecking] = useState(false);
   const [verified, setVerified] = useState(githubVerified);
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function send(url: string, body?: unknown, setBusy?: (v: boolean) => void) {
     setError(null);
-    setLoading(true);
+    setBusy?.(true);
     try {
-      const res = await fetch(`/api/submissions/${submissionId}/phase2`, {
+      const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vibehostUrl, githubRepoUrl }),
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
       });
       const data = await res.json();
       if (!res.ok) {
@@ -45,74 +46,66 @@ export function BuildForm({
         return;
       }
       setVerified(!!data.githubVerified);
-      if (!data.githubVerified) {
-        setError(data.githubError ?? "Chưa verify được GitHub");
-      }
+      if (!data.githubVerified) setError(data.githubError ?? "Chưa xác minh được quyền truy cập repo");
       router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ, thử lại sau");
     } finally {
-      setLoading(false);
+      setBusy?.(false);
     }
   }
 
-  async function onRecheck() {
-    setError(null);
-    setRechecking(true);
-    try {
-      const res = await fetch(`/api/submissions/${submissionId}/phase2/recheck`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Kiểm tra lại thất bại");
-        return;
-      }
-      setVerified(!!data.githubVerified);
-      if (!data.githubVerified) {
-        setError(data.githubError ?? "Chưa verify được GitHub");
-      }
-      router.refresh();
-    } finally {
-      setRechecking(false);
-    }
+  function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    void send(`/api/submissions/${submissionId}/phase2`, { vibehostUrl, githubRepoUrl }, setLoading);
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="vibehostUrl">Link sản phẩm Vibe Host</Label>
-        <Input
-          id="vibehostUrl"
-          type="url"
-          placeholder="https://ten-san-pham.vibehost.vn"
-          value={vibehostUrl}
-          onChange={(e) => setVibehostUrl(e.target.value)}
-          required
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="githubRepoUrl">Link GitHub repo (private)</Label>
-        <Input
-          id="githubRepoUrl"
-          type="url"
-          placeholder="https://github.com/ten-ban/ten-repo"
-          value={githubRepoUrl}
-          onChange={(e) => setGithubRepoUrl(e.target.value)}
-          required
-        />
-      </div>
+    <form onSubmit={onSubmit} className="space-y-4">
+      <Input
+        label="Link sản phẩm trên Vibe Host"
+        type="url"
+        placeholder="https://ten-san-pham.vibehost.vn"
+        value={vibehostUrl}
+        onChange={(e) => setVibehostUrl(e.target.value)}
+        required
+      />
+      <Input
+        label="Link repo GitHub (private)"
+        type="url"
+        placeholder="https://github.com/tai-khoan/ten-repo"
+        value={githubRepoUrl}
+        onChange={(e) => setGithubRepoUrl(e.target.value)}
+        required
+      />
+
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={verified ? "default" : "secondary"} className="gap-1">
-          {verified && <CheckCircle2 size={12} />}
-          {verified ? "Đã verify GitHub" : "Chưa verify"}
+        <Badge tone={verified ? "success" : "warning"}>
+          {verified ? "Đã xác minh quyền truy cập repo" : "Chưa xác minh"}
         </Badge>
+        {lastCheckedAt && <span className="text-meta text-ink-3">Kiểm tra lần cuối: {lastCheckedAt}</span>}
         {!verified && githubRepoUrl && (
-          <Button type="button" size="sm" variant="outline" onClick={onRecheck} disabled={rechecking} className="gap-1">
-            <RefreshCw size={13} className={rechecking ? "animate-spin" : ""} />
-            {rechecking ? "Đang kiểm tra..." : "Kiểm tra lại"}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            loading={rechecking}
+            leftIcon={<ArrowsClockwiseIcon size={15} />}
+            onClick={() => void send(`/api/submissions/${submissionId}/phase2/recheck`, undefined, setRechecking)}
+          >
+            Kiểm tra lại
           </Button>
         )}
       </div>
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <Button type="submit" disabled={loading} className="w-fit">
-        {loading ? "Đang kiểm tra..." : "Gửi & verify"}
+
+      {error && (
+        <Alert tone="warning" title="Chưa xác minh được repo">
+          {error}
+        </Alert>
+      )}
+
+      <Button type="submit" variant="solid" loading={loading}>
+        Lưu & xác minh
       </Button>
     </form>
   );

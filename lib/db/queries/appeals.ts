@@ -30,3 +30,11 @@ export async function resolveAppeal(
     .returning();
   return row;
 }
+
+/** Phản biện của một bài — dùng để chặn gửi lần 2 (thể lệ: một vòng duy nhất). */
+export async function listAppealsForSubmission(submissionId: number) {
+  return db.query.appeals.findMany({
+    where: eq(appeals.submissionId, submissionId),
+    orderBy: desc(appeals.createdAt),
+  });
+}

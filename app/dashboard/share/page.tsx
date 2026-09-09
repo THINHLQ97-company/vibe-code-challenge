@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmptyState } from "@/components/empty-state";
+import { formatDateVN } from "@/lib/datetime";
+import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
+import { Card, CardHeader } from "@/components/dsvh/ui/Card";
+import { Button } from "@/components/dsvh/ui/Button";
+import { Empty } from "@/components/dsvh/ui/data/Empty";
+import { Note } from "@/components/dsvh/ui/data/Note";
+import { NotepadIcon, HourglassIcon } from "@/components/dsvh/icons";
 import { ShareForm } from "./share-form";
-import { Megaphone, Clock } from "lucide-react";
 
 export default async function SharePage() {
   const session = await getSession();
@@ -12,48 +16,68 @@ export default async function SharePage() {
 
   if (!submission) {
     return (
-      <EmptyState
-        icon={Megaphone}
-        title="Bạn chưa có đề tài"
-        desc="Đăng ký đề tài trước khi chia sẻ & lan tỏa."
-        action={
-          <Link href="/dashboard/register">
-            <button className="ds-btn ds-btn-primary">Đăng ký ngay</button>
-          </Link>
-        }
-      />
+      <PageShell title="Chia sẻ & lan tỏa">
+        <Card>
+          <Empty
+            icon={<NotepadIcon size={40} />}
+            title="Bạn chưa có đề tài"
+            description="Đăng ký đề tài trước khi tới bước chia sẻ."
+            action={
+              <Link href="/dashboard/register">
+                <Button variant="solid">Đăng ký đề tài</Button>
+              </Link>
+            }
+          />
+        </Card>
+      </PageShell>
     );
   }
+
   if (submission.currentPhase < 3) {
     return (
-      <EmptyState
-        icon={Clock}
-        title="Chưa tới bước chia sẻ"
-        desc="Bạn cần được BTC duyệt Phase 2 (sản phẩm & mã nguồn) trước khi sang bước này."
-      />
+      <PageShell title="Chia sẻ & lan tỏa">
+        <Card>
+          <Empty
+            icon={<HourglassIcon size={40} />}
+            title="Chưa tới bước chia sẻ"
+            description="BTC cần duyệt Phase 2 (sản phẩm & mã nguồn) trước. Đăng bài sớm hơn sẽ không được tính điểm lan tỏa."
+            action={
+              <Link href="/dashboard/build">
+                <Button variant="ghost">Xem trạng thái nộp bài</Button>
+              </Link>
+            }
+          />
+        </Card>
+      </PageShell>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Chia sẻ & lan tỏa</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <p className="text-sm text-muted-foreground">
-          Đăng bài <b>ẩn danh</b> lên nhóm &quot;Vibe Coding chưa?&quot; (không lộ nick chính /
-          không lộ đang làm ở Mắt Bão, không đặt link bấm được trong thân bài). Dán link bài đăng
-          bên dưới — BGK sẽ kiểm tra rồi tick duyệt, sau đó đếm tương tác 7 ngày ra điểm lan tỏa
-          cuối.
-        </p>
+    <PageShell
+      title="Chia sẻ & lan tỏa"
+      subtitle="Phase 3: điểm lan tỏa tính theo tương tác 7 ngày, so trung vị các bài cùng tuần"
+    >
+      <Card>
+        <CardHeader
+          title="Link bài đăng trên nhóm cộng đồng"
+          subtitle='Đăng ẩn danh lên nhóm "Vibe Coding chưa?" rồi dán link vào đây'
+        />
         <ShareForm
           submissionId={submission.id}
           initialUrl={submission.facebookPostUrl ?? ""}
           approved={!!submission.facebookApprovedAt}
+          approvedAt={
+            submission.facebookApprovedAt ? formatDateVN(submission.facebookApprovedAt) : null
+          }
           engagementCount={submission.engagementCount}
           engagementTier={submission.engagementTier}
         />
-      </CardContent>
-    </Card>
+        <Note tone="warning" className="mt-4">
+          Ràng buộc nội dung bài đăng: không nhắc Mắt Bão, không để lộ bạn đang làm ở Mắt Bão, không
+          đặt link bấm được trong thân bài (đưa link xuống bình luận), và bài phải kể được quá trình
+          làm — chỗ vấp, cách xử lý.
+        </Note>
+      </Card>
+    </PageShell>
   );
 }

@@ -1,95 +1,155 @@
-import { FolderOpen } from "lucide-react";
-import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
+import Link from "next/link";
+import { listSubmissionsWithUser, countApprovedThisWeek } from "@/lib/db/queries/submissions";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
-import { EmptyState } from "@/components/empty-state";
-
-const BAR_COLORS = ["var(--ds-c1)", "var(--ds-c2)", "var(--ds-c3)", "var(--ds-c4)", "var(--ds-c5)", "var(--ds-c6)"];
+import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
+import { Card, CardHeader } from "@/components/dsvh/ui/Card";
+import { StatCard } from "@/components/dsvh/ui/data/StatCard";
+import { Button } from "@/components/dsvh/ui/Button";
+import { Empty } from "@/components/dsvh/ui/data/Empty";
+import { Note } from "@/components/dsvh/ui/data/Note";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { InfoTile } from "@/components/dsvh/ui/data/InfoTile";
+import {
+  NotepadIcon,
+  HourglassIcon,
+  RocketIcon,
+  TrophyIcon,
+  ShieldWarningIcon,
+  FolderIcon,
+  ArrowRightIcon,
+} from "@/components/dsvh/icons";
 
 export default async function AdminDashboardPage() {
   const [submissions, season] = await Promise.all([listSubmissionsWithUser(), getActiveSeason()]);
+  const approvedThisWeek = season ? await countApprovedThisWeek(season.id) : 0;
 
-  const total = submissions.length;
-  const pending = submissions.filter((s) => s.registrationStatus === "pending").length;
-  const submitted = submissions.filter((s) => s.currentPhase >= 2).length;
-  const published = submissions.filter((s) => s.publishedAt).length;
-  const flagged = submissions.filter((s) => s.securityStatus === "flagged").length;
+  const pending = submissions.filter((s) => s.registrationStatus === "pending");
+  const inProgress = submissions.filter((s) => s.currentPhase >= 2 && !s.publishedAt);
+  const published = submissions.filter((s) => s.publishedAt);
+  const flagged = submissions.filter((s) => s.securityStatus === "flagged");
+  const awaitingPost = submissions.filter((s) => s.facebookPostUrl && !s.facebookApprovedAt);
 
   const byTopicGroup = submissions.reduce<Record<string, number>>((acc, s) => {
     acc[s.topicGroup] = (acc[s.topicGroup] ?? 0) + 1;
     return acc;
   }, {});
-  const topicEntries = Object.entries(byTopicGroup);
-  const maxTopicCount = Math.max(1, ...topicEntries.map(([, c]) => c));
+  const topicEntries = Object.entries(byTopicGroup).sort((a, b) => b[1] - a[1]);
+  const maxTopic = Math.max(1, ...topicEntries.map(([, c]) => c));
+
+  const capLeft = season ? Math.max(0, season.capPerWeek - approvedThisWeek) : 0;
 
   return (
-    <div className="dash">
-      <div className="dash-head">
-        <div>
-          <div className="dash-h1">Dashboard BTC</div>
-          <div className="dash-sub">
-            {season ? (
-              <>
-                Mùa hiện tại: <b>{season.name}</b> · trần <b>{season.capPerWeek}</b> đề tài duyệt/tuần
-              </>
-            ) : (
-              "Chưa có mùa thi nào"
+    <PageShell
+      title="Dashboard BTC"
+      subtitle={season ? `${season.name} · trần ${season.capPerWeek} đề tài duyệt/tuần` : "Chưa mở mùa thi"}
+    >
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard icon={NotepadIcon} label="Tổng đăng ký" value={submissions.length} desc="toàn mùa thi" />
+        <StatCard
+          icon={HourglassIcon}
+          label="Chờ duyệt đề tài"
+          value={pending.length}
+          desc={season ? `còn ${capLeft} suất tuần này` : "—"}
+          tone={pending.length > 0 ? "danger" : "default"}
+        />
+        <StatCard icon={RocketIcon} label="Đang làm bài" value={inProgress.length} desc="đã duyệt, chưa công bố" />
+        <StatCard icon={TrophyIcon} label="Đã công bố" value={published.length} desc="có điểm cuối" tone="success" />
+      </div>
+
+      {(pending.length > 0 || flagged.length > 0 || awaitingPost.length > 0) && (
+        <Card>
+          <CardHeader title="Cần xử lý" subtitle="Việc đang chặn thí sinh đi tiếp — xử trước" />
+          <div className="space-y-2">
+            {pending.length > 0 && (
+              <ActionRow
+                tone="warning"
+                text={`${pending.length} đề tài chờ duyệt`}
+                href="/admin/topics"
+                cta="Duyệt đề tài"
+              />
+            )}
+            {flagged.length > 0 && (
+              <ActionRow
+                tone="danger"
+                text={`${flagged.length} bài bị gắn cờ ở cổng an toàn`}
+                href="/admin/security"
+                cta="Xem cảnh báo"
+              />
+            )}
+            {awaitingPost.length > 0 && (
+              <ActionRow
+                tone="warning"
+                text={`${awaitingPost.length} bài đăng chờ BGK duyệt`}
+                href="/admin/posts"
+                cta="Duyệt bài đăng"
+              />
             )}
           </div>
-        </div>
-      </div>
+        </Card>
+      )}
 
-      <div className="kpirow">
-        <Kpi label="Tổng đăng ký" value={total} />
-        <Kpi label="Chờ duyệt" value={pending} tone={pending > 0 ? "warn" : undefined} />
-        <Kpi label="Đang làm/nộp bài" value={submitted} />
-        <Kpi label="Đã công bố" value={published} />
-        <Kpi label="Cảnh báo bảo mật" value={flagged} tone={flagged > 0 ? "alert" : undefined} />
-      </div>
+      {season && capLeft === 0 && (
+        <Alert tone="warning" title="Đã dùng hết trần duyệt của tuần này">
+          Tuần này đã duyệt đủ {season.capPerWeek} đề tài. Duyệt thêm sẽ bị hệ thống chặn — để sang
+          tuần sau hoặc điều chỉnh trần của mùa thi.
+        </Alert>
+      )}
 
-      <div className="panel">
-        <div className="panel-head">
-          <div>
-            <div className="panel-title">Phân bổ theo nhóm chủ đề</div>
-            <div className="panel-desc">Số đề tài đăng ký theo từng nhóm — giúp BTC cân bằng gợi ý chủ đề.</div>
+      <Card>
+        <CardHeader
+          title="Phân bổ theo nhóm chủ đề"
+          subtitle="Dùng để cân bằng ngân hàng đề tài và định hướng gợi ý cho đợt đăng ký sau"
+        />
+        {topicEntries.length === 0 ? (
+          <Empty
+            icon={<FolderIcon size={40} />}
+            title="Chưa có đăng ký nào"
+            description="Khi thí sinh đăng ký đề tài, phân bổ theo nhóm chủ đề sẽ hiện ở đây."
+          />
+        ) : (
+          <div className="space-y-3">
+            {topicEntries.map(([group, count]) => (
+              <InfoTile
+                key={group}
+                layout="row"
+                label={group}
+                value={String(count)}
+                progress={(count / maxTopic) * 100}
+                progressTone="orange"
+              />
+            ))}
           </div>
-        </div>
-        <div className="panel-body">
-          {topicEntries.length === 0 ? (
-            <EmptyState
-              icon={FolderOpen}
-              title="Chưa có đăng ký nào"
-              desc="Khi thí sinh đăng ký đề tài, phân bổ theo nhóm chủ đề sẽ hiện ở đây."
-            />
-          ) : (
-            <div className="barlist">
-              {topicEntries.map(([group, count], i) => (
-                <div key={group} className="barlist-row">
-                  <span className="barlist-name">{group}</span>
-                  <span className="barlist-val">{count}</span>
-                  <div className="barlist-track">
-                    <div
-                      className="barlist-fill"
-                      style={{
-                        width: `${(count / maxTopicCount) * 100}%`,
-                        background: BAR_COLORS[i % BAR_COLORS.length],
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+        )}
+        <Note className="mt-3">
+          Trần 30–40 bài/tuần là để hội đồng và hệ chấm kham nổi — không phải để loại người.
+        </Note>
+      </Card>
+    </PageShell>
   );
 }
 
-function Kpi({ label, value, tone }: { label: string; value: number; tone?: "warn" | "alert" }) {
+function ActionRow({
+  tone,
+  text,
+  href,
+  cta,
+}: {
+  tone: "warning" | "danger";
+  text: string;
+  href: string;
+  cta: string;
+}) {
   return (
-    <div className={`kcard${tone ? ` ${tone}` : ""}`}>
-      <span className="kcard-l">{label}</span>
-      <span className={`kcard-v${tone ? ` ${tone}` : ""}`}>{value}</span>
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-stroke bg-surface-2 px-3 py-2">
+      <span className="flex items-center gap-2 text-caption text-ink">
+        <ShieldWarningIcon size={16} className={tone === "danger" ? "text-red" : "text-amber"} />
+        {text}
+      </span>
+      <Link href={href}>
+        <Button variant="ghost" size="sm" rightIcon={<ArrowRightIcon size={14} />}>
+          {cta}
+        </Button>
+      </Link>
     </div>
   );
 }

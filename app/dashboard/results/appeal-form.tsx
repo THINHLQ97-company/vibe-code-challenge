@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CheckCircle2 } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/dsvh/ui/Input";
+import { Textarea } from "@/components/dsvh/ui/form/Textarea";
+import { Button } from "@/components/dsvh/ui/Button";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { Note } from "@/components/dsvh/ui/data/Note";
 
 export function AppealForm({ submissionId }: { submissionId: number }) {
+  const router = useRouter();
   const [criteria, setCriteria] = useState("");
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent) {
@@ -26,53 +27,42 @@ export function AppealForm({ submissionId }: { submissionId: number }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Gửi thất bại");
+        setError(data.error ?? "Gửi phản biện thất bại");
         return;
       }
-      setSent(true);
+      router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ, thử lại sau");
     } finally {
       setLoading(false);
     }
   }
 
-  if (sent) {
-    return (
-      <p className="flex items-center gap-1.5 text-base text-success">
-        <CheckCircle2 size={16} /> Đã gửi phản biện — BTC phản hồi trong ≤48h.
-      </p>
-    );
-  }
-
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">
-        Chỉ 1 lần, phải có bằng chứng kiểm chứng được (link chức năng chạy, commit, video, ảnh
-        màn hình). Điểm chủ quan (Giá trị ứng dụng/Lan tỏa) chỉ nhận nếu có bằng chứng mới.
-      </p>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="criteria">Tiêu chí muốn phản biện</Label>
-        <Textarea
-          id="criteria"
-          placeholder="VD: chức năng X thực ra có chạy, máy chấm nhầm"
-          value={criteria}
-          onChange={(e) => setCriteria(e.target.value)}
-          required
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="evidenceUrl">Link bằng chứng</Label>
-        <Input
-          id="evidenceUrl"
-          type="url"
-          placeholder="Link video/ảnh/commit"
-          value={evidenceUrl}
-          onChange={(e) => setEvidenceUrl(e.target.value)}
-          required
-        />
-      </div>
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <Button type="submit" disabled={loading} className="w-fit">
-        {loading ? "Đang gửi..." : "Gửi phản biện"}
+    <form onSubmit={onSubmit} className="space-y-4">
+      <Note>
+        Phản biện cảm tính (&quot;em thấy xứng đáng hơn&quot;) sẽ bị bỏ qua. Bằng chứng phải kiểm
+        chứng được: link chức năng chạy, commit, video, ảnh màn hình.
+      </Note>
+      <Textarea
+        label="Tiêu chí muốn phản biện"
+        hint="Nêu rõ mục điểm nào và vì sao bạn cho là chấm chưa đúng"
+        placeholder="VD: chức năng nhắc hạn có chạy thật, máy chấm không bấm tới"
+        value={criteria}
+        onChange={(e) => setCriteria(e.target.value)}
+        required
+      />
+      <Input
+        label="Link bằng chứng"
+        type="url"
+        placeholder="https://... (video/commit/ảnh màn hình)"
+        value={evidenceUrl}
+        onChange={(e) => setEvidenceUrl(e.target.value)}
+        required
+      />
+      {error && <Alert tone="error">{error}</Alert>}
+      <Button type="submit" variant="solid" loading={loading}>
+        Gửi phản biện
       </Button>
     </form>
   );

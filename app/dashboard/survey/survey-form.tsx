@@ -2,10 +2,9 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/dsvh/ui/form/Textarea";
+import { Button } from "@/components/dsvh/ui/Button";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 
 const COMMON_QUESTIONS = [
   "Bước nào bạn bị kẹt lâu nhất, và kẹt bao lâu?",
@@ -51,7 +50,7 @@ export function SurveyForm({
     e.preventDefault();
     setError(null);
     if (common.some((a) => !a.trim()) || boardSpecific.some((a) => !a.trim())) {
-      setError("Cần trả lời đủ tất cả câu hỏi");
+      setError("Cần trả lời đủ tất cả câu hỏi — phiếu này là mốc bắt buộc CP6.");
       return;
     }
     setLoading(true);
@@ -68,6 +67,8 @@ export function SurveyForm({
       }
       setDone(true);
       router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ, thử lại sau");
     } finally {
       setLoading(false);
     }
@@ -75,41 +76,44 @@ export function SurveyForm({
 
   if (done) {
     return (
-      <p className="flex items-center gap-1.5 text-base text-success">
-        <CheckCircle2 size={16} /> Bạn đã nộp phiếu trải nghiệm.
-      </p>
+      <Alert tone="success" title="Đã nộp phiếu trải nghiệm">
+        Cảm ơn bạn — CP6 đã hoàn thành. Nội dung phiếu được đội sản phẩm dùng để cải thiện Vibe Host.
+      </Alert>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5">
-      <div className="text-sm font-bold uppercase tracking-wide text-success">
-        Phần chung
-      </div>
+    <form onSubmit={onSubmit} className="space-y-5">
+      <div className="text-meta font-semibold uppercase tracking-wide text-ink-3">Phần chung</div>
       {COMMON_QUESTIONS.map((q, i) => (
-        <div key={i} className="flex flex-col gap-1.5">
-          <Label>{q}</Label>
-          <Textarea
-            value={common[i]}
-            onChange={(e) => setCommon((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))}
-          />
-        </div>
+        <Textarea
+          key={q}
+          label={`${i + 1}. ${q}`}
+          value={common[i]}
+          onChange={(e) =>
+            setCommon((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))
+          }
+        />
       ))}
-      <div className="mt-2 text-sm font-bold uppercase tracking-wide text-success">
+
+      <div className="pt-2 text-meta font-semibold uppercase tracking-wide text-ink-3">
         Phần riêng — {board === "ky_thuat" ? "Bảng Kỹ thuật" : "Bảng Văn phòng"}
       </div>
       {boardQuestions.map((q, i) => (
-        <div key={i} className="flex flex-col gap-1.5">
-          <Label>{q}</Label>
-          <Textarea
-            value={boardSpecific[i]}
-            onChange={(e) => setBoardSpecific((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))}
-          />
-        </div>
+        <Textarea
+          key={q}
+          label={`${i + 7}. ${q}`}
+          value={boardSpecific[i]}
+          onChange={(e) =>
+            setBoardSpecific((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))
+          }
+        />
       ))}
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <Button type="submit" disabled={loading} className="w-fit">
-        {loading ? "Đang gửi..." : "Nộp phiếu"}
+
+      {error && <Alert tone="error">{error}</Alert>}
+
+      <Button type="submit" variant="solid" loading={loading}>
+        Nộp phiếu trải nghiệm
       </Button>
     </form>
   );

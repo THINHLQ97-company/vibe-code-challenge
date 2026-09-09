@@ -2,22 +2,31 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/dsvh/ui/Input";
+import { Button } from "@/components/dsvh/ui/Button";
+import { Badge } from "@/components/dsvh/ui/Badge";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
+
+const TIER_LABEL: Record<number, string> = {
+  4: "Bậc 4 — trên 200% trung vị (20đ)",
+  3: "Bậc 3 — 120–200% trung vị (15đ)",
+  2: "Bậc 2 — 70–119% trung vị (10đ)",
+  1: "Bậc 1 — dưới 70% trung vị (5đ)",
+};
 
 export function ShareForm({
   submissionId,
   initialUrl,
   approved,
+  approvedAt,
   engagementCount,
   engagementTier,
 }: {
   submissionId: number;
   initialUrl: string;
   approved: boolean;
+  approvedAt: string | null;
   engagementCount: number | null;
   engagementTier: number | null;
 }) {
@@ -42,42 +51,56 @@ export function ShareForm({
         return;
       }
       router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ, thử lại sau");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="space-y-4">
       <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="flex flex-1 flex-col gap-1.5">
-          <Label htmlFor="facebookPostUrl">Link bài đăng (ẩn danh)</Label>
-          <Input
-            id="facebookPostUrl"
-            type="url"
-            placeholder="https://facebook.com/groups/.../posts/..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            required
-          />
-        </div>
-        <Button type="submit" disabled={loading}>
-          {loading ? "Đang gửi..." : "Gửi link bài"}
+        <Input
+          className="flex-1"
+          label="Link bài đăng (ẩn danh)"
+          type="url"
+          placeholder="https://facebook.com/groups/.../posts/..."
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          required
+        />
+        <Button type="submit" variant="solid" loading={loading}>
+          {initialUrl ? "Cập nhật link" : "Gửi link bài"}
         </Button>
       </form>
-      {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <div className="flex items-center gap-2 text-sm">
-        <Badge variant={approved ? "default" : "secondary"}>
-          {approved && <CheckCircle2 size={12} />}
-          {approved ? "BGK đã duyệt bài" : "Chờ BGK duyệt"}
-        </Badge>
-        {engagementCount != null && (
-          <span className="text-muted-foreground">
-            Tương tác: {engagementCount} · Bậc điểm: {engagementTier ?? "—"}/4
-          </span>
-        )}
-      </div>
+      {error && <Alert tone="error">{error}</Alert>}
+
+      <dl className="divide-y divide-stroke">
+        <InfoRow
+          label="BGK duyệt bài"
+          value={
+            approved ? (
+              <span className="flex items-center gap-2">
+                <Badge tone="success">Đã duyệt</Badge>
+                {approvedAt && <span className="text-caption text-ink-2">{approvedAt}</span>}
+              </span>
+            ) : (
+              <Badge tone="warning">Chờ BGK kiểm tra</Badge>
+            )
+          }
+        />
+        <InfoRow
+          label="Tương tác sau 7 ngày"
+          value={engagementCount != null ? String(engagementCount) : "Chưa đếm"}
+          numeric
+        />
+        <InfoRow
+          label="Bậc điểm lan tỏa"
+          value={engagementTier ? TIER_LABEL[engagementTier] : "Chưa chốt"}
+        />
+      </dl>
     </div>
   );
 }

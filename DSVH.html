@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DSVH — Design system VAYS Panel</title>
+<style>
+  :root{
+    --ink:#1a1b23; --ink2:#4a4c5a; --ink3:#7b7e8f; --line:#e4e6ec;
+    --bg:#f7f8fa; --card:#fff; --accent:#e8590c; --code:#f2f3f6;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --ink:#e8e9ee; --ink2:#b3b6c2; --ink3:#8a8d9c; --line:#2e303b;
+           --bg:#131419; --card:#1a1b23; --accent:#ff8a4c; --code:#22232e; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:28px;margin:0 0 4px;letter-spacing:-.02em}
+  h2{font-size:20px;margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);letter-spacing:-.01em}
+  h3{font-size:15px;margin:0 0 6px}
+  p{margin:0 0 8px}
+  code{background:var(--code);border-radius:4px;padding:1px 5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+  .lead{color:var(--ink2);margin:0 0 20px}
+  .meta{color:var(--ink3);font-size:12px}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 8px;padding:0;list-style:none}
+  .toc a{display:inline-block;padding:5px 11px;border:1px solid var(--line);border-radius:999px;
+         background:var(--card);color:var(--ink2);text-decoration:none;font-size:12.5px}
+  .toc a:hover{border-color:var(--accent);color:var(--accent)}
+  .toc b{color:var(--ink3);font-weight:500}
+  .c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 12px}
+  .c .imp{color:var(--ink3);font-size:12px;font-family:ui-monospace,Menlo,monospace;margin:0 0 8px;word-break:break-all}
+  .c .why{color:var(--ink2)}
+  .lbl{display:inline-block;margin:12px 0 4px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}
+  table{width:100%;border-collapse:collapse;margin:2px 0 0;font-size:13px}
+  th,td{text-align:left;vertical-align:top;padding:6px 10px 6px 0;border-bottom:1px solid var(--line)}
+  th{color:var(--ink3);font-weight:500;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase}
+  td:first-child{white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .tag{font-size:12px;color:var(--ink2);background:var(--code);border-radius:5px;padding:2px 8px}
+  .sw{display:inline-block;width:15px;height:15px;border-radius:4px;border:1px solid var(--line);vertical-align:-3px;margin-right:3px}
+  .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+        border-radius:8px;padding:12px 16px;margin:0 0 20px;color:var(--ink2)}
+  ol,ul{margin:0 0 8px;padding-left:20px}
+  li{margin:0 0 5px}
+  .scroll{overflow-x:auto}
+</style></head><body><div class="wrap">
+
+<h1>DSVH — Design system của VAYS Panel</h1>
+<p class="lead">Bản trích ngày 09/09/2026 · 94 component · 41 token · 35 cổng tự động</p>
+
+<div class="note">
+  <p><b>Tài liệu này sinh tự động từ <code>manifest.ts</code></b> — cùng nguồn mà cổng
+  <code>npm run ds:check</code> đối chiếu hai chiều với mã đang chạy. Nghĩa là nó không thể mô tả
+  khác thứ sản phẩm thật sự có: thêm một component mà quên khai sổ, hay khai một component không
+  tồn tại, đều làm cổng đỏ.</p>
+  <p style="margin:0"><b>Luật gốc:</b> component không có trong sổ này = không tồn tại. Cần một
+  thứ chưa có thì mở mục ở <i>Sổ thiếu</i> chứ không dựng riêng một bản trong màn hình của mình.</p>
+</div>
+
+<ul class="toc"><li><a href="#g-Layout">Layout <b>3</b></a></li><li><a href="#g-Overlay">Overlay <b>1</b></a></li><li><a href="#g-Data-Display">Data Display <b>36</b></a></li><li><a href="#g-Core-Concepts">Core Concepts <b>2</b></a></li><li><a href="#g-Components">Components <b>16</b></a></li><li><a href="#g-Forms">Forms <b>11</b></a></li><li><a href="#g-Deploy">Deploy <b>11</b></a></li><li><a href="#g-Overlays">Overlays <b>7</b></a></li><li><a href="#g-Navigation">Navigation <b>5</b></a></li><li><a href="#g-Feedback">Feedback <b>2</b></a></li><li><a href="#token">Token <b>41</b></a></li><li><a href="#congthuc">Công thức ghép <b>9</b></a></li><li><a href="#luat">Luật <b>21</b></a></li><li><a href="#cong">Cổng tự động <b>35</b></a></li><li><a href="#sothieu">Sổ thiếu <b>13</b></a></li></ul>
+
+<h2 id="g-Layout">Layout <span class="meta">3</span></h2>
+<div class="c">
+  <h3>PageShell</h3>
+  <p class="imp">@/components/dsvh/ui/layout/PageShell</p>
+  <p>KHUNG của một trang: đệm ngoài co theo breakpoint (16 → 20 → 24px), nhịp dọc 24px, và <code>PageHeader</code> bên trong. Đổi hai con số đó ở đây là đổi MỌI trang.</p>
+  <p class="why"><b>Khi nào dùng.</b> Khối ngoài cùng của MỌI trang trong <code>app/(app)/**</code>. Trước bản này khuôn dựng trang là quy ước chép tay ở 23 file, không có gì canh — nên hai trang mới nhất (<code>/agent-tokens</code>, <code>/stack/[id]</code>) đều quên đệm ngoài và tiêu đề dính sát mép khung. Gate PAGESHELL nay chặn: file nào render <code>PageHeader</code> mà không qua <code>PageShell</code> (hoặc tự mang đủ lớp đệm) thì fail.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>title / subtitle</td><td>string — bỏ trống thì không dựng PageHeader, chỉ còn cái khung</td><td></td></tr><tr><td>action</td><td>ReactNode — nút/bộ lọc/thanh bước đối diện tiêu đề</td><td></td></tr><tr><td>children</td><td>ReactNode — nội dung trang</td><td></td></tr><tr><td>className</td><td>string</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">khung trang</span><span class="tag">lề ngoài trang</span><span class="tag">đệm quanh nội dung</span></div>
+</div><div class="c">
+  <h3>PageHeader</h3>
+  <p class="imp">@/components/dsvh/ui/layout/PageHeader</p>
+  <p>Tiêu đề trang (title + subtitle, tuỳ chọn <code>action</code> góc phải). Khối ĐẦU TIÊN của mọi trang trong vùng nội dung.</p>
+  <p class="why"><b>Khi nào dùng.</b> Mọi trang. Xem mục &quot;Cấu trúc trang&quot; (nhóm Bố cục) để biết thứ tự các khối còn lại.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>title / subtitle</td><td>string</td><td></td></tr><tr><td>action</td><td>ReactNode — nút/bộ lọc ở góc phải</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">tiêu đề trang</span><span class="tag">đầu trang</span><span class="tag">tên màn hình</span></div>
+</div><div class="c">
+  <h3>Separator</h3>
+  <p class="imp">@/components/dsvh/ui/data/Separator</p>
+  <p>Đường kẻ ngăn hai nhóm nội dung. Chỉ dùng khi khoảng trắng không đủ tách nhóm — kẻ nhiều làm trang vụn.</p>
+  <p class="why"><b>Khi nào dùng.</b> Split sections/toolbars.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>orientation</td><td>&#39;horizontal&#39; | &#39;vertical&#39;</td><td>dọc thì khối cha phải có chiều cao xác định</td></tr><tr><td>className</td><td>string</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">đường kẻ ngăn</span><span class="tag">gạch phân cách</span></div>
+</div><h2 id="g-Overlay">Overlay <span class="meta">1</span></h2>
+<div class="c">
+  <h3>HintTip</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/HintTip</p>
+  <p>Icon chữ i cạnh một nhãn/tiêu đề — rê hoặc Tab vào thì hiện câu giải thích trong tooltip. Không chiếm dòng nào.</p>
+  <p class="why"><b>Khi nào dùng.</b> Câu BỔ TRỢ đọc một lần là hiểu. Ranh giới với dòng chữ hiện sẵn là CHỖ ĐỨNG chứ không phải nội dung: câu người đọc cần thấy MỖI LẦN mở màn thì để hiện, câu giải thích một lần thì vào đây. Chủ dự án chốt 26/08: chín câu hướng dẫn dài 50–282 ký tự ở /admin/nodes tab Cấu hình làm vỡ bố cục lưới hai cột — mọi ô cùng hàng cao bằng ô cao nhất, nên một câu ba dòng ở cột phải đẩy cả hàng giãn ra. Dùng qua prop <code>tip</code> của <code>CardHeader</code> và <code>FormField</code>, ít khi gọi thẳng.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>content</td><td>ReactNode</td><td>câu giải thích</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Note</code> — Câu giải thích LUÔN ĐÚNG và cần thấy mỗi lần — nó chiếm một khối riêng dưới nội dung.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">icon chữ i cạnh nhãn</span><span class="tag">chú thích bổ trợ</span><span class="tag">dấu hỏi giải thích</span></div>
+</div><h2 id="g-Data-Display">Data Display <span class="meta">36</span></h2>
+<div class="c">
+  <h3>Note</h3>
+  <p class="imp">@/components/dsvh/ui/data/Note</p>
+  <p>Ghi chú TĨNH — một câu giải thích luôn hiện, gắn dưới khối nó nói về. Khối viền mảnh, icon Info, <code>text-caption</code>.</p>
+  <p class="why"><b>Khi nào dùng.</b> Chú thích giới hạn/điều kiện của một khối. KHÔNG dùng <code>Alert</code>: <code>Alert</code> mang <code>role=&quot;alert&quot;</code> (vùng live ARIA) nên trình đọc màn hình NGẮT LỜI đọc ngay — đúng cho &#39;vừa có chuyện xảy ra&#39;, sai cho câu vốn nằm đó từ đầu.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>children</td><td>ReactNode</td><td></td></tr><tr><td>tone</td><td>&#39;neutral&#39; | &#39;warning&#39; | &#39;danger&#39;</td><td>mặc định <code>neutral</code>. <code>warning</code>/<code>danger</code> cho câu cảnh báo LUÔN ĐÚNG về hệ quả của tình trạng đang có (&quot;chưa liên kết thì không được sao lưu&quot;, &quot;danh sách IP rỗng = mở cho cả Internet&quot;) — vẫn KHÔNG phải <code>Alert</code>, vì nó không ngắt lời trình đọc màn hình. Icon đi theo tone, nơi gọi không tự chọn.</td></tr><tr><td>icon</td><td>boolean — mặc định true; tắt khi khối đã có dấu nhận biết riêng</td><td></td></tr><tr><td>className</td><td>string</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>HintTip</code> — Câu đọc một lần là hiểu — để nó nằm vĩnh viễn thì mỗi lần vào lại phải lướt qua mới tới được nội dung.</li><li><code>Alert</code> — Trạng thái VỪA đổi hoặc CẦN người xử lý — có <code>role=&quot;alert&quot;</code>, trình đọc màn hình đọc ngay.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ghi chú dưới khối</span><span class="tag">câu giải thích luôn hiện</span><span class="tag">chú thích giới hạn</span><span class="tag">dòng cảnh báo nền hổ phách</span></div>
+</div><div class="c">
+  <h3>ReadonlyField</h3>
+  <p class="imp">@/components/dsvh/ui/data/ReadonlyField</p>
+  <p>Ô CHỈ ĐỌC + nút sao chép: nhãn trên, giá trị trong hộp viền cao <code>min-h-9</code>, nút ở mép phải. Nhãn nhận <code>labelHint</code> để đẩy câu giải thích dài vào tooltip.</p>
+  <p class="why"><b>Khi nào dùng.</b> Thông số kết nối, host/port, khoá, mã định danh — thứ người dùng mở trang ra để CHÉP chứ không để sửa. Đưa vào DSVH 09/09/2026 sau khi soát <code>/databases/[id]</code>: hình dạng này đang có HAI bản, <code>ConnField</code> gõ tay trong module và hộp field bên trong <code>CredentialCard</code> (có trong hệ nhưng chưa ai dùng). Bản gõ tay trôi khỏi thang chiều cao BA lượt trong một buổi — 46px (không khai chiều cao, để CopyButton 28px tự quyết) → 44px (lấy <code>lg</code> thay vì bậc mặc định <code>md</code>) → ô mật khẩu thiếu phần đuôi nên thấp hơn hàng xóm 8px. Nay cả hai chỗ gọi cùng một đường mã.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>label</td><td>string</td><td></td></tr><tr><td>value</td><td>ReactNode</td><td></td></tr><tr><td>labelHint</td><td>string</td><td>câu dài → tooltip trên nhãn (gạch chấm dưới, mở được bằng bàn phím) thay vì chiếm ba dòng trong một ô hẹp</td></tr><tr><td>trailing</td><td>ReactNode</td><td>thay <code>CopyButton size=&quot;sm&quot;</code> mặc định. Truyền gì cũng nên cao <code>size-6</code>: phần đuôi là thứ giữ mọi ô cùng chiều cao, bản <code>CopyButton</code> 28px sẽ đẩy ô vượt bậc 36px</td></tr><tr><td>muted</td><td>boolean</td><td>giá trị là chỗ giữ chỗ (chấm che, dấu gạch) ⇒ chữ nhạt</td></tr><tr><td>wrap</td><td>boolean</td><td>giá trị xuống dòng thay vì cắt — bật cho host nội bộ, chuỗi kết nối, đường dẫn. Cùng quy ước <code>InfoTile</code></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Input</code> — Người dùng GÕ vào. <code>ReadonlyField</code> không phải <code>&lt;input readOnly&gt;</code> — nó không nhận focus như một ô nhập, nên không hứa hẹn sửa được.</li><li><code>SecretInput</code> — Giá trị BÍ MẬT cần che và mở ra xem. Hai thứ cùng cao <code>min-h-9</code> nên đứng chung một lưới field vẫn thẳng.</li><li><code>InfoRow</code> — Chỉ ĐỌC, không chép — hàng nhãn ↔ giá trị không khung.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">trường thông số kết nối</span><span class="tag">ô chỉ đọc để lấy giá trị</span><span class="tag">ô không sửa được</span></div>
+</div><div class="c">
+  <h3>InfoRow</h3>
+  <p class="imp">@/components/dsvh/ui/data/InfoRow</p>
+  <p>Hàng NHÃN ↔ GIÁ TRỊ chỉ-đọc, KHÔNG khung — dùng bên trong một thẻ đã có khung. Phát <code>&lt;dt&gt;</code>/<code>&lt;dd&gt;</code> nên phải nằm trong một <code>&lt;dl&gt;</code>.</p>
+  <p class="why"><b>Khi nào dùng.</b> Thẻ danh tính, ngăn kéo chi tiết, tab hồ sơ. Đóng mục sổ thiếu mở 19/08 sau khi đếm đủ BA bản viết tay: <code>InfoRow</code> (profile), <code>Muc</code> (service-expiry), <code>Row</code> (admin-nodes). Cỡ chữ do component quyết, nơi gọi KHÔNG truyền vào được — bản <code>Row</code> không khai cỡ nào, và vì không chỗ nào đặt cỡ nền cho <code>body</code> nên nó render ra 16px, đúng bằng <code>text-title</code> (cỡ của TIÊU ĐỀ thẻ). Chủ dự án bắt được 26/08: &quot;sai size font, đây là một lỗi rất nặng&quot;.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>label</td><td>string</td><td></td></tr><tr><td>value</td><td>ReactNode</td><td></td></tr><tr><td>layout</td><td>&#39;row&#39; | &#39;stack&#39;</td><td>mặc định <code>row</code> (nhãn trái ↔ giá trị phải). <code>stack</code> cho ngăn kéo nhiều cột, nơi nhãn dài mà bề ngang hẹp</td></tr><tr><td>size</td><td>&#39;md&#39; | &#39;sm&#39;</td><td>mặc định <code>md</code> (giá trị <code>text-body</code>). <code>sm</code> hạ giá trị xuống <code>text-caption</code> — cho cụm siêu dữ liệu ở HÀNG TIÊU ĐỀ thẻ, nơi <code>text-body</code> làm nó to ngang chữ trong thân thẻ. Tập ĐÓNG hai phần tử: cỡ vẫn do component quyết, nơi gọi chỉ chọn vai — không mở lại lỗ 16px của bản <code>Row</code></td></tr><tr><td>icon</td><td>ComponentType</td><td>tuỳ chọn — ngăn kéo 10 mục mà gắn icon cả 10 là nhiễu</td></tr><tr><td>numeric</td><td>boolean</td><td>bật <code>tabular-nums</code>; nơi gọi tự khai vì ép lên chữ thường (địa chỉ, tên miền) chỉ làm đổi hình chữ</td></tr><tr><td>wrap</td><td>boolean</td><td>giá trị xuống dòng thay vì cắt — bật cho UUID, chuỗi kết nối, đường dẫn</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>InfoTile</code> — Ô ĐỨNG RIÊNG trong lưới và cần khung. Đặt <code>InfoTile</code> vào trong <code>Card</code> là khung lồng khung (gate FRAMENEST).</li><li><code>ReadonlyField</code> — Giá trị CHỈ ĐỌC để CHÉP (host, port, chuỗi kết nối) — không gõ vào được, và có sẵn nút sao chép ở mép phải.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">hàng nhãn và giá trị</span><span class="tag">danh tính</span><span class="tag">thông số chỉ đọc</span></div>
+</div><div class="c">
+  <h3>InfoTile</h3>
+  <p class="imp">@/components/dsvh/ui/data/InfoTile</p>
+  <p>Ô nhãn + giá trị nằm TRONG một thẻ (hạn mức gói, chỉ số node). Ba bố cục: <code>stack</code> (nhãn trên, giá trị dưới — xếp lưới để so theo cột), <code>row</code> (nhãn trái, giá trị phải, kèm thanh đo) và <code>metric</code> (chấm icon + nhãn + số lớn <code>text-kpi</code> + thanh đo + dòng chú thích).</p>
+  <p class="why"><b>Khi nào dùng.</b> Bảng thông số nhỏ bên trong <code>Card</code>. KHÔNG thay <code>StatCard</code>: <code>StatCard</code> là ô KPI cấp trang và tự bọc <code>Card</code>, nhét nó vào trong một <code>Card</code> là lồng hai bề mặt trắng có viền.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>icon</td><td>ComponentType — icon DSVH, tuỳ chọn</td><td></td></tr><tr><td>label</td><td>string</td><td></td></tr><tr><td>value</td><td>ReactNode — nhận node vì có ô ghép hai con số có màu riêng (Mạng ở /admin/nodes)</td><td></td></tr><tr><td>progress</td><td>number | null | undefined — <code>null</code> = chưa đo được (thanh rỗng), <code>undefined</code> = ô không có thanh. Chỉ có nghĩa ở <code>row</code> và <code>metric</code></td><td></td></tr><tr><td>desc</td><td>string</td><td>dòng chú thích DƯỚI thanh đo, chỉ ở <code>metric</code> (vd &quot;8% đã sử dụng&quot;). Tách khỏi <code>value</code> vì <code>value</code> là số để quét ngang so bốn ô, còn dòng này là câu đọc khi đã dừng ở một ô</td></tr><tr><td>progressTone</td><td>&#39;orange&#39; | &#39;teal&#39; | &#39;amber&#39; | &#39;red&#39;</td><td></td></tr><tr><td>layout</td><td>&#39;stack&#39; | &#39;row&#39; | &#39;metric&#39; — mặc định <code>stack</code></td><td></td></tr><tr><td>wrap</td><td>boolean — giá trị xuống dòng thay vì cắt. Bật khi người dùng phải đọc TRỌN (địa chỉ kết nối, mã dịch vụ): cắt một <code>host:port</code> là giấu đúng thứ người ta mở ô đó ra để lấy</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>InfoRow</code> — Hàng nằm TRONG một thẻ đã có khung — <code>InfoTile</code> tự mang khung nên đặt vào trong <code>Card</code> là khung lồng khung.</li><li><code>StatCard</code> — Ô KPI cấp trang, đứng thành hàng dưới tiêu đề trang.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô nhãn và giá trị trong thẻ</span><span class="tag">ô hạn mức của gói</span><span class="tag">ô chỉ số nhỏ</span><span class="tag">ô thông số kèm thanh đo</span></div>
+</div><div class="c">
+  <h3>StatCard</h3>
+  <p class="imp">@/components/dsvh/ui/data/StatCard</p>
+  <p>Ô KPI tóm tắt — hàng 4 ô ngay dưới PageHeader. Tĩnh, KHÔNG bấm được. Hỗ trợ <code>loading</code> (Skeleton giữ chiều cao) và <code>tone</code> (tô đỏ/xanh con số khi nó mang nghĩa xấu/tốt).</p>
+  <p class="why"><b>Khi nào dùng.</b> Hàng số liệu tóm tắt đầu trang quản trị. Trước 05/08/2026 tồn tại 5 BẢN khác nhau (1 shared + 4 tự viết trong module) chia 2 thiết kế — nay gộp về một.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>icon</td><td>component icon DSVH (Phosphor) — KHÔNG dùng lucide</td><td></td></tr><tr><td>label / value / desc</td><td>string | number</td><td></td></tr><tr><td>loading</td><td>boolean</td><td></td></tr><tr><td>tone</td><td>&#39;default&#39; | &#39;danger&#39; | &#39;success&#39;</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>StatTile</code> — Ô to, TĨNH, xếp thành hàng ngay dưới tiêu đề trang — con số tóm tắt cả màn.</li><li><code>InfoTile</code> — Ô nằm TRONG một <code>Card</code> đã có, mô tả thuộc tính của chính thẻ đó — không phải KPI cấp trang.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">thẻ số liệu</span><span class="tag">hàng bốn ô kpi</span><span class="tag">ô tóm tắt tĩnh</span></div>
+</div><div class="c">
+  <h3>Chart kit (C / gridProps / cursorLine / TooltipCard / chartTooltip / pieTooltip / axisTick)</h3>
+  <p class="imp">@/components/dsvh/charts/kit</p>
+  <p>Bộ dụng cụ dùng chung cho MỌI biểu đồ Recharts: <code>C</code> (palette theo token), <code>axisTick</code>, <code>gridProps</code>, <code>cursorLine</code>, <code>TooltipCard</code>. Không phải component vẽ chart — là lớp thống nhất để chart nào cũng cùng một ngôn ngữ thị giác.</p>
+  <p class="why"><b>Khi nào dùng.</b> Bất cứ khi nào dựng biểu đồ. LUẬT: chart = Recharts + kit này, KHÔNG tự set màu/lưới/tooltip rời rạc.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>C</td><td>palette màu chart lấy từ token</td><td></td></tr><tr><td>gridProps</td><td>props cho &lt;CartesianGrid&gt;</td><td></td></tr><tr><td>cursorLine</td><td>cursor cho &lt;Tooltip&gt;</td><td></td></tr><tr><td>TooltipCard</td><td>component nội dung tooltip</td><td></td></tr><tr><td>axisTick</td><td>style tick cho &lt;XAxis&gt;/&lt;YAxis&gt;</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">biểu đồ</span><span class="tag">đồ thị</span><span class="tag">màu series</span></div>
+</div><div class="c">
+  <h3>PeriodPill</h3>
+  <p class="imp">@/components/dsvh/ui/Card</p>
+  <p>Nút chọn khoảng thời gian (Today / Last 7 Days / …) dạng pill, mở dropdown qua FloatingLayer.</p>
+  <p class="why"><b>Khi nào dùng.</b> Góc phải CardHeader của chart card.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>label</td><td>string</td><td>nhãn đang chọn (7 ngày · 30 ngày…)</td></tr><tr><td>options</td><td>string[]</td><td>danh sách kỳ; bỏ trống thì dùng bộ mặc định</td></tr><tr><td>onChange</td><td>(val: string) =&gt; void</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">chọn kỳ thời gian</span><span class="tag">bảy ngày ba mươi ngày</span></div>
+</div><div class="c">
+  <h3>KebabButton / IconGhostButton / TileKebabDropdown</h3>
+  <p class="imp">@/components/dsvh/ui/Card</p>
+  <p>Nút ⋮ (kebab) + nút icon ghost dùng ở góc thẻ; TileKebabDropdown là bản có sẵn menu mặc định (Xem/Làm mới/Xuất…).</p>
+  <p class="why"><b>Khi nào dùng.</b> Hành động phụ trên Card/StatTile.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>items</td><td>KebabItem[]</td><td>{ label, icon?, action?, danger? } — danger tô đỏ, luôn đặt cuối</td></tr><tr><td>children</td><td>ReactNode</td><td>(IconGhostButton) icon bên trong</td></tr><tr><td>label</td><td>string</td><td>(IconGhostButton) BẮT BUỘC — nhãn cho screen reader vì nút chỉ có icon</td></tr><tr><td>active</td><td>boolean</td><td>(IconGhostButton) trạng thái bật, ví dụ nút lọc đang áp dụng</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>DropdownMenu</code> — Bản dựng sẵn cho ĐẦU THẺ (CardHeader): nút icon chìm, hợp với mật độ của thẻ.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nút ba chấm trên đầu thẻ</span><span class="tag">nút icon mờ trong thẻ</span></div>
+</div><div class="c">
+  <h3>LegendDot</h3>
+  <p class="imp">@/components/dsvh/ui/Card</p>
+  <p>Chấm màu + nhãn cho chú thích chart, màu lấy từ palette <code>C</code> của kit.</p>
+  <p class="why"><b>Khi nào dùng.</b> Legend của chart card — mỗi series một LegendDot.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>color</td><td>string</td><td>class token của chấm, ví dụ &#39;bg-orange&#39; — KHÔNG truyền hex</td></tr><tr><td>label</td><td>string</td><td>tên series</td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">chấm chú giải</span><span class="tag">ký hiệu màu cho từng đường</span></div>
+</div><div class="c">
+  <h3>TableIdentityCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô ĐỊNH DANH hai dòng: tên (vai CHÍNH) + mô tả (vai PHỤ), tuỳ chọn icon/avatar bên trái.</p>
+  <p class="why"><b>Khi nào dùng.</b> Cột ĐẦU TIÊN của gần như mọi bảng. Đây là mẫu ô hay bị chép tay nhất — chép tay là lúc cỡ chữ hai dòng bắt đầu lệch giữa các bảng.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>title</td><td>ReactNode</td><td></td></tr><tr><td>sub?</td><td>ReactNode</td><td></td></tr><tr><td>leading?</td><td>ReactNode</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô tên hai dòng</span><span class="tag">cột đầu của bảng</span></div>
+</div><div class="c">
+  <h3>TableTextCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô chữ thường, vai CHÍNH. <code>muted</code> hạ MÀU xuống text-ink-2 nhưng GIỮ cỡ chữ.</p>
+  <p class="why"><b>Khi nào dùng.</b> Giá trị chữ không có cấu trúc gì thêm. Cần hạ bớt độ nổi thì dùng <code>muted</code>, ĐỪNG hạ cỡ chữ — hạ cỡ là việc của vai, không phải của độ quan trọng.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>ReactNode</td><td></td></tr><tr><td>muted?</td><td>boolean</td><td></td></tr><tr><td>truncate?</td><td>boolean</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô chữ trong bảng</span><span class="tag">giá trị chữ trong bảng</span></div>
+</div><div class="c">
+  <h3>TableNumberCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô số: canh PHẢI, <code>tabular-nums</code>, định dạng vi-VN (tiền tệ VND).</p>
+  <p class="why"><b>Khi nào dùng.</b> Mọi cột số. Canh phải + tabular-nums là điều kiện để so sánh theo chiều dọc — thiếu thì cột số chỉ còn đọc được từng ô một.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>number</td><td></td></tr><tr><td>null</td><td>—</td><td></td></tr><tr><td>format?</td><td>&#39;plain&#39;</td><td></td></tr><tr><td>&#39;currency&#39;</td><td>—</td><td></td></tr><tr><td>&#39;percent&#39;</td><td>—</td><td></td></tr><tr><td>prefix?/suffix?</td><td>string</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô số trong bảng</span><span class="tag">cột số canh phải</span><span class="tag">cột tiền</span></div>
+</div><div class="c">
+  <h3>TableFractionCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô phân số kiểu 1/2 — hai vế CÙNG cỡ, mẫu số chỉ nhạt hơn về màu.</p>
+  <p class="why"><b>Khi nào dùng.</b> Đang dùng bao nhiêu trên tổng bấy nhiêu (website, tên miền, chỗ ngồi). Thu nhỏ mẫu số làm mắt đọc ra hai thông tin khác cấp trong khi ý nghĩa chỉ có một.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>used</td><td>number</td><td></td></tr><tr><td>total</td><td>number</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô phân số</span><span class="tag">một trên hai trong bảng</span></div>
+</div><div class="c">
+  <h3>TableDateCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô ngày, vai CHÍNH, định dạng giờ Việt Nam. KHÔNG kèm icon lịch.</p>
+  <p class="why"><b>Khi nào dùng.</b> <code>withTime</code> cho cột nói về việc VỪA xảy ra (lần chạy, đăng nhập gần nhất); ngày trần cho thứ đổi theo ngày. Icon lịch lặp ở mọi dòng là trang trí — tiêu đề cột đã nói đó là ngày.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>string</td><td></td></tr><tr><td>Date</td><td>—</td><td></td></tr><tr><td>null</td><td>—</td><td></td></tr><tr><td>withTime?</td><td>boolean</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô ngày trong bảng</span><span class="tag">cột ngày tạo</span></div>
+</div><div class="c">
+  <h3>TableStatusCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô trạng thái: chấm màu + nhãn chữ, tone lấy từ một nguồn status.ts.</p>
+  <p class="why"><b>Khi nào dùng.</b> Trạng thái vận hành (đang chạy / lỗi / chờ). Đừng tự chế tone tại chỗ: cùng một trạng thái phải cùng màu ở bảng, ở thẻ và ở dải trạng thái.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>status</td><td>Status</td><td></td></tr><tr><td>label?</td><td>string</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô trạng thái có chấm</span><span class="tag">chấm màu kèm chữ trong bảng</span></div>
+</div><div class="c">
+  <h3>TableBooleanCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô đúng/sai bằng icon check (teal) hoặc close (đỏ).</p>
+  <p class="why"><b>Khi nào dùng.</b> Cột hẹp mà giá trị chỉ có hai khả năng. Giá trị có sắc thái hơn hai mức thì dùng Badge, không dùng ô này.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>boolean</td><td></td></tr><tr><td>null</td><td>—</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô đúng sai</span><span class="tag">dấu tích trong bảng</span></div>
+</div><div class="c">
+  <h3>TableTagsCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô nhiều nhãn nhỏ, dựng bằng <code>Tag</code>; quá <code>max</code> thì gộp thành +N có title liệt kê phần còn lại.</p>
+  <p class="why"><b>Khi nào dùng.</b> Phân loại, thông số ngắn, danh sách ngắn trong một ô. Nhận cả chuỗi trần lẫn chip có icon — CỐ Ý một hàm, tách đôi là tự tạo thêm một cặp trùng vai.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>tags</td><td>(string </td><td></td></tr><tr><td> { icon?</td><td>ReactNode; label: string })[]</td><td></td></tr><tr><td>max?</td><td>number</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô nhiều nhãn nhỏ</span><span class="tag">chip trong bảng</span></div>
+</div><div class="c">
+  <h3>TableUsageCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô thanh đo có ngưỡng màu, dựng bằng <code>Progress</code>.</p>
+  <p class="why"><b>Khi nào dùng.</b> <code>high-bad</code> cho MỨC DÙNG tài nguyên (≥90 đỏ · ≥70 cam); <code>low-bad</code> cho ĐỘ HOÀN THÀNH / độ phủ (&lt;30 đỏ · &lt;70 cam). Bắt buộc khai hướng — dùng nhầm thì một máy chủ sắp đầy đĩa lại hiện màu teal yên tâm.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>number</td><td></td></tr><tr><td>direction</td><td>&#39;high-bad&#39; </td><td></td></tr><tr><td> &#39;low-bad&#39;</td><td>—</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Progress</code> — Chính thanh đó nhưng NẰM TRONG Ô BẢNG: đã gói sẵn ngưỡng màu và bề rộng tối thiểu.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">thanh đo trong ô bảng</span><span class="tag">cột mức dùng</span></div>
+</div><div class="c">
+  <h3>TableUserCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô người dùng: Avatar + tên (CHÍNH) + email/vai trò (PHỤ).</p>
+  <p class="why"><b>Khi nào dùng.</b> Bảng nhân sự, khách hàng, người thao tác. Dùng <code>Avatar</code> của DSVH nên cách rơi về khi không có ảnh (logo Vibe Host) giống hệt mọi nơi khác.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>name</td><td>string</td><td></td></tr><tr><td>sub?</td><td>string</td><td></td></tr><tr><td>src?</td><td>string</td><td></td></tr><tr><td>null</td><td>—</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Avatar</code> — Ảnh + tên + dòng phụ, đã gói sẵn cho một ô bảng.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô người dùng trong bảng</span><span class="tag">avatar kèm tên trong bảng</span></div>
+</div><div class="c">
+  <h3>TableUserGroupCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Nhóm avatar chồng nhau +N.</p>
+  <p class="why"><b>Khi nào dùng.</b> Cột &#39;ai đang tham gia&#39;. AvatarGroup chưa có bản chính trong DSVH (đang trong Sổ thiếu) — khi dựng xong thì ô này rút lại thành lời gọi component đó.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>people</td><td>{ name, src? }[]</td><td></td></tr><tr><td>max?</td><td>number</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nhiều avatar chồng nhau</span><span class="tag">ô nhóm người</span></div>
+</div><div class="c">
+  <h3>TableLinkCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô liên kết; mặc định mở tab mới kèm icon mũi tên.</p>
+  <p class="why"><b>Khi nào dùng.</b> Địa chỉ website đã triển khai, liên kết ra ngoài. <code>external={false}</code> cho liên kết nội bộ — kéo người dùng rời khỏi danh sách họ đang quét là làm mất chỗ đang đứng.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>text</td><td>string</td><td></td></tr><tr><td>href</td><td>string</td><td></td></tr><tr><td>external?</td><td>boolean</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô liên kết trong bảng</span><span class="tag">cột địa chỉ website</span></div>
+</div><div class="c">
+  <h3>TableActionsCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Ô hành động: MỘT menu ba chấm, dựng bằng <code>DropdownMenu</code>.</p>
+  <p class="why"><b>Khi nào dùng.</b> Mọi cột thao tác. KHÔNG dùng ba nút icon xếp hàng: chúng đội chiều cao dòng và bắt đoán nghĩa icon, trong khi menu gọi tên hành động bằng chữ và thêm đúng một nhịp trước hành động nguy hiểm.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>items</td><td>MenuItem[]</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>DropdownMenu</code> — Bản dựng sẵn cho CỘT THAO TÁC của bảng: đã có nút ba chấm, canh phải, cỡ đúng chiều cao dòng.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nút ba chấm cuối dòng bảng</span><span class="tag">cột thao tác</span></div>
+</div><div class="c">
+  <h3>TableEmptyCell</h3>
+  <p class="imp">@/components/dsvh/ui/table-cells</p>
+  <p>Dấu gạch cho ô không có dữ liệu.</p>
+  <p class="why"><b>Khi nào dùng.</b> Các ô dựng sẵn tự gọi khi giá trị rỗng; gọi tay khi tự viết <code>render</code>. Để cột không bị &#39;thủng&#39; và người đọc biết là TRỐNG chứ không phải lỗi.</p>
+  
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô trống dấu gạch</span><span class="tag">dấu gạch ngang thay giá trị</span></div>
+</div><div class="c">
+  <h3>Table</h3>
+  <p class="imp">@/components/dsvh/ui/Table</p>
+  <p>Generic data table &lt;T&gt;: sortable columns, row selection (checkbox + indeterminate), variants (default/bordered/zebra), density, sticky header, skeleton loading, empty state, pagination. RESPONSIVE: <code>&lt;th&gt;</code> không rớt dòng (<code>whitespace-nowrap</code>), vệt mờ hai mép tự bật/tắt báo còn nội dung khi cuộn ngang, scrollbar mảnh — ba thứ này đi cùng nhau, thiếu cái nào thì trên màn hẹp bảng hoặc rớt dòng hoặc trông như bị cắt cụt. Ô trong bảng KHÔNG dựng tay: lấy từ bộ ô dựng sẵn (xem <code>Ô bảng dựng sẵn</code>), và cách ghép cả bảng xem mục Giải phẫu ngay trên trang này. ƯU TIÊN CỘT: dùng <code>hideBelow</code> bỏ cột phụ ở màn hẹp — cuộn ngang là lối thoát CUỐI, không phải mặc định; giữ định danh · trạng thái · thao tác ở mọi bề ngang. GOM NHÓM (<code>rowGroup</code>): dồn các dòng cùng khoá về liền nhau rồi bọc chúng trong MỘT khung có tiêu đề — dùng khi mấy dòng thật ra là một thứ (các thành phần của một cụm). Khung vẽ bằng viền trên <code>&lt;td&gt;</code>, KHÔNG trên <code>&lt;tr&gt;</code>: bảng dùng <code>border-collapse</code> nên viền đặt ở <code>&lt;tr&gt;</code> bị trình duyệt bỏ qua. Dồn nhóm chạy SAU phép sắp xếp, nên bấm sắp theo cột nào thì cả khối di chuyển theo mà không bị xé rời.</p>
+  <p class="why"><b>Khi nào dùng.</b> Any tabular data — user lists, transactions, admin tables. Dùng <code>rowGroup</code> khi các dòng có quan hệ &#39;thuộc về nhau&#39;: quan hệ đó là THỊ GIÁC, nhét thêm chữ vào từng dòng không thay được cái khung.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>data</td><td>T[]</td><td></td></tr><tr><td>columns</td><td>ColumnDef&lt;T&gt;[]</td><td>key, header, accessorKey, align, render, sortable, hideBelow (ẩn cột trùng thông tin ở màn hẹp thay vì cuộn ngang)</td></tr><tr><td>columns[].maxWidth</td><td>string | number — TRẦN bề ngang cột. Thứ DUY NHẤT làm <code>truncate</code> cắt được thật: bảng chạy <code>table-layout: auto</code> nên <code>width</code> chỉ là gợi ý, và <code>&lt;td&gt;</code> mang sẵn <code>whitespace-nowrap</code> nên nội dung dài đẩy cả bảng cuộn ngang. Đo 24/08: cột thêm <code>truncate</code> mà không có <code>maxWidth</code> vẫn cuộn y như cũ, và bộ kiểm dựng vẫn xanh vì nó chỉ soi được LỚP CSS chứ không soi được bố cục.</td><td></td></tr><tr><td>selectable / selectedRowIds / onSelectionChange</td><td>row selection</td><td></td></tr><tr><td>sortState / onSortChange</td><td>sorting</td><td></td></tr><tr><td>variant/density/loading/pagination</td><td>states</td><td></td></tr><tr><td>rowGroup</td><td>{ keyOf, header }</td><td>gom dòng cùng khoá vào MỘT khối có khung + tiêu đề; keyOf trả null ⇒ dòng đứng riêng như cũ</td></tr><tr><td>pagination</td><td>PaginationConfig</td><td>⚠ KHÔNG phải bản chuẩn của app. Nó vẽ <code>TablePagination</code> — một thanh RIÊNG nằm trong <code>Table.tsx</code>: chỉ có &quot;Trang x / y&quot; + hai mũi tên, kèm ô chọn cỡ trang. Thanh CHUẨN mà 10+ màn đang dùng là <code>AppPagination</code> (<code>components/shared/app-pagination</code>) → <code>Pagination</code> của DSVH: dãy SỐ TRANG có rút gọn dấu &quot;…&quot;. Đi qua prop này là làm màn của bạn lệch khỏi mọi màn danh sách còn lại — gặp thật ở /admin/dashboard ngày 20/08, phải làm lại cả bốn bảng. Dùng <code>AppPagination</code> đặt DƯỚI bảng, và để <code>data</code> là mảng ĐÃ CẮT theo trang.</td></tr><tr><td>emptyText / emptySubtext / emptyIcon</td><td>trạng thái rỗng</td><td>Từ 19/08/2026 hàng rỗng dựng bằng <code>Empty</code> (variant inline) — MỘT trạng thái rỗng cho cả app, xem <code>Empty</code>. Truyền ĐỦ CẢ BA: câu mặc định của Table nói về BỘ LỌC KHÔNG KHỚP, dùng nhầm cho ca CHƯA CÓ GÌ là chỉ sai đường cho người dùng. Bảng đã tự lo hàng rỗng rồi thì ĐỪNG bọc thêm một nhánh <code>data.length === 0 ? &lt;Empty/&gt; : &lt;Table/&gt;</code> bên ngoài — nhánh <code>emptyText</code> khi ấy chết hẳn mà không có gì báo (gặp thật ở <code>/admin/dashboard</code>, hai câu chữ khác nhau cho cùng một tình huống).</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>List / ListItem</code> — Từ BA cột so sánh được trở lên, hoặc cần sắp xếp / chọn nhiều dòng / phân trang.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">bảng dữ liệu</span><span class="tag">danh sách nhiều cột</span><span class="tag">bảng có sắp xếp</span></div>
+</div><div class="c">
+  <h3>LogViewer</h3>
+  <p class="imp">@/components/dsvh/ui/data/LogViewer</p>
+  <p>Terminal/log stream nền surface-hover (theme-aware, xem giá trị ở mục Token): tô màu theo level, số dòng, search/filter, auto-scroll follow-tail + nút về mới nhất, copy toàn bộ + tải log, StatusDot pulse khi đang stream.</p>
+  <p class="why"><b>Khi nào dùng.</b> Log build/deploy, runtime container, database.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>lines</td><td>(LogLine|string)[]</td><td></td></tr><tr><td>title / streaming</td><td>string / boolean</td><td></td></tr><tr><td>heightClass / showLineNumbers / filename</td><td>options</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">khung xem log</span><span class="tag">nhật ký chạy</span><span class="tag">cửa sổ terminal</span></div>
+</div><div class="c">
+  <h3>ResourceMeter</h3>
+  <p class="imp">@/components/dsvh/ui/data/ResourceMeter</p>
+  <p>Thanh đo tài nguyên (CPU core/RAM/disk): icon + used/total + bar tô theo ngưỡng (&lt;70% teal · 70–90% amber · ≥90% red).</p>
+  <p class="why"><b>Khi nào dùng.</b> Giám sát container; metrics trên AppCard.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>icon / label</td><td>ReactNode / string</td><td></td></tr><tr><td>used / total</td><td>number</td><td></td></tr><tr><td>unit</td><td>string</td><td></td></tr><tr><td>format</td><td>(v)=&gt;string</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>MetricGauge</code> — Nhiều chỉ số xếp thành DÒNG, so sánh được với nhau (CPU · RAM · đĩa).</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">dòng đo tài nguyên có icon</span><span class="tag">cpu ram đĩa dạng dòng</span></div>
+</div><div class="c">
+  <h3>MetricGauge</h3>
+  <p class="imp">@/components/dsvh/ui/data/MetricGauge</p>
+  <p>Đồng hồ đo 1 chỉ số (CPU/RAM/uptime): cung 270° tô theo ngưỡng (&lt;70% teal · 70–90% amber · ≥90% red), số lớn ở giữa.</p>
+  <p class="why"><b>Khi nào dùng.</b> Điểm nhấn một metric trên dashboard/monitoring; bổ trợ ResourceMeter.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value / max</td><td>number</td><td></td></tr><tr><td>label / sublabel / unit</td><td>string</td><td></td></tr><tr><td>thresholds</td><td>{warning,danger}</td><td></td></tr><tr><td>tone</td><td>&#39;auto&#39;|teal|amber|red|orange|ink</td><td></td></tr><tr><td>size</td><td>number</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>ResourceMeter</code> — MỘT chỉ số làm điểm nhấn, vẽ dạng cung tròn — dùng khi nó là thứ đáng nhìn nhất trên màn.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">đồng hồ đo</span><span class="tag">vòng cung chỉ số</span></div>
+</div><div class="c">
+  <h3>TableToolbar</h3>
+  <p class="imp">@/components/dsvh/ui/data/TableToolbar</p>
+  <p>Thanh trên Table: search + filters + action chính; khi có selection đổi sang &#39;N đã chọn&#39; + bulk actions. Responsive.</p>
+  <p class="why"><b>Khi nào dùng.</b> Toolbar cho danh sách/bảng có lọc &amp; thao tác hàng loạt.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>search / onSearchChange</td><td>controlled</td><td></td></tr><tr><td>selectedCount / onClearSelection</td><td>selection</td><td></td></tr><tr><td>filters / bulkActions / actions</td><td>ReactNode</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">thanh công cụ trên bảng</span><span class="tag">bộ lọc phía trên danh sách</span></div>
+</div><div class="c">
+  <h3>TreeGuide · TreeRow</h3>
+  <p class="imp">@/components/dsvh/ui/data/TreeGuide</p>
+  <p>Nét nối cây thư mục (├─ └─) cho dòng CON, và <code>TreeRow</code> bọc sẵn nét nối + nội dung. Đường kẻ trung tính <code>stroke</code>, hỗ trợ lồng nhiều cấp qua <code>depth</code>.</p>
+  <p class="why"><b>Khi nào dùng.</b> Bảng/danh sách có quan hệ CHA–CON: cụm nhiều thành phần ở /dashboard, cây thư mục, cây tài nguyên. Đừng thụt lề bằng <code>pl-8</code> — thụt lề không nói dòng đó thuộc về AI, cũng không nói còn phần tử nữa hay đã hết.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>last</td><td>boolean — phần tử cuối nhánh, đường dọc dừng ở khuỷu</td><td></td></tr><tr><td>depth</td><td>number (1 = con trực tiếp); mỗi cấp thêm một đường dọc để nhánh trên không đứt</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nét nối cây</span><span class="tag">dòng cha con</span></div>
+</div><div class="c">
+  <h3>Progress</h3>
+  <p class="imp">@/components/dsvh/ui/Progress</p>
+  <p>Thanh tiến độ cho tác vụ ĐO ĐƯỢC phần trăm; không đo được thì dùng Spinner.</p>
+  <p class="why"><b>Khi nào dùng.</b> Task/quota/upload progress.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>number 0-100</td><td></td></tr><tr><td>tone</td><td>&#39;orange&#39;|&#39;teal&#39;|&#39;amber&#39;|&#39;ink&#39;|&#39;red&#39;</td><td><code>amber</code> thêm 14/08/2026 cho bậc CẢNH BÁO của luật #7 — trước đó chỉ có teal và đỏ, nên chỗ &#39;sắp chạm ngưỡng&#39; phải chọn giữa nói quá (đỏ) và nói thiếu (teal). Đừng thay bằng <code>orange</code>: cam là màu THƯƠNG HIỆU (nút chính, tiến độ trung tính), amber là màu TRẠNG THÁI.</td></tr><tr><td>showValue</td><td>boolean</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Spinner</code> — ĐO được phần trăm.</li><li><code>TableUsageCell</code> — Thanh tiến độ đứng riêng, ngoài bảng.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">thanh tiến độ</span><span class="tag">phần trăm hoàn thành</span></div>
+</div><div class="c">
+  <h3>StatTile</h3>
+  <p class="imp">@/components/dsvh/ui/StatTile</p>
+  <p>Ô số liệu nhỏ: nhãn + số lớn + biến động. Delta dương teal, âm cam (luật #7).</p>
+  <p class="why"><b>Khi nào dùng.</b> Dashboard KPI groups (pair with CountUp).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>label</td><td>string</td><td></td></tr><tr><td>value</td><td>ReactNode</td><td></td></tr><tr><td>delta</td><td>string</td><td></td></tr><tr><td>positive</td><td>boolean</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>StatCard</code> — Ô NHỎ có phần biến động (mũi tên tăng/giảm), nhét được vào trong một thẻ khác.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô số liệu nhỏ có biến động</span><span class="tag">số kèm mũi tên tăng giảm</span></div>
+</div><div class="c">
+  <h3>Avatar</h3>
+  <p class="imp">@/components/dsvh/ui/data/Avatar</p>
+  <p>Ảnh đại diện. KHÔNG có ảnh ⇒ vẽ logo Vibe Host, không phải chữ viết tắt.</p>
+  <p class="why"><b>Khi nào dùng.</b> Người dùng, nhân sự, người được giao việc.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>name</td><td>string</td><td>BẮT BUỘC — dùng cho aria-label/title, và cho chữ cái đầu nếu fallback=&#39;initials&#39;</td></tr><tr><td>src</td><td>string | null</td><td>null hoặc lỗi tải đều rơi về <code>fallback</code></td></tr><tr><td>fallback</td><td>&#39;logo&#39; | &#39;initials&#39;</td><td>mặc định &#39;logo&#39; (luật chốt 06/08). &#39;initials&#39; chỉ cho ca hiếm — hai chữ cái trùng nhau rất dễ, đo được ở /admin/staff</td></tr><tr><td>size</td><td>&#39;xs&#39; | &#39;sm&#39; | &#39;md&#39; | &#39;lg&#39; | &#39;xl&#39;</td><td>trong bảng dùng sm</td></tr><tr><td>shape</td><td>&#39;circle&#39; | &#39;square&#39;</td><td>circle cho người, square cho tổ chức/dự án</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>TableUserCell</code> — Chỉ riêng ảnh/chữ viết tắt.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ảnh đại diện</span><span class="tag">chữ viết tắt tên</span><span class="tag">logo thay ảnh đại diện</span><span class="tag">chưa đặt ảnh</span></div>
+</div><div class="c">
+  <h3>Tag</h3>
+  <p class="imp">@/components/dsvh/ui/data/Tag</p>
+  <p>Nhãn phân loại do NGƯỜI DÙNG gắn và gỡ được (bộ lọc đang áp dụng, từ khoá). Trạng thái do HỆ THỐNG sinh thì dùng Badge — hai thứ khác nhau về nghĩa nên không thay nhau.</p>
+  <p class="why"><b>Khi nào dùng.</b> Selected filters, editable labels.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>children</td><td>ReactNode</td><td></td></tr><tr><td>tone</td><td>&#39;neutral&#39; | &#39;accent&#39; | &#39;success&#39; | &#39;danger&#39;</td><td>mặc định neutral</td></tr><tr><td>onRemove</td><td>(e) =&gt; void</td><td>có truyền thì hiện dấu × để gỡ</td></tr><tr><td>removeLabel</td><td>string</td><td>tên đọc được của nút gỡ; bỏ trống ⇒ <code>ds.tag_remove</code>. NÊN truyền khi màn có nhiều thẻ cùng lúc — năm chip mà nút nào cũng đọc &quot;Gỡ nhãn&quot; thì người dùng trình đọc màn hình không biết đang xoá cái nào</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Badge</code> — Nhãn do NGƯỜI DÙNG gắn và gỡ được: bộ lọc đang áp dụng, từ khoá.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nhãn gỡ được</span><span class="tag">chip có dấu x</span></div>
+</div><div class="c">
+  <h3>List / ListItem</h3>
+  <p class="imp">@/components/dsvh/ui/data/List</p>
+  <p>Danh sách dọc mỗi dòng một bản ghi — dùng khi mỗi bản ghi chỉ có 1–2 thông tin; từ ba cột so sánh được trở lên thì dùng Table. Hai variant, chọn theo NGỮ CẢNH chứ không theo thẩm mỹ, đúng cặp từ <code>Empty</code> đang dùng: <code>block</code> tự mang khung để đứng một mình, <code>inline</code> không khung vì đã nằm trong một khối có khung.</p>
+  <p class="why"><b>Khi nào dùng.</b> Member lists, settings rows, feeds. Nằm trong <code>Card</code>/tab thì BẮT BUỘC <code>inline</code> — bản <code>block</code> đặt vào trong <code>Card</code> là hai đường viền lồng nhau, mắt đọc ra hai bề mặt cho một nội dung. Đây là lỗi tái diễn (<code>Empty</code> dính ngày 11/08, thẻ &quot;Website sử dụng&quot; của /databases/[id] dính lại ngày 20/08) nên nay có gate FRAMENEST chặn.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>variant</td><td>&#39;block&#39; | &#39;inline&#39;</td><td>mặc định <code>block</code>. <code>inline</code> bỏ khung + bỏ đệm ngang của hàng con (để chữ thẳng hàng với tiêu đề thẻ) và bỏ nền riêng của hàng; vạch ngăn giữ nguyên vì đó mới là thứ khiến nhiều dòng đọc ra MỘT danh sách</td></tr><tr><td>ListItem.title</td><td>ReactNode</td><td>dòng chính</td></tr><tr><td>ListItem.description</td><td>ReactNode</td><td>dòng phụ</td></tr><tr><td>ListItem.leading</td><td>ReactNode</td><td>icon/avatar bên trái</td></tr><tr><td>ListItem.trailing</td><td>ReactNode</td><td>giá trị hoặc nút bên phải</td></tr><tr><td>ListItem.onClick</td><td>() =&gt; void</td><td>có truyền thì dòng thành bấm được (đổi nền khi rê chuột)</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Table</code> — Mỗi bản ghi chỉ có 1–2 thông tin và không ai đi so cột với cột.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">danh sách dọc</span><span class="tag">mỗi dòng một bản ghi</span></div>
+</div><div class="c">
+  <h3>Empty</h3>
+  <p class="imp">@/components/dsvh/ui/data/Empty</p>
+  <p>Trạng thái rỗng, hai variant: <code>inline</code> (mặc định, KHÔNG khung — dùng bên trong một khối đã có khung) và <code>block</code> (tự mang khung, đứng một mình giữa trang). Luật: luôn kèm action — màn trống không lối đi là chỗ người dùng mắc kẹt nhiều nhất.</p>
+  <p class="why"><b>Khi nào dùng.</b> Khối đã tải xong mà không có dữ liệu. Chọn variant theo NGỮ CẢNH chứ không theo thẩm mỹ: nằm trong Card/tab thì <code>inline</code> (thêm khung thứ hai là hai đường viền lồng nhau), đứng một mình giữa trang thì <code>block</code> (không có khung thì nó trôi lơ lửng). Gộp từ hai bản rời ngày 11/08 — trước đó DSVH có một bản 0 nơi dùng còn app chạy bản khác ở 25 chỗ. LẦN GỘP THỨ HAI 19/08: hàng rỗng bên trong <code>Table</code> cũng tự vẽ một bản riêng (21 chỗ, không khai manifest, icon bọc khung) — nay nó gọi <code>Empty</code> variant inline, nên đây là trạng thái rỗng DUY NHẤT của app, cả trong lẫn ngoài bảng. Icon phải theo NGHĨA chứ không theo thói quen: rỗng-là-tin-tốt dùng dấu tích, chưa-đo-được dùng icon trung tính, chỉ hỏng thật mới dùng tam giác cảnh báo.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>title</td><td>string</td><td>BẮT BUỘC — nói rõ trống vì CHƯA CÓ hay vì bộ lọc không khớp; hai tình huống này cần hai câu và hai hành động khác nhau</td></tr><tr><td>description</td><td>ReactNode</td><td></td></tr><tr><td>icon</td><td>ReactNode</td><td>dạng PHẦN TỬ: <code>icon={&lt;BackupIcon size={40} /&gt;}</code>; icon trang trí nên nó xám (<code>text-ink-3</code>), không tô màu</td></tr><tr><td>action</td><td>ReactNode</td><td>nút tạo mới hoặc nút xoá bộ lọc</td></tr><tr><td>variant</td><td>&#39;inline&#39; | &#39;block&#39;</td><td>mặc định inline</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Skeleton</code> — Đã tải xong và KHÔNG có dữ liệu.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">màn trống</span><span class="tag">chưa có dữ liệu</span></div>
+</div><div class="c">
+  <h3>StatusDot</h3>
+  <p class="imp">@/components/dsvh/ui/data/StatusDot</p>
+  <p>Chấm trạng thái VẬN HÀNH (idle/queued/building/deploying/live/stopped/failed/degraded) có pulse cho trạng thái đang diễn ra. Khác status.ts (4 tone semantic).</p>
+  <p class="why"><b>Khi nào dùng.</b> Trạng thái deploy / container / database.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>status</td><td>OpStatus</td><td></td></tr><tr><td>label / showLabel / pulse</td><td>tuỳ chọn</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">chấm trạng thái nhấp nháy</span><span class="tag">chấm tình trạng triển khai</span></div>
+</div><h2 id="g-Core-Concepts">Core Concepts <span class="meta">2</span></h2>
+<div class="c">
+  <h3>Reveal</h3>
+  <p class="imp">@/components/dsvh/motion/Reveal</p>
+  <p>Hiệu ứng xuất hiện khi cuộn tới (fade + slide-up nhẹ), dùng IntersectionObserver.</p>
+  <p class="why"><b>Khi nào dùng.</b> Bọc khối nội dung cần vào màn có nhịp. LUẬT motion của DSVH: entrance dùng Reveal, không tự chế keyframe rời.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>children</td><td>ReactNode</td><td>khối cần hiện dần</td></tr><tr><td>delay</td><td>number</td><td>ms trễ, để xếp nhịp nhiều khối cạnh nhau (0 · 80 · 160…)</td></tr><tr><td>className</td><td>string</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">hiện dần khi cuộn</span><span class="tag">hiệu ứng xuất hiện</span></div>
+</div><div class="c">
+  <h3>CountUp</h3>
+  <p class="imp">@/components/dsvh/motion/CountUp</p>
+  <p>Số đếm tăng dần tới giá trị đích khi khối vào màn — dùng cho KPI, không dùng cho số phải đọc chính xác tức thì (giá tiền trong hoá đơn).</p>
+  <p class="why"><b>Khi nào dùng.</b> Số KPI trong StatTile / dashboard. Đi kèm Reveal trong recipe KPI.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>end</td><td>number</td><td>số đích; tự chạy từ 0 lên khi vào màn</td></tr><tr><td>duration</td><td>number</td><td>ms, mặc định ~1200</td></tr><tr><td>className</td><td>string</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">số chạy tăng dần</span><span class="tag">số đếm lên</span></div>
+</div><h2 id="g-Components">Components <span class="meta">16</span></h2>
+<div class="c">
+  <h3>Button</h3>
+  <p class="imp">@/components/dsvh/ui/Button</p>
+  <p>Canonical button (tailwind-variants). Variants: solid/dark/ghost/soft/cream/link/quiet; sizes sm/md/lg/icon. Hỗ trợ leftIcon/rightIcon (tự cách bằng gap), loading (spinner + disable), icon-only (size=&#39;icon&#39; + aria-label), asChild (mặc children làm phần tử gốc — cho <code>&lt;a href&gt;</code> mở tab mới), và forward ref tới <code>&lt;button&gt;</code>.</p>
+  <p class="why"><b>Khi nào dùng.</b> Any button. solid=primary CTA, dark=send-style, ghost/soft=secondary, cream=Create New, link=hành động phụ trong luồng đọc, quiet=nút chìm hẳn vào nền (icon nhỏ, hành động phụ cạnh CTA). LƯU Ý tên gọi: <code>ghost</code> của DSVH CÓ viền + nền (tương đương <code>outline</code> của shadcn); muốn trong suốt thì dùng <code>quiet</code>. Icon+text: leftIcon/rightIcon; chỉ-icon: size=&#39;icon&#39;.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>variant</td><td>&#39;solid&#39;|&#39;dark&#39;|&#39;ghost&#39;|&#39;soft&#39;|&#39;cream&#39;|&#39;link&#39;|&#39;quiet&#39;|&#39;danger&#39; — danger cho hành động KHÔNG HOÀN TÁC (xoá/huỷ), màu từ token red</td><td></td></tr><tr><td>size</td><td>&#39;sm&#39;|&#39;md&#39;|&#39;lg&#39;|&#39;icon&#39;|&#39;icon-sm&#39; — icon 36px cho form/thanh công cụ, icon-sm 32px cho HÀNG BẢNG (ba nút icon ở 36px đội chiều cao hàng lên rõ rệt)</td><td></td></tr><tr><td>leftIcon / rightIcon</td><td>ReactNode</td><td></td></tr><tr><td>loading</td><td>boolean (spinner + disable)</td><td></td></tr><tr><td>asChild</td><td>boolean — mặc children làm phần tử gốc, chỉ truyền class xuống</td><td></td></tr><tr><td>ref</td><td>Ref&lt;HTMLButtonElement&gt; — forward tới chính &lt;button&gt;</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nút bấm</span><span class="tag">nút hành động</span></div>
+</div><div class="c">
+  <h3>Badge</h3>
+  <p class="imp">@/components/dsvh/ui/Badge</p>
+  <p>Nhãn trạng thái do HỆ THỐNG sinh (Đang chạy · Lỗi · Pro), tone lấy từ status.ts. Trong một bảng chỉ dùng MỘT cỡ badge.</p>
+  <p class="why"><b>Khi nào dùng.</b> Status tags, deltas, counters, &#39;soon&#39; markers.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>tone</td><td>&#39;neutral&#39;|&#39;accent&#39;|&#39;success&#39;|&#39;warning&#39;|&#39;danger&#39;|&#39;outline&#39;</td><td></td></tr><tr><td>size</td><td>&#39;sm&#39;|&#39;md&#39; — trong BẢNG dùng cùng MỘT size cho mọi huy hiệu (mặc định md); trộn size là cùng một vai ra hai cỡ</td><td></td></tr><tr><td>title</td><td>string? — chú thích đầy đủ khi rê chuột (08/08); nhãn hay viết tắt (db/FREE/ok) nên cần nói đủ nghĩa, trước phải bọc thêm một <code>&lt;span title&gt;</code> chỉ để giữ một thuộc tính HTML sẵn có</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Tag</code> — Nhãn do HỆ THỐNG sinh: trạng thái, hạng gói. Người dùng không gỡ được.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nhãn trạng thái</span><span class="tag">huy hiệu</span></div>
+</div><div class="c">
+  <h3>UploadModal</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/UploadModal</p>
+  <p>Multi-state file upload dialog (Figma &#39;Media Upload&#39; layout, DSVH skin): dropzone drag/browse, validation (maxFiles, accept), per-file states queued/uploading(progress+pause/cancel)/done, footer Cancel/Upload.</p>
+  <p class="why"><b>Khi nào dùng.</b> A confirmed upload flow in a modal (vs FileUpload inline dropzone).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>open / onClose</td><td>control</td><td></td></tr><tr><td>onComplete</td><td>(files)=&gt;void</td><td></td></tr><tr><td>maxFiles / accept</td><td>constraints</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">hộp thoại tải tệp</span><span class="tag">cửa sổ tải lên</span></div>
+</div><div class="c">
+  <h3>FileUpload</h3>
+  <p class="imp">@/components/dsvh/ui/FileUpload</p>
+  <p>Dropzone (drag+click) + validation (accept, maxSize) + per-file progress and states (queued/uploading/success/error+retry). Helpers formatFileSize, validateFile; sub-parts Dropzone, FileRow.</p>
+  <p class="why"><b>Khi nào dùng.</b> Any file/attachment upload surface.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>accept / maxSize / maxFiles / multiple</td><td>constraints</td><td></td></tr><tr><td>value / onChange / onUploadComplete</td><td>controlled + callbacks</td><td></td></tr><tr><td>disabled / autoUpload / label / description</td><td>options</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">vùng kéo thả tệp</span><span class="tag">chọn tệp từ máy</span></div>
+</div><div class="c">
+  <h3>Input</h3>
+  <p class="imp">@/components/dsvh/ui/Input</p>
+  <p>Text field with label/hint/error, sizes sm/md/lg, optional left icon, invalid state. Forward <code>ref</code> tới chính <code>&lt;input&gt;</code> (để focus()/select() sau khi báo lỗi) — <code>className</code> thì gắn vào DIV ROOT vì root mới là phần tử tham gia layout.</p>
+  <p class="why"><b>Khi nào dùng.</b> Any single-line text entry.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>label/hint/error</td><td>string</td><td></td></tr><tr><td>size</td><td>&#39;sm&#39;|&#39;md&#39;|&#39;lg&#39;</td><td></td></tr><tr><td>leftIcon</td><td>ReactNode</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Textarea</code> — Một dòng.</li><li><code>ReadonlyField</code> — Giá trị CHỈ ĐỌC để CHÉP (host, port, chuỗi kết nối) — không gõ vào được, và có sẵn nút sao chép ở mép phải.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô nhập một dòng</span><span class="tag">trường nhập chữ</span><span class="tag">ô tìm kiếm</span></div>
+</div><div class="c">
+  <h3>CopyButton</h3>
+  <p class="imp">@/components/dsvh/ui/CopyButton</p>
+  <p>Nút sao chép giá trị vào clipboard, hiện trạng thái &#39;đã chép&#39; (icon đổi + teal). Icon-only hoặc nút viền có chữ.</p>
+  <p class="why"><b>Khi nào dùng.</b> Sao chép URL/subdomain, connection string, API key, giá trị env.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>string</td><td></td></tr><tr><td>label</td><td>string</td><td>có → nút viền; không → icon</td></tr><tr><td>size</td><td>&#39;sm&#39;|&#39;md&#39;</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nút sao chép</span><span class="tag">icon copy</span></div>
+</div><div class="c">
+  <h3>Tooltip</h3>
+  <p class="imp">@/components/dsvh/ui/Tooltip</p>
+  <p>Câu giải thích ngắn hiện khi rê chuột/focus, KHÔNG chứa nội dung bấm được — cần bấm thì dùng Popover.</p>
+  <p class="why"><b>Khi nào dùng.</b> Explain icon-only buttons (pair with aria-label).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>content</td><td>ReactNode</td><td></td></tr><tr><td>side</td><td>&#39;top&#39;|&#39;bottom&#39;|&#39;left&#39;|&#39;right&#39;</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Popover</code> — Chỉ một câu giải thích, KHÔNG có gì bấm được bên trong.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">chú thích khi rê chuột</span><span class="tag">bong bóng giải thích</span></div>
+</div><div class="c">
+  <h3>Kbd</h3>
+  <p class="imp">@/components/dsvh/ui/data/Kbd</p>
+  <p>Ô hiển thị phím tắt, dựng bằng thẻ &lt;kbd&gt; thật để công cụ đọc màn hình đọc đúng là phím.</p>
+  <p class="why"><b>Khi nào dùng.</b> Show shortcuts.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>children</td><td>ReactNode</td><td>tên phím: ⌘ · Ctrl · K</td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô hiển thị phím</span><span class="tag">tên phím trong câu chữ</span></div>
+</div><div class="c">
+  <h3>Card / CardHeader</h3>
+  <p class="imp">@/components/dsvh/ui/Card</p>
+  <p>Bề mặt trắng có viền — TĨNH theo mặc định. <code>CardHeader</code> dựng sẵn <code>&lt;h3&gt;</code> + dòng mô tả (<code>subtitle</code>) hoặc chú thích tooltip (<code>hint</code>) + slot hành động bên phải, KHÔNG có bộ phận con kiểu shadcn (Content/Footer): nội dung đặt thẳng vào <code>Card</code>, lớp bố cục (grid/flex) thì tự khai bằng <code>div</code>.</p>
+  <p class="why"><b>Khi nào dùng.</b> Mọi khối nội dung. Thẻ BẤM ĐƯỢC thì bật hiệu ứng tường minh <code>&lt;Card hoverShadow hoverLift&gt;</code> — mặc định TẮT từ 08/08, vì trước đó 39 chỗ phải viết <code>={false}</code> để tắt trong khi thẻ bấm được đếm trên đầu ngón tay; và sau đợt 2 bỏ shadcn thì 23 tệp lặng lẽ mọc thêm hiệu ứng nhấc-lên mà không ai gõ thêm dòng nào.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>className</td><td>string</td><td></td></tr><tr><td>ref</td><td>Ref&lt;HTMLElement&gt; — chuyển tiếp từ 08/08; /admin/dashboard cần DOM node để <code>scrollIntoView</code></td><td></td></tr><tr><td>hoverShadow / hoverLift</td><td>boolean, MẶC ĐỊNH false — hai cái luôn bật/tắt cùng nhau, tắt lẻ một cái nhìn dở dang</td><td></td></tr><tr><td>title</td><td>ReactNode</td><td>CardHeader</td></tr><tr><td>subtitle</td><td>ReactNode — dòng mô tả dưới tiêu đề (08/08). Thay cho việc tự gõ <code>&lt;p className=&quot;-mt-3 mb-4 …&quot;&gt;</code> sau header: <code>-mt-3</code> ở đó là số ma, chỉ đúng khi lề dưới của CardHeader vẫn là 4</td><td>CardHeader</td></tr><tr><td>hint</td><td>ReactNode — câu BỔ TRỢ, hiện trong tooltip cạnh tiêu đề thay vì chiếm một dòng (20/08). Ranh giới với <code>subtitle</code>: thứ người đọc cần thấy MỖI LẦN mở thẻ (vd &quot;34 khách hàng&quot;) thì <code>subtitle</code>; thứ đọc một lần là hiểu (vd giải thích nền/tuỳ chỉnh ở /admin/ai-rules) thì <code>hint</code>. Trigger là <code>&lt;button&gt;</code> thật để mở được bằng bàn phím</td><td>CardHeader</td></tr><tr><td>icon</td><td>ReactNode — anh em RIÊNG của title (shrink-0 được); nhét icon vào title sẽ bị <code>truncate</code> bóp gần về 0px khi thẻ hẹp</td><td>CardHeader</td></tr><tr><td>action</td><td>ReactNode</td><td>CardHeader right slot</td></tr><tr><td>titleSub</td><td>ReactNode — dòng phụ NẰM TRONG cụm icon+title (07/09/2026). Khác <code>subtitle</code> ở loại nội dung: <code>subtitle</code> là câu nói về CẢ THẺ nên canh mép trái thẻ (chốt 17/08); <code>titleSub</code> là THUỘC TÍNH của chính cái tên (&quot;thêm ngày nào&quot;) nên thụt theo tên, đúng khuôn <code>TableIdentityCell</code>. Có nó thì <code>&lt;h3&gt;</code> bỏ <code>truncate</code> và thành khối hai dòng</td><td>CardHeader</td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">thẻ nội dung</span><span class="tag">khối viền bo</span></div>
+</div><div class="c">
+  <h3>SocialButton</h3>
+  <p class="imp">@/components/dsvh/ui/auth/SocialButton</p>
+  <p>Nút đăng nhập provider full-width; truyền brand icon (Google/GitHub…) qua prop icon.</p>
+  <p class="why"><b>Khi nào dùng.</b> OAuth login (Google/GitHub…).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>size</td><td>&#39;sm&#39; | &#39;md&#39; | &#39;lg&#39;</td><td>mặc định <code>md</code>, khớp thang chiều cao của <code>Button</code>.</td></tr><tr><td>icon</td><td>ReactNode (brand-icons)</td><td></td></tr><tr><td>...button</td><td>native</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">đăng nhập google</span><span class="tag">nút mang màu hãng</span></div>
+</div><div class="c">
+  <h3>PasswordInput</h3>
+  <p class="imp">@/components/dsvh/ui/auth/PasswordInput</p>
+  <p>Ô mật khẩu: nút hiện/ẩn + thanh đo độ mạnh (showStrength), label/hint/error.</p>
+  <p class="why"><b>Khi nào dùng.</b> Login / đăng ký / đổi mật khẩu.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>size</td><td>&#39;sm&#39; | &#39;md&#39; | &#39;lg&#39;</td><td>mặc định <code>md</code> — chiều cao trường. Đặt chiều cao qua <code>className</code> KHÔNG có tác dụng (gate FIELDCLS chặn): <code>className</code> gắn vào div gốc chứ không vào ô nhập.</td></tr><tr><td>label/hint/error</td><td>string</td><td></td></tr><tr><td>showStrength</td><td>boolean</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô mật khẩu</span><span class="tag">nút hiện mật khẩu</span></div>
+</div><div class="c">
+  <h3>PinInput</h3>
+  <p class="imp">@/components/dsvh/ui/auth/PinInput</p>
+  <p>Nhập OTP nhiều ô: auto-advance, backspace lùi, dán full-code, onComplete.</p>
+  <p class="why"><b>Khi nào dùng.</b> Xác thực 2 bước / đặt lại mật khẩu.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value/onChange</td><td>controlled</td><td></td></tr><tr><td>length</td><td>number (6)</td><td></td></tr><tr><td>onComplete</td><td>(v)=&gt;void</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô nhập mã otp</span><span class="tag">mã sáu số</span></div>
+</div><div class="c">
+  <h3>AuthCard</h3>
+  <p class="imp">@/components/dsvh/ui/auth/AuthCard</p>
+  <p>Khung căn giữa cho màn xác thực: nền canvas + thẻ surface, logo + title + subtitle + footer.</p>
+  <p class="why"><b>Khi nào dùng.</b> Login / register / reset password.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>title</td><td>string</td><td></td></tr><tr><td>subtitle / footer / brand</td><td>ReactNode</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">khung đăng nhập</span><span class="tag">thẻ giữa màn đăng nhập</span></div>
+</div><div class="c">
+  <h3>SegmentedControl</h3>
+  <p class="imp">@/components/dsvh/ui/SegmentedControl</p>
+  <p>Chọn 1 trong vài mục ngắn (view/filter), mục active nổi trên rãnh surface-2. Nhẹ hơn Tabs (không đổi panel).</p>
+  <p class="why"><b>Khi nào dùng.</b> Đổi view/chế độ tại chỗ, 2–4 lựa chọn.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>options</td><td>{value,label,icon?,disabled?}[]</td><td></td></tr><tr><td>value / onChange</td><td>controlled</td><td></td></tr><tr><td>size / fullWidth</td><td>tuỳ chọn</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Tabs</code> — Đổi CÁCH XEM cùng một nội dung (2–4 lựa chọn ngắn), nhẹ hơn, không đổi panel.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nút gạt vài lựa chọn ngắn</span><span class="tag">đổi chế độ tại chỗ</span></div>
+</div><div class="c">
+  <h3>Stepper</h3>
+  <p class="imp">@/components/dsvh/ui/Stepper</p>
+  <p>Chỉ báo tiến trình nhiều bước (khung luồng deploy/tạo DB). Bước xong=cam+tick, hiện tại=viền cam, sắp tới=mờ. Ngang hoặc dọc.</p>
+  <p class="why"><b>Khi nào dùng.</b> Luồng nhiều bước (deploy wizard, tạo database…).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>steps</td><td>{label,description?}[]</td><td></td></tr><tr><td>current</td><td>number (0-based; &lt; current = xong)</td><td></td></tr><tr><td>orientation</td><td>&#39;horizontal&#39;|&#39;vertical&#39;</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>DeploymentTimeline</code> — Tiến trình đang diễn ra, biết trước có mấy bước (wizard tạo mới).</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">các bước một hai ba</span><span class="tag">chỉ báo tiến trình nhiều bước</span></div>
+</div><div class="c">
+  <h3>DropdownMenu</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/DropdownMenu</p>
+  <p>Menu ngữ cảnh chuẩn (icon, phím tắt, mục danger, separator, mục chọn-một) dựng trên FloatingLayer (portal + né mép). Thay các Popover-menu chế tay.</p>
+  <p class="why"><b>Khi nào dùng.</b> Menu hành động trong bảng/card/toolbar; hoặc nhóm CHỌN MỘT gọn (giao diện, sắp xếp theo…) khi không đáng dựng cả một Select.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>trigger</td><td>ReactNode</td><td></td></tr><tr><td>items</td><td>MenuItem[] ({label,icon?,onSelect?,danger?,shortcut?,selected?} | {separator:true})</td><td><code>selected</code> (thêm 14/08/2026 cho menu chọn giao diện Sáng/Tối/Theo hệ thống) đổi ngữ nghĩa trợ năng của mục: <code>menuitem</code> → <code>menuitemradio</code> + <code>aria-checked</code>. Khác biệt này NGHE ĐƯỢC trên trình đọc màn hình — <code>menuitem</code> chỉ nói &#39;bấm được&#39;, <code>menuitemradio</code> nói &#39;một trong mấy lựa chọn, cái này đang chọn&#39;. Mục HÀNH ĐỘNG (Xoá, Làm mới) phải để TRỐNG vì không có gì để chọn. Trình bày trạng thái chọn BÁM ĐÚNG <code>form/Select</code>: chữ CAM + tick cam 16px. NỀN xám (<code>bg-stroke-soft</code>) chỉ dành cho hover/focus — nó nói &#39;con trỏ đang ở đây&#39;, không nói &#39;đang chọn&#39;. Bản đầu 14/08 tô nền cho mục đang chọn và trúng đúng màu hover, nên mục đang chọn với mục đang rê chuột nhìn y hệt nhau; chủ dự án nhìn ảnh chụp phát hiện trước gate. Chỗ đánh dấu luôn chiếm chỗ kể cả khi chưa chọn (<code>invisible</code>, không bỏ hẳn) để bề rộng bảng menu không đổi khi lựa chọn đổi.</td></tr><tr><td>side / align</td><td>vị trí</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>TableActionsCell</code> — Menu ngữ cảnh ở bất cứ đâu, trigger tự chọn.</li><li><code>KebabButton / IconGhostButton / TileKebabDropdown</code> — Menu ngữ cảnh dùng chung, trigger tự chọn.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">menu xổ xuống</span><span class="tag">danh sách lệnh khi bấm</span><span class="tag">menu ba chấm</span></div>
+</div><h2 id="g-Forms">Forms <span class="meta">11</span></h2>
+<div class="c">
+  <h3>SecretInput</h3>
+  <p class="imp">@/components/dsvh/ui/form/SecretInput</p>
+  <p>Ô nhập bí mật: che (•••), nút hiện/ẩn, nút sao chép, font mono. Nhận mọi prop của &lt;input&gt;.</p>
+  <p class="why"><b>Khi nào dùng.</b> API key, connection string, biến môi trường mã hoá.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>label/hint/error</td><td>string</td><td></td></tr><tr><td>copyable</td><td>boolean</td><td>mặc định true</td></tr><tr><td>defaultVisible</td><td>boolean</td><td>mặc định false (che). Bật cho ca HIỆN ĐÚNG MỘT LẦN ĐỂ CHÉP LẠI — chuỗi TOTP lúc bật 2FA, khoá API vừa tạo — nơi người dùng đang phải đọc và gõ lại giá trị ngay lúc đó, che đi là thêm một bước vào đúng việc màn hình sinh ra để làm. Nút hiện/ẩn vẫn còn.</td></tr><tr><td>value/onChange</td><td>controlled</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>ReadonlyField</code> — Giá trị CHỈ ĐỌC để CHÉP (host, port, chuỗi kết nối) — không gõ vào được, và có sẵn nút sao chép ở mép phải.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô khoá bí mật</span><span class="tag">ô token che đi</span></div>
+</div><div class="c">
+  <h3>KeyValueEditor</h3>
+  <p class="imp">@/components/dsvh/ui/form/KeyValueEditor</p>
+  <p>Trình sửa cặp KEY–VALUE (biến môi trường): mỗi dòng input KEY (mono) + SecretInput (che/hiện/sao chép) cho VALUE, thêm/bớt dòng.</p>
+  <p class="why"><b>Khi nào dùng.</b> Bảng biến môi trường mã hoá, config key-value.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>KVPair[]</td><td></td></tr><tr><td>onChange</td><td>(rows)=&gt;void</td><td></td></tr><tr><td>label/hint</td><td>string</td><td></td></tr><tr><td>secret</td><td>boolean</td><td>mặc định true — value che</td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">biến môi trường</span><span class="tag">cặp khoá giá trị</span></div>
+</div><div class="c">
+  <h3>Select</h3>
+  <p class="imp">@/components/dsvh/ui/form/Select</p>
+  <p>Custom dropdown select (not native), options with disabled, sizes, error.</p>
+  <p class="why"><b>Khi nào dùng.</b> Choose one value from a list in forms.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>size</td><td>&#39;sm&#39; | &#39;md&#39; | &#39;lg&#39;</td><td>mặc định <code>md</code> — chiều cao trường. Đặt chiều cao qua <code>className</code> KHÔNG có tác dụng (gate FIELDCLS chặn): <code>className</code> gắn vào div gốc chứ không vào ô nhập.</td></tr><tr><td>value/onChange/options</td><td>controlled</td><td></td></tr><tr><td>className</td><td>string</td><td>gốc mang <code>w-full</code> (đúng cho một trường trong biểu mẫu). Đặt trong HÀNG LỌC nằm ngang thì phải <code>w-auto min-w-[…]</code> — <code>min-w-*</code> một mình KHÔNG ghi đè <code>w-full</code> vì khác nhóm twMerge, và hậu quả là mỗi ô lọc chiếm trọn một dòng. Đo thật 11/08 ở /admin/staff.</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Combobox</code> — Danh sách NGẮN, nhìn hết được trong một tầm cuộn.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô chọn xổ xuống</span><span class="tag">chọn một trong danh sách</span></div>
+</div><div class="c">
+  <h3>Textarea</h3>
+  <p class="imp">@/components/dsvh/ui/form/Textarea</p>
+  <p>Ô nhập nhiều dòng, cùng thang cỡ và cùng cách báo lỗi với Input — dùng cho mô tả, ghi chú, dán biến môi trường.</p>
+  <p class="why"><b>Khi nào dùng.</b> Long text entry.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>size</td><td>&#39;sm&#39; | &#39;md&#39; | &#39;lg&#39;</td><td>mặc định <code>md</code> — chiều cao trường. Đặt chiều cao qua <code>className</code> KHÔNG có tác dụng (gate FIELDCLS chặn): <code>className</code> gắn vào div gốc chứ không vào ô nhập.</td></tr><tr><td>autoGrow</td><td>boolean</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Input</code> — Nhiều dòng — mô tả, ghi chú, dán khối văn bản.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô nhập nhiều dòng</span><span class="tag">ô mô tả dài</span></div>
+</div><div class="c">
+  <h3>Checkbox</h3>
+  <p class="imp">@/components/dsvh/ui/form/Checkbox</p>
+  <p>Ô đánh dấu nhiều lựa chọn, có cả trạng thái nửa vời (indeterminate) cho ô chọn-tất-cả ở đầu bảng.</p>
+  <p class="why"><b>Khi nào dùng.</b> Multi-select / toggle confirmable options.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>checked</td><td>boolean</td><td></td></tr><tr><td>onChange</td><td>(checked: boolean) =&gt; void</td><td></td></tr><tr><td>indeterminate</td><td>boolean</td><td>ô &#39;chọn tất cả&#39; khi mới chọn một phần — vẽ gạch ngang thay vì dấu tick</td></tr><tr><td>disabled</td><td>boolean</td><td></td></tr><tr><td>label</td><td>ReactNode</td><td>nhãn cạnh ô; bỏ trống thì phải tự gắn aria-label</td></tr><tr><td>size</td><td>&#39;sm&#39; | &#39;md&#39; | &#39;lg&#39;</td><td>mặc định md; trong bảng dùng sm</td></tr><tr><td>id / name</td><td>string</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Switch</code> — Chọn nhiều mục trong một danh sách; thay đổi chỉ có hiệu lực khi bấm Lưu.</li><li><code>RadioGroup</code> — Chọn được NHIỀU mục cùng lúc.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô đánh dấu</span><span class="tag">tick chọn nhiều mục</span></div>
+</div><div class="c">
+  <h3>RadioGroup</h3>
+  <p class="imp">@/components/dsvh/ui/form/RadioGroup</p>
+  <p>Nhóm chọn MỘT trong nhiều — dùng khi số lựa chọn ít và cần thấy hết cùng lúc; nhiều hơn ~6 lựa chọn thì đổi sang Select.</p>
+  <p class="why"><b>Khi nào dùng.</b> Pick one exclusive option.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>string</td><td>giá trị đang chọn</td></tr><tr><td>onChange</td><td>(value: string) =&gt; void</td><td></td></tr><tr><td>options</td><td>RadioOption[]</td><td>{ value, label, disabled? }</td></tr><tr><td>name</td><td>string</td><td>gom nhóm khi submit form thật</td></tr><tr><td>disabled</td><td>boolean</td><td>khoá cả nhóm</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Checkbox</code> — Chỉ chọn được MỘT trong nhóm.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nút tròn chọn một</span><span class="tag">nhóm lựa chọn tròn</span></div>
+</div><div class="c">
+  <h3>Switch</h3>
+  <p class="imp">@/components/dsvh/ui/form/Switch</p>
+  <p>Instant on/off toggle (bg-orange when on). Optional <code>onLabel</code>/<code>offLabel</code> renders a SHORT status label INSIDE the track itself instead of an external <code>label</code> — track width is tuned SNUG for a short 1-word label (vd &#39;Bật&#39;/&#39;Tắt&#39;), one fixed width for both states (no layout shift on toggle), thumb order flips via flex instead of translate-x. OFF fill is SOLID <code>bg-ink-3</code> (no alpha) — same treatment as ON&#39;s solid <code>bg-orange</code>, just a neutral hue. Tried alpha-blending both the <code>--dsvh-line-*</code> scale AND <code>ink-3</code> itself at 10–35% first — any alpha blend over a white table background desaturates back toward white regardless of the source color&#39;s chroma, so nothing short of an opaque fill reads as a confidently-filled ~56px pill. White label text on <code>ink-3</code> ≈ 4.6:1, enough for the small bold label. Thumb size is derived BACKWARD from the desired inset (<code>thumb = trackHeight − 2×inset</code>) with <code>padding-x = inset − border</code>, so the white thumb sits an equal 2/3/4px (sm/md/lg) from all four edges — a fixed thumb height ignores vertical padding and is centered by <code>items-center</code>, so sizing the thumb independently of <code>px-*</code> is what made it look squashed against the top/bottom edge. The in-track label carries its own <code>px-*</code> so it clears the rounded cap.</p>
+  <p class="why"><b>Khi nào dùng.</b> Immediate setting toggle. Use <code>onLabel</code>/<code>offLabel</code> in dense contexts (status column in a table with many rows) where an external label would eat too much horizontal space — default width fits a short 1-word label; longer text needs <code>className=&quot;w-&lt;n&gt;&quot;</code> to widen the track (merges via twMerge, no separate prop).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>checked / onChange</td><td>controlled</td><td></td></tr><tr><td>label</td><td>ReactNode — nhãn NGOÀI track (mặc định)</td><td></td></tr><tr><td>onLabel / offLabel</td><td>string — nhãn NGẮN (lý tưởng 1 từ, vd &#39;Bật&#39;/&#39;Tắt&#39;) hiện TRONG track, thay cho <code>label</code> khi cả hai đều có mặt</td><td></td></tr><tr><td>size</td><td>&#39;sm&#39;|&#39;md&#39;|&#39;lg&#39;</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Checkbox</code> — Bật/tắt MỘT thứ và có hiệu lực NGAY, không cần nút Lưu.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">công tắc bật tắt</span><span class="tag">gạt on off</span></div>
+</div><div class="c">
+  <h3>Label</h3>
+  <p class="imp">@/components/dsvh/ui/form/Label</p>
+  <p>Nhãn của một control: cỡ <code>text-caption</code>, màu <code>text-ink-2</code>, có dấu sao khi bắt buộc.</p>
+  <p class="why"><b>Khi nào dùng.</b> Khi control đứng RIÊNG, không bọc <code>FormField</code> (vd nhãn cạnh một công tắc trong hàng cài đặt). Có chỉ dẫn hoặc thông báo lỗi đi kèm thì dùng <code>FormField</code> — nó đã gói sẵn cả ba.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>htmlFor</td><td>string</td><td>phải khớp id của control, nếu không bấm vào nhãn sẽ không focus</td></tr><tr><td>required</td><td>boolean</td><td>thêm dấu sao cam</td></tr><tr><td>children</td><td>ReactNode</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>FormField</code> — Chỉ cần MỖI cái nhãn — control đứng riêng, không có chỉ dẫn hay lỗi đi kèm.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nhãn của ô nhập</span><span class="tag">chữ đứng trên trường nhập</span></div>
+</div><div class="c">
+  <h3>FormField</h3>
+  <p class="imp">@/components/dsvh/ui/form/FormField</p>
+  <p>Khung bọc quanh một control: nhãn, chỉ dẫn, thông báo lỗi và dấu bắt buộc — để mọi trường trong app xếp nhãn và báo lỗi giống hệt nhau.</p>
+  <p class="why"><b>Khi nào dùng.</b> Consistent form field layout.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>label</td><td>string</td><td></td></tr><tr><td>hint</td><td>string</td><td>chỉ dẫn phụ, hiện khi CHƯA lỗi</td></tr><tr><td>error</td><td>string</td><td>có giá trị thì thay chỗ hint và đổi sang tone lỗi</td></tr><tr><td>required</td><td>boolean</td><td>thêm dấu sao vào nhãn</td></tr><tr><td>htmlFor</td><td>string</td><td>phải khớp id của control bên trong, nếu không nhãn bấm vào không focus</td></tr><tr><td>children</td><td>ReactNode</td><td>control thật: Input / Select / Textarea…</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Label</code> — Cần nhãn + chỉ dẫn + báo lỗi + dấu bắt buộc gói sẵn trong một khối.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">nhãn kèm ô nhập</span><span class="tag">báo lỗi dưới trường</span></div>
+</div><div class="c">
+  <h3>Slider</h3>
+  <p class="imp">@/components/dsvh/ui/form/Slider</p>
+  <p>Thanh kéo chọn giá trị trong dải liên tục (RAM, CPU) — luôn hiện số bên cạnh, vì kéo tay không đặt được giá trị chính xác.</p>
+  <p class="why"><b>Khi nào dùng.</b> Numeric range/level input.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>number</td><td></td></tr><tr><td>onChange</td><td>(value: number) =&gt; void</td><td></td></tr><tr><td>min / max / step</td><td>number</td><td>mặc định 0 / 100 / 1</td></tr><tr><td>disabled</td><td>boolean</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">thanh kéo chọn giá trị</span><span class="tag">kéo để chỉnh ram cpu</span></div>
+</div><div class="c">
+  <h3>Combobox</h3>
+  <p class="imp">@/components/dsvh/ui/form/Combobox</p>
+  <p>Select CÓ Ô GÕ LỌC — dùng khi danh sách dài quá tầm cuộn (chọn vùng, chọn ảnh nền); danh sách ngắn thì dùng Select cho nhẹ.</p>
+  <p class="why"><b>Khi nào dùng.</b> Long option lists.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value</td><td>T | null</td><td></td></tr><tr><td>onChange</td><td>(value: T) =&gt; void</td><td></td></tr><tr><td>options</td><td>ComboboxOption&lt;T&gt;[]</td><td>{ value, label, disabled? }</td></tr><tr><td>placeholder / emptyText</td><td>string</td><td>emptyText là câu hiện khi gõ không khớp gì</td></tr><tr><td>size</td><td>&#39;sm&#39; | &#39;md&#39; | &#39;lg&#39;</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Select</code> — Danh sách DÀI, phải gõ để lọc mới tìm ra.</li><li><code>Command</code> — Chọn một GIÁ TRỊ để điền vào biểu mẫu.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô chọn có tìm kiếm</span><span class="tag">gõ để lọc danh sách</span></div>
+</div><h2 id="g-Deploy">Deploy <span class="meta">11</span></h2>
+<div class="c">
+  <h3>DBTypeCard</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/DBTypeCard</p>
+  <p>Lưới thẻ chọn engine database (Postgres/MySQL/Redis/Mongo) — icon tô màu hãng (DB_BRAND), chọn = ring cam + tick. Radiogroup.</p>
+  <p class="why"><b>Khi nào dùng.</b> Bước chọn loại DB khi tạo database.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>options</td><td>DBTypeOption[]</td><td></td></tr><tr><td>value / onChange</td><td>DBEngine</td><td></td></tr><tr><td>columns</td><td>2|3|4</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">thẻ chọn loại database</span><span class="tag">chọn mysql postgres</span></div>
+</div><div class="c">
+  <h3>CredentialCard</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/CredentialCard</p>
+  <p>Thẻ thông tin kết nối DB: connection string (SecretInput che+copy) + lưới field host/port/user/password (mỗi field CopyButton, field secret dùng SecretInput).</p>
+  <p class="why"><b>Khi nào dùng.</b> Hiển thị credential database/service sau khi tạo.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>connectionString</td><td>string</td><td></td></tr><tr><td>fields</td><td>CredentialField[]</td><td></td></tr><tr><td>title / action</td><td>ReactNode</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">khối thông tin đăng nhập</span><span class="tag">mật khẩu hiện một lần</span></div>
+</div><div class="c">
+  <h3>AppCard</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/AppCard</p>
+  <p>Thẻ app catalog (one-click deploy): logo + tên + Badge category + mô tả + metrics core/RAM/disk (icon+số) + nút hành động. Hover-lift.</p>
+  <p class="why"><b>Khi nào dùng.</b> Danh mục app/template deploy sẵn.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>icon / name / category / description</td><td>content</td><td></td></tr><tr><td>metrics</td><td>{core,ram,disk}</td><td></td></tr><tr><td>actionLabel / onDeploy</td><td>action</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">thẻ ứng dụng</span><span class="tag">thẻ website đã triển khai</span></div>
+</div><div class="c">
+  <h3>DeployStages</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/DeployStages</p>
+  <p>Danh sách chặng của một lượt triển khai đang chạy — icon trạng thái, nhãn, nhãn phụ, dòng mô tả, thanh tiến độ tuỳ chọn.</p>
+  <p class="why"><b>Khi nào dùng.</b> Bất kỳ màn nào đang dựng/khôi phục và cần kể tiến trình theo chặng. KHÔNG tự dựng lại danh sách này bằng tay.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>items</td><td>DeployStageItem[]</td><td></td></tr><tr><td>title</td><td>string</td><td></td></tr><tr><td>subtitle</td><td>string</td><td></td></tr><tr><td>progress</td><td>number</td><td></td></tr><tr><td>labels</td><td>Partial&lt;{running,failed,doneSr,pending}&gt;</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">danh sách bước đang chạy</span><span class="tag">tiến trình triển khai</span><span class="tag">checklist có spinner</span></div>
+</div><div class="c">
+  <h3>TemplateGallery</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/TemplateGallery</p>
+  <p>Lưới catalog app responsive (1→sm:2→lg:3) gồm nhiều AppCard — đúng ca &#39;chiều ngang rộng + metrics/category/action per-card&#39;.</p>
+  <p class="why"><b>Khi nào dùng.</b> Trang chọn template/app để deploy.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>items</td><td>TemplateItem[]</td><td></td></tr><tr><td>columns</td><td>2|3</td><td></td></tr><tr><td>onDeploy</td><td>(id)=&gt;void</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">lưới chọn mẫu</span><span class="tag">thư viện template</span></div>
+</div><div class="c">
+  <h3>DNSRecordTable</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/DNSRecordTable</p>
+  <p>Bảng bản ghi DNS (verify domain): badge loại + host + value mono có copy + TTL + trạng thái verify. Cuộn ngang trên mobile.</p>
+  <p class="why"><b>Khi nào dùng.</b> Thêm domain / hướng dẫn trỏ DNS.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>records</td><td>DNSRecord[]</td><td></td></tr><tr><td>hideTtl</td><td>boolean</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">bảng bản ghi dns</span><span class="tag">cname và a record</span></div>
+</div><div class="c">
+  <h3>DangerZone</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/DangerZone</p>
+  <p>Card viền đỏ liệt kê hành động phá huỷ (pause/xoá app…); mỗi mục mở ConfirmDialog tone danger.</p>
+  <p class="why"><b>Khi nào dùng.</b> Đặt CUỐI tab Cài đặt, sau mọi khối thường — hành động không hoàn tác được thì không nằm chung chỗ với hành động sửa đổi bình thường.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>title</td><td>string</td><td>mặc định &quot;Danger Zone&quot;</td></tr><tr><td>actions</td><td>DangerAction[]</td><td>{ title, description, buttonLabel, confirmTitle, confirmDescription?, confirmText?, onConfirm } — confirmText có giá trị thì buộc gõ đúng chuỗi đó mới bấm được nút xác nhận (dùng cho xoá vĩnh viễn)</td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">vùng nguy hiểm</span><span class="tag">khối xoá vĩnh viễn</span></div>
+</div><div class="c">
+  <h3>RepoPicker</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/RepoPicker</p>
+  <p>Chọn repo import/deploy (icon provider + tên + badge private + updated, dòng chọn tô cam). Kèm BranchPicker (dropdown nhánh qua FloatingLayer).</p>
+  <p class="why"><b>Khi nào dùng.</b> Bước import Git → deploy.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>repos</td><td>Repo[]</td><td></td></tr><tr><td>value / onChange</td><td>repo id</td><td></td></tr><tr><td>BranchPicker.branches</td><td>string[]</td><td></td></tr><tr><td>defaultBranch</td><td>string</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">chọn kho mã nguồn</span><span class="tag">chọn repository</span></div>
+</div><div class="c">
+  <h3>SourcePicker</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/SourcePicker</p>
+  <p>Lưới thẻ chọn NGUỒN deploy (GitHub/ZIP/URL git/Vercel/Template/HTML). Icon (brand-icons cho GitHub/Vercel) + mô tả; thẻ chọn viền cam + tick; badge cho Beta/Sắp có.</p>
+  <p class="why"><b>Khi nào dùng.</b> Bước 1 của luồng deploy — chọn nguồn.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>options</td><td>SourceOption[] (value,label,description?,icon,badge?,disabled?)</td><td></td></tr><tr><td>value / onChange</td><td>controlled (string|null)</td><td></td></tr><tr><td>columns</td><td>2 | 3</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">chọn nguồn triển khai</span><span class="tag">git hay docker</span></div>
+</div><div class="c">
+  <h3>SubdomainInput</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/SubdomainInput</p>
+  <p>Nhập subdomain + suffix cố định (.dev.matbao.ai) + trạng thái check trùng (idle/checking/available/taken/invalid/check_failed). Tự lọc ký tự a-z 0-9 -. Suffix nằm TRONG khung viền, cùng hàng với ô nhập.</p>
+  <p class="why"><b>Khi nào dùng.</b> MỌI chỗ đặt subdomain: /deploy · /templates · /project/domains. Đừng dựng tay — bản dựng tay ở /deploy từng đặt suffix bằng <code>absolute right-3</code> + <code>pr-32</code>, và khi Input trả className về div gốc thì suffix rơi hẳn ra ngoài khung viền (07/08).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>value / onChange</td><td>controlled (value đã lọc)</td><td></td></tr><tr><td>status</td><td>SubdomainStatus — check_failed KHÁC taken: chưa hỏi được máy chủ, không phải tên hỏng</td><td></td></tr><tr><td>suffix</td><td>string (&#39;.dev.matbao.ai&#39;)</td><td></td></tr><tr><td>message</td><td>string? — đè chữ mặc định của status bằng lý do CỤ THỂ từ server (vd taken/reserved)</td><td></td></tr><tr><td>action</td><td>ReactNode? — nút cùng hàng với ô nhập (vd &#39;Tạo ngẫu nhiên&#39;)</td><td></td></tr><tr><td>messageAction</td><td>ReactNode? — nút thuộc về CÂU thông báo (vd &#39;Thử lại&#39; khi check_failed)</td><td></td></tr><tr><td>inputRef</td><td>Ref&lt;HTMLInputElement&gt;? — kéo con trỏ về ô khi validate hỏng</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">ô nhập tên miền phụ</span><span class="tag">đuôi domain cố định</span></div>
+</div><div class="c">
+  <h3>DeploymentTimeline</h3>
+  <p class="imp">@/components/dsvh/ui/deploy/DeploymentTimeline</p>
+  <p>Lịch sử các lần deploy (version): StatusDot trạng thái + commit + thời gian; bản &#39;Hiện tại&#39; + nút Rollback cho bản cũ.</p>
+  <p class="why"><b>Khi nào dùng.</b> Trang project — lịch sử deploy + rollback.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>items</td><td>DeploymentItem[] (id,status,title,commit?,time,current?,canRollback?)</td><td></td></tr><tr><td>onRollback</td><td>(id)=&gt;void</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Stepper</code> — Lịch sử ĐÃ XẢY RA, số mục không biết trước và còn dài thêm (các lần deploy).</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">lịch sử triển khai</span><span class="tag">danh sách phiên bản deploy</span></div>
+</div><h2 id="g-Overlays">Overlays <span class="meta">7</span></h2>
+<div class="c">
+  <h3>ConfirmDialog</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/ConfirmDialog</p>
+  <p>Hộp xác nhận dựng trên Modal; tone danger (nút đỏ + icon) + confirmText (gõ tên để bật nút xác nhận).</p>
+  <p class="why"><b>Khi nào dùng.</b> Xác nhận hành động phá huỷ / quan trọng.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>open / onClose / onConfirm</td><td>control</td><td></td></tr><tr><td>title / description</td><td>ReactNode</td><td></td></tr><tr><td>tone</td><td>&#39;danger&#39;|&#39;default&#39;</td><td></td></tr><tr><td>confirmText</td><td>string</td><td></td></tr><tr><td>loading</td><td>boolean</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Modal</code> — Đúng một câu hỏi có/không trước một hành động — không nhét thêm gì khác vào.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">hộp thoại xác nhận</span><span class="tag">hỏi có chắc không</span></div>
+</div><div class="c">
+  <h3>Modal</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/Modal</p>
+  <p>Center dialog + backdrop (close on backdrop/Esc); trạng thái có icon theo tone (info/success/warning/error, màu từ status.ts); bề rộng chặn min/max theo size (sm 400–500 · md 460–640 · lg 540–800 · xl 620–1000 · 2xl 820–1160, w-auto vừa nội dung); tiêu đề + mô tả tách 2 khối; header/footer LUÔN cố định, chỉ phần children ở giữa cuộn (<code>overflow-y-auto</code>) khi nội dung vượt chiều cao.</p>
+  <p class="why"><b>Khi nào dùng.</b> Confirm / short form / thông báo có icon. Form dài hơn vẫn dùng được (size lg/xl) nhờ nội dung tự cuộn — không cần đổi sang Drawer chỉ vì form dài, trừ khi cố ý muốn dạng panel cạnh màn hình. TRẦN NỚI MỘT NẤC 08/08 (480/620/780/980 → 500/640/800/1000): hàng &quot;biến môi trường&quot; ở /admin/templates cần 728px mà <code>lg</code> cũ chỉ chừa 730px, sát tới mức ô giá trị nở một chút là nút X rớt xuống dòng riêng. Hộp thoại canh giữa màn mà chiều cao đổi theo thao tác người dùng thì nên ghim (<code>fixedHeight</code>) — xem ghi chú trong Modal.tsx.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>open / onClose</td><td>control</td><td></td></tr><tr><td>title / description</td><td>ReactNode</td><td></td></tr><tr><td>tone</td><td>&#39;default&#39;|&#39;info&#39;|&#39;success&#39;|&#39;warning&#39;|&#39;error&#39;</td><td></td></tr><tr><td>icon</td><td>ReactNode (đè icon tone)</td><td></td></tr><tr><td>size</td><td>&#39;sm&#39;|&#39;md&#39;|&#39;lg&#39;|&#39;xl&#39;|&#39;2xl&#39; — 2xl (820–1160) thêm 07/09/2026 cho hộp thoại NHIỀU BƯỚC có bảng bản ghi DNS. Thêm bậc chứ KHÔNG nới <code>xl</code>: <code>xl</code> có 6 nơi gọi và hai trong số đó tính bố cục cột theo đúng bề ngang cũ. LƯU Ý <code>min-w</code> mới là con số quyết định — panel để <code>w-auto</code> nên nó co vừa nội dung rồi mới bị kẹp; bước đầu của một wizard chỉ có một ô nhập thì nó rơi đúng về <code>min-w</code>, <code>max-w</code> không bao giờ chạm tới</td><td></td></tr><tr><td>fixedHeight</td><td>boolean|string — mặc định false (co vừa nội dung, đúng cho confirm ngắn). Bật khi nội dung DAO ĐỘNG nhiều theo lựa chọn người dùng (field điều kiện, danh sách thêm/bớt) — ghim cao để hộp thoại không đổi cao/thấp và nút footer không nhảy vị trí giữa các lượt thao tác. <code>true</code> = ghim mức TRẦN (100vh-3rem, dùng khi nội dung thật sự dài). Chuỗi = ghim mức TỰ CHỌN thấp hơn trần (vd &#39;h-[min(820px,calc(100vh-3rem))]&#39;) — đo thật nội dung trước khi chọn số, mức trần cho nội dung ngắn để lại khoảng trắng thừa.</td><td></td></tr><tr><td>footer / children</td><td>ReactNode</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Drawer</code> — Bắt buộc quyết xong mới đi tiếp; che nền để cắt mọi thứ khác.</li><li><code>ConfirmDialog</code> — Nội dung tự do: biểu mẫu, danh sách, nhiều bước.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">cửa sổ nổi giữa màn</span><span class="tag">popup che nền</span></div>
+</div><div class="c">
+  <h3>Drawer</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/Drawer</p>
+  <p>Tấm trượt từ mép màn hình, giữ nguyên ngữ cảnh phía sau — dùng cho thao tác phụ (bộ lọc, xem nhanh); việc buộc phải quyết xong mới đi tiếp thì dùng Modal.</p>
+  <p class="why"><b>Khi nào dùng.</b> Longer detail / side form.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>open</td><td>boolean</td><td></td></tr><tr><td>onClose</td><td>() =&gt; void</td><td>bấm nền mờ hoặc Esc đều gọi hàm này</td></tr><tr><td>side</td><td>&#39;left&#39; | &#39;right&#39;</td><td>mặc định right</td></tr><tr><td>title</td><td>ReactNode</td><td></td></tr><tr><td>width</td><td>string</td><td>class bề rộng, ví dụ &#39;w-[420px]&#39;</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Modal</code> — Thao tác PHỤ, cần giữ nguyên ngữ cảnh phía sau để đối chiếu (bộ lọc, xem nhanh).</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">tấm trượt từ mép</span><span class="tag">panel bên phải</span></div>
+</div><div class="c">
+  <h3>Alert</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/Alert</p>
+  <p>Dải thông báo NẰM TRONG trang, tồn tại tới khi người dùng xử lý — khác Toast là thứ tự tắt sau vài giây.</p>
+  <p class="why"><b>Khi nào dùng.</b> Persistent in-page message.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>tone</td><td>Status</td><td>info · success · warning · error — lấy từ status.ts, KHÔNG tự chế màu</td></tr><tr><td>variant</td><td>&#39;soft&#39; | &#39;loud&#39;</td><td>soft nằm trong trang, loud dành cho cảnh báo chặn</td></tr><tr><td>title</td><td>ReactNode</td><td></td></tr><tr><td>children</td><td>ReactNode</td><td>phần diễn giải</td></tr><tr><td>onClose</td><td>() =&gt; void</td><td>có truyền thì hiện nút đóng</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>ToastProvider / useToast</code> — Việc CÒN PHẢI XỬ LÝ — nằm trong trang, tồn tại tới khi người dùng làm gì đó.</li><li><code>Note</code> — Câu giải thích TĨNH, luôn đúng, không phải trạng thái — không cần trình đọc màn hình ngắt lời.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">dải thông báo trong trang</span><span class="tag">khung cảnh báo</span></div>
+</div><div class="c">
+  <h3>Popover</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/Popover</p>
+  <p>Khối nổi có thể chứa nội dung tương tác (nút, ô nhập) — nếu chỉ cần một câu giải thích thì dùng Tooltip, đừng dùng cái này.</p>
+  <p class="why"><b>Khi nào dùng.</b> Context menu / small form.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>trigger</td><td>ReactNode</td><td>phần tử bấm để mở</td></tr><tr><td>children</td><td>ReactNode</td><td>nội dung nổi</td></tr><tr><td>side</td><td>&#39;top&#39; | &#39;bottom&#39; | &#39;left&#39; | &#39;right&#39;</td><td></td></tr><tr><td>align</td><td>&#39;start&#39; | &#39;center&#39; | &#39;end&#39;</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Tooltip</code> — Bên trong có thứ bấm/nhập được — lúc đó tooltip không dùng nổi vì nó tắt khi rời chuột.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">khối nổi có nội dung bấm được</span><span class="tag">bong bóng có nút bên trong</span></div>
+</div><div class="c">
+  <h3>ToastProvider / useToast</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/Toast</p>
+  <p>Thông báo thoáng qua ở góc màn, tự tắt — báo việc ĐÃ xong; việc còn phải xử lý thì dùng Alert. Bọc ToastProvider một lần ở layout gốc rồi gọi useToast() ở bất kỳ đâu.</p>
+  <p class="why"><b>Khi nào dùng.</b> Ephemeral success/error feedback.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>toast(opts)</td><td>(opts: ToastOptions) =&gt; string</td><td>trả về id để tự đóng sớm</td></tr><tr><td>dismiss(id)</td><td>(id: string) =&gt; void</td><td></td></tr><tr><td>opts.tone</td><td>Status</td><td>mặc định info</td></tr><tr><td>opts.duration</td><td>number</td><td>ms, mặc định 4000</td></tr><tr><td>opts.title / description</td><td>ReactNode</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Alert</code> — Việc ĐÃ XONG — nổi ở góc màn rồi tự tắt sau vài giây.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">thông báo góc màn</span><span class="tag">thông báo tự tắt</span></div>
+</div><div class="c">
+  <h3>Command</h3>
+  <p class="imp">@/components/dsvh/ui/overlay/Command</p>
+  <p>Bảng lệnh mở bằng phím tắt (⌘K): gõ để tìm nhanh trang/thao tác. Là ĐƯỜNG TẮT chứ không thay điều hướng — mọi thứ trong này phải có lối tới bằng chuột.</p>
+  <p class="why"><b>Khi nào dùng.</b> Quick actions/navigation.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>groups</td><td>CommandGroup[]</td><td>{ heading, items } — items: { id, label, icon?, onSelect, disabled? }</td></tr><tr><td>open</td><td>boolean</td><td></td></tr><tr><td>onOpenChange</td><td>(open: boolean) =&gt; void</td><td>tự gọi khi bấm Esc hoặc bấm ra ngoài</td></tr><tr><td>placeholder</td><td>string</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Combobox</code> — Tìm nhanh TRANG hoặc THAO TÁC trong cả app, mở bằng tổ hợp phím.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">bảng lệnh gõ nhanh</span><span class="tag">tìm nhanh bằng tổ hợp phím</span></div>
+</div><h2 id="g-Navigation">Navigation <span class="meta">5</span></h2>
+<div class="c">
+  <h3>Tabs</h3>
+  <p class="imp">@/components/dsvh/ui/nav/Tabs</p>
+  <p>Underline tabs, keyboard nav, aria roles. <code>label</code> là ReactNode — ICON ĐẶT TRƯỚC TEXT là cách dùng chuẩn, bọc <code>&lt;span className=&quot;inline-flex items-center gap-1.5&quot;&gt;</code> với icon <code>size={15}</code>. Quy ước này đang chạy thật ở /admin/deployments và /admin/plans nhưng trước 05/08/2026 mỗi nơi tự gõ lại vì chưa được tài liệu hoá.</p>
+  <p class="why"><b>Khi nào dùng.</b> Đổi view trong một khu vực. Có icon thì đặt trước text; chỉ bỏ icon khi nhãn đã tự đủ rõ (vd Tất cả / Đang chạy).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>tabs</td><td>TabItem[] = { id, label: ReactNode, content: ReactNode, disabled? }[]</td><td></td></tr><tr><td>defaultTab</td><td>string? — chế độ TỰ GIỮ state</td><td></td></tr><tr><td>value</td><td>string? — chế độ ĐIỀU KHIỂN: tab đang mở do nơi gọi quyết (08/08). Cần khi tab phải đồng bộ với thứ khác: /admin/settings ghi tab vào URL <code>?tab=email</code> để F5 và gửi link còn đúng chỗ</td><td></td></tr><tr><td>onChange</td><td>(id: string) =&gt; void</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>TabsNav</code> — Đổi view TẠI CHỖ, không đổi đường dẫn — không cần gửi link riêng cho từng tab.</li><li><code>SegmentedControl</code> — Đổi hẳn KHU VỰC nội dung bên dưới.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">tab đổi khu vực</span><span class="tag">thanh tab gạch chân</span></div>
+</div><div class="c">
+  <h3>TabsNav</h3>
+  <p class="imp">@/components/dsvh/ui/nav/Tabs</p>
+  <p>Tab ĐI THEO ROUTE — cùng vẻ ngoài với <code>Tabs</code> (chung <code>tabTriggerClass</code> nên không trôi khỏi nhau) nhưng mỗi đầu tab là một <code>&lt;Link&gt;</code>, trạng thái chọn đọc từ <code>usePathname()</code>. Ngữ nghĩa là <code>&lt;nav&gt;</code> + <code>aria-current</code>, KHÔNG phải <code>role=&quot;tablist&quot;</code>: vai trò tab của ARIA bắt buộc điều khiển panel cùng tài liệu, mà đây là điều hướng sang màn khác.</p>
+  <p class="why"><b>Khi nào dùng.</b> Mỗi mục là một MÀN riêng cần gửi link được, cần nút Back chạy đúng, cần F5 giữ nguyên chỗ đang đứng (vd cụm /profile). Đổi view tại chỗ (lọc bảng) thì dùng <code>Tabs</code>. Tab gốc của cụm PHẢI đặt <code>exact: true</code>, nếu không route con làm sáng cả hai tab.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>items</td><td>TabNavItem[] = { href, label: ReactNode, icon?: ReactNode, exact?, disabled? }[] — icon là ANH EM RIÊNG của label (shrink-0 được), đừng nhét icon vào trong label</td><td></td></tr><tr><td>label</td><td>string — nhãn vùng điều hướng cho trình đọc màn hình</td><td></td></tr><tr><td>className</td><td>string</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Tabs</code> — Mỗi tab là một MÀN riêng: cần gửi link được, nút Back chạy đúng, F5 giữ nguyên chỗ đang đứng.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">tab theo đường dẫn</span><span class="tag">tab đổi url</span></div>
+</div><div class="c">
+  <h3>Breadcrumb</h3>
+  <p class="imp">@/components/dsvh/ui/nav/Breadcrumb</p>
+  <p>Đường dẫn phân cấp về trang cha — dùng khi trang nằm sâu từ 3 tầng trở lên, nông hơn thì chỉ cần nút quay lại.</p>
+  <p class="why"><b>Khi nào dùng.</b> Show location in nested pages.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>items</td><td>BreadcrumbItem[]</td><td>{ label, href? } — mục CUỐI bỏ href vì đó là trang đang đứng</td></tr><tr><td>className</td><td>string</td><td></td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">đường dẫn phân cấp</span><span class="tag">lối về trang cha</span></div>
+</div><div class="c">
+  <h3>Pagination</h3>
+  <p class="imp">@/components/dsvh/ui/nav/Pagination</p>
+  <p>Thanh chuyển trang có rút gọn dấu … — dùng cho danh sách đếm được tổng số; danh sách trôi vô hạn thì dùng nút tải thêm.</p>
+  <p class="why"><b>Khi nào dùng.</b> Paginate grids/lists (Table has its own).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>page</td><td>number</td><td>trang hiện tại, đếm từ 1</td></tr><tr><td>totalPages</td><td>number</td><td></td></tr><tr><td>onPageChange</td><td>(page: number) =&gt; void</td><td></td></tr><tr><td>siblingCount</td><td>number</td><td>số trang hiện hai bên trang hiện tại, mặc định 1; phần giữa rút thành dấu …</td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">phân trang</span><span class="tag">chuyển trang</span></div>
+</div><div class="c">
+  <h3>Accordion</h3>
+  <p class="imp">@/components/dsvh/ui/data/Accordion</p>
+  <p>Nhóm mục đóng-mở để giấu nội dung dài. Không dùng để giấu thông tin BẮT BUỘC phải đọc — cái gì quan trọng thì để mở sẵn.</p>
+  <p class="why"><b>Khi nào dùng.</b> FAQ, nhóm cài đặt — những chỗ mục đóng-mở chỉ cần một dòng tiêu đề và nội dung chữ.
+
+KHÔNG dùng khi: (a) trạng thái mở do màn hình quyết (tự bung nhóm đang chạy/vừa hỏng) — component này giữ state nội bộ, không nhận <code>open</code>/<code>onOpenChange</code>; (b) đầu mục là một cụm giàu (icon trạng thái + huy hiệu + số đếm + đồng hồ) — tiêu đề bị <code>truncate</code> cắt cụt và chevron dựng sẵn thành mũi tên thứ hai; (c) mỗi mục cần khung riêng — thân bị ép <code>bg-surface-2 px-4 py-3</code>. Ba ca đó dùng <code>collapsible</code> của shadcn (nhóm <code>allowed</code>, có ghi lý do tại chỗ), như <code>project-logs</code> và <code>deploy-website</code> đang làm.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>items</td><td>AccordionItem[]</td><td>{ id, title, content, disabled? }</td></tr><tr><td>type</td><td>&#39;single&#39; | &#39;multiple&#39;</td><td>single tự đóng mục khác khi mở mục mới</td></tr><tr><td>defaultOpen</td><td>string | string[]</td><td>id mở sẵn khi vào trang</td></tr></table></div>
+  
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">mục đóng mở</span><span class="tag">gập nội dung dài</span></div>
+</div><h2 id="g-Feedback">Feedback <span class="meta">2</span></h2>
+<div class="c">
+  <h3>Spinner</h3>
+  <p class="imp">@/components/dsvh/ui/nav/Spinner</p>
+  <p>Vòng quay chờ cho tác vụ KHÔNG biết trước bao lâu; chờ có tiến độ đo được thì dùng Progress, còn chờ nạp một khối có hình dạng biết trước thì dùng Skeleton.</p>
+  <p class="why"><b>Khi nào dùng.</b> Short inline loading (button submit).</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>size</td><td>&#39;sm&#39; | &#39;md&#39; | &#39;lg&#39;</td><td>sm nằm trong nút, md trong khối, lg giữa trang</td></tr><tr><td>className</td><td>string</td><td></td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Skeleton</code> — Không biết trước nội dung sắp hiện có hình dạng thế nào.</li><li><code>Progress</code> — Không đo được phần trăm.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">vòng quay chờ</span><span class="tag">đang tải</span></div>
+</div><div class="c">
+  <h3>Skeleton</h3>
+  <p class="imp">@/components/dsvh/ui/nav/Skeleton</p>
+  <p>Khung xám mô phỏng nội dung đang nạp, giữ nguyên chỗ để trang không nhảy khi dữ liệu về — luôn ưu tiên hơn Spinner khi biết trước bố cục.</p>
+  <p class="why"><b>Khi nào dùng.</b> Loading list/table/card content.</p>
+  <span class="lbl">Props</span><div class="scroll"><table><tr><th>Tên</th><th>Kiểu</th><th>Ghi chú</th></tr><tr><td>variant</td><td>&#39;text&#39; | &#39;circle&#39; | &#39;rect&#39;</td><td>dựng đúng hình khối sắp thay thế</td></tr><tr><td>className</td><td>string</td><td>đặt bề rộng/cao/bo góc ở đây. Gộp bằng <code>cn()</code> từ 14/08/2026 — trước đó nối chuỗi thường nên <code>rounded-lg</code> của variant <code>rect</code> và <code>rounded-*</code> của nơi gọi cùng tồn tại, thắng thua do thứ tự trong stylesheet đã biên dịch chứ không do thứ tự viết. Đo ở khung xương /admin/dashboard: <code>rounded-card</code> ra 8px (variant thắng) trong khi <code>rounded-xl</code> ra 12px (nơi gọi thắng) — cùng cách viết, kết quả ngược nhau tuỳ tên lớp. Đây là luật 10 lặp lại ở nhóm BO GÓC thay vì cỡ chữ, nên <code>rounded-card</code> đã phải khai thêm vào <code>tv.ts</code> + <code>lib/utils.ts</code>; khai <code>cn()</code> không thôi chưa đủ vì tailwind-merge không tự biết khoá theme tự đặt.</td></tr></table></div>
+  <span class="lbl">Đừng nhầm với</span><ul><li><code>Spinner</code> — BIẾT trước bố cục — giữ chỗ để trang không nhảy khi dữ liệu về. Ưu tiên hơn Spinner.</li><li><code>Empty</code> — ĐANG tải, chưa biết có dữ liệu hay không.</li></ul>
+  <span class="lbl">Nhận diện</span><div class="tags"><span class="tag">khung xám đang nạp</span><span class="tag">chỗ giữ tạm khi nạp</span></div>
+</div>
+
+<h2 id="token">Token <span class="meta">chỉ dùng token, không hardcode màu</span></h2>
+<div class="c"><h3>Surfaces</h3><div class="scroll"><table>
+  <tr><th></th><th>Utility</th><th>Sáng</th><th>Tối</th></tr>
+  <tr><td><span class="sw" style="background:#212230"></span><span class="sw" style="background:#0e0f14"></span></td><td>canvas</td><td>#212230</td><td>#0e0f14</td></tr><tr><td><span class="sw" style="background:#ffffff"></span><span class="sw" style="background:#1a1b23"></span></td><td>surface</td><td>#ffffff</td><td>#1a1b23</td></tr><tr><td><span class="sw" style="background:#fcfeff"></span><span class="sw" style="background:#22232e"></span></td><td>surface-2</td><td>#fcfeff</td><td>#22232e</td></tr>
+</table></div></div><div class="c"><h3>Ink / text</h3><div class="scroll"><table>
+  <tr><th></th><th>Utility</th><th>Sáng</th><th>Tối</th></tr>
+  <tr><td><span class="sw" style="background:#001d21"></span><span class="sw" style="background:#eef1f2"></span></td><td>ink</td><td>#001d21</td><td>#eef1f2</td></tr><tr><td><span class="sw" style="background:#334a4d"></span><span class="sw" style="background:#aeb6b8"></span></td><td>ink-2</td><td>#334a4d</td><td>#aeb6b8</td></tr><tr><td><span class="sw" style="background:#64797c"></span><span class="sw" style="background:#78838a"></span></td><td>ink-3</td><td>#64797c</td><td>#78838a</td></tr>
+</table></div></div><div class="c"><h3>Lines</h3><div class="scroll"><table>
+  <tr><th></th><th>Utility</th><th>Sáng</th><th>Tối</th></tr>
+  <tr><td><span class="sw" style="background:#dfe6e6"></span><span class="sw" style="background:#2d2f3d"></span></td><td>stroke</td><td>#dfe6e6</td><td>#2d2f3d</td></tr><tr><td><span class="sw" style="background:#eef2f2"></span><span class="sw" style="background:#24252f"></span></td><td>stroke-soft</td><td>#eef2f2</td><td>#24252f</td></tr><tr><td><span class="sw" style="background:#d3dede"></span><span class="sw" style="background:#3a3d4d"></span></td><td>stroke-hover</td><td>#d3dede</td><td>#3a3d4d</td></tr><tr><td><span class="sw" style="background:#cdd7d7"></span><span class="sw" style="background:#454859"></span></td><td>stroke-strong</td><td>#cdd7d7</td><td>#454859</td></tr><tr><td><span class="sw" style="background:#c3d0d0"></span><span class="sw" style="background:#565a78"></span></td><td>stroke-focus</td><td>#c3d0d0</td><td>#565a78</td></tr><tr><td><span class="sw" style="background:#e4eaea"></span><span class="sw" style="background:#2c2e3a"></span></td><td>surface-hover</td><td>#e4eaea</td><td>#2c2e3a</td></tr>
+</table></div></div><div class="c"><h3>Cream</h3><div class="scroll"><table>
+  <tr><th></th><th>Utility</th><th>Sáng</th><th>Tối</th></tr>
+  <tr><td><span class="sw" style="background:#fff3e0"></span><span class="sw" style="background:null"></span></td><td>cream</td><td>#fff3e0</td><td></td></tr><tr><td><span class="sw" style="background:#fbf3e6"></span><span class="sw" style="background:null"></span></td><td>cream-100</td><td>#fbf3e6</td><td></td></tr><tr><td><span class="sw" style="background:#f7ecda"></span><span class="sw" style="background:null"></span></td><td>cream-200</td><td>#f7ecda</td><td></td></tr><tr><td><span class="sw" style="background:#f0e6d8"></span><span class="sw" style="background:null"></span></td><td>cream-300</td><td>#f0e6d8</td><td></td></tr><tr><td><span class="sw" style="background:#001d21"></span><span class="sw" style="background:null"></span></td><td>cream-ink</td><td>#001d21</td><td></td></tr>
+</table></div></div><div class="c"><h3>Brand + data accents</h3><div class="scroll"><table>
+  <tr><th></th><th>Utility</th><th>Sáng</th><th>Tối</th></tr>
+  <tr><td><span class="sw" style="background:#de4400"></span><span class="sw" style="background:null"></span></td><td>orange</td><td>#de4400</td><td></td></tr><tr><td><span class="sw" style="background:#f5872a"></span><span class="sw" style="background:null"></span></td><td>orange-bright</td><td>#f5872a</td><td></td></tr><tr><td><span class="sw" style="background:#cf3e00"></span><span class="sw" style="background:null"></span></td><td>orange-strong</td><td>#cf3e00</td><td></td></tr><tr><td><span class="sw" style="background:#d92d20"></span><span class="sw" style="background:null"></span></td><td>red</td><td>#d92d20</td><td></td></tr><tr><td><span class="sw" style="background:#b42318"></span><span class="sw" style="background:null"></span></td><td>red-strong</td><td>#b42318</td><td></td></tr><tr><td><span class="sw" style="background:#f59e0b"></span><span class="sw" style="background:null"></span></td><td>amber</td><td>#f59e0b</td><td></td></tr><tr><td><span class="sw" style="background:#b45309"></span><span class="sw" style="background:null"></span></td><td>amber-strong</td><td>#b45309</td><td></td></tr><tr><td><span class="sw" style="background:#ffd8a8"></span><span class="sw" style="background:null"></span></td><td>peach</td><td>#ffd8a8</td><td></td></tr><tr><td><span class="sw" style="background:#ffc84c"></span><span class="sw" style="background:null"></span></td><td>yellow</td><td>#ffc84c</td><td></td></tr><tr><td><span class="sw" style="background:#21b37a"></span><span class="sw" style="background:null"></span></td><td>teal</td><td>#21b37a</td><td></td></tr><tr><td><span class="sw" style="background:#0f7a52"></span><span class="sw" style="background:null"></span></td><td>teal-strong</td><td>#0f7a52</td><td></td></tr><tr><td><span class="sw" style="background:#86f2c8"></span><span class="sw" style="background:null"></span></td><td>mint</td><td>#86f2c8</td><td></td></tr><tr><td><span class="sw" style="background:#e879c7"></span><span class="sw" style="background:null"></span></td><td>magenta</td><td>#e879c7</td><td></td></tr><tr><td><span class="sw" style="background:#0b6bcb"></span><span class="sw" style="background:#6bb6ff"></span></td><td>link</td><td>#0b6bcb</td><td>#6bb6ff</td></tr><tr><td><span class="sw" style="background:#08529c"></span><span class="sw" style="background:#9acbff"></span></td><td>link-hover</td><td>#08529c</td><td>#9acbff</td></tr>
+</table></div></div><div class="c"><h3>Thang chữ</h3><div class="scroll"><table>
+  <tr><th></th><th>Utility</th><th>Sáng</th><th>Tối</th></tr>
+  <tr><td></td><td>text-micro</td><td>10px</td><td></td></tr><tr><td></td><td>text-meta</td><td>11px</td><td></td></tr><tr><td></td><td>text-caption</td><td>12px</td><td></td></tr><tr><td></td><td>text-body</td><td>14px</td><td></td></tr><tr><td></td><td>text-title</td><td>16px</td><td></td></tr><tr><td></td><td>text-page</td><td>24px</td><td></td></tr><tr><td></td><td>text-kpi</td><td>28px</td><td></td></tr><tr><td></td><td>text-hero</td><td>34px</td><td></td></tr>
+</table></div></div><div class="c"><h3>Bo góc</h3><div class="scroll"><table>
+  <tr><th></th><th>Utility</th><th>Sáng</th><th>Tối</th></tr>
+  <tr><td></td><td>rounded-card</td><td>16px</td><td></td></tr>
+</table></div></div>
+
+<h2 id="congthuc">Công thức ghép <span class="meta">hình dạng hay gặp, ghép từ component có sẵn</span></h2>
+<div class="c"><h3>Thẻ biểu đồ</h3>
+  <p><b>Ghép từ:</b> <code>Card / CardHeader</code> + <code>Chart kit (C / gridProps / cursorLine / TooltipCard / chartTooltip / pieTooltip / axisTick)</code> + <code>LegendDot</code> + <code>Empty</code> + <code>Skeleton</code></p>
+  <p class="why">BẢN MẪU CHẠY THẬT: <code>/dsvh/patterns-dashboard</code> và <code>/dsvh/charts</code> — cùng render <code>ChartsDemo</code> trong <code>demos.tsx</code>. Dùng thật: /admin/reports (4 thẻ).</p>
+  
+  <div class="tags"><span class="tag">chart card</span><span class="tag">thẻ thống kê theo ngày</span><span class="tag">khối số liệu có trục</span></div>
+</div><div class="c"><h3>Hàng số liệu tóm tắt đầu trang</h3>
+  <p><b>Ghép từ:</b> <code>PageHeader</code> + <code>StatCard</code> + <code>CountUp</code> + <code>Skeleton</code></p>
+  <p class="why">/dashboard · /admin/dashboard</p>
+  
+  <div class="tags"><span class="tag">hàng số liệu dưới tiêu đề</span><span class="tag">dãy ô kpi ngang</span></div>
+</div><div class="c"><h3>Dải trạng thái dính</h3>
+  <p><b>Ghép từ:</b> <code>Badge</code> + <code>Tooltip</code> + <code>Skeleton</code></p>
+  <p class="why">/admin/dashboard — khối ① <code>status-bar.tsx</code></p>
+  
+  <div class="tags"><span class="tag">dải trạng thái</span><span class="tag">thanh mỏng dính trên đầu nội dung</span></div>
+</div><div class="c"><h3>Danh sách việc cần xử lý</h3>
+  <p><b>Ghép từ:</b> <code>Card / CardHeader</code> + <code>Table</code> + <code>Badge</code> + <code>Button</code> + <code>Empty</code> + <code>TableActionsCell</code></p>
+  <p class="why">/admin/dashboard — khối ④ <code>action-list.tsx</code></p>
+  
+  <div class="tags"><span class="tag">danh sách việc cần làm</span><span class="tag">khối cần xử lý hôm nay</span></div>
+</div><div class="c"><h3>Hộp chú giải “vì sao số này như vậy”</h3>
+  <p><b>Ghép từ:</b> </p>
+  <p class="why">/admin/dashboard — <code>why-note.tsx</code>, dùng dưới hầu hết các khối</p>
+  
+  <div class="tags"><span class="tag">hộp đáng chú ý</span><span class="tag">dòng giải thích cạnh số liệu</span></div>
+</div><div class="c"><h3>Trang danh sách (khuôn chuẩn)</h3>
+  <p><b>Ghép từ:</b> <code>PageShell</code> + <code>PageHeader</code> + <code>Card / CardHeader</code> + <code>TableToolbar</code> + <code>Table</code> + <code>Empty</code> + <code>Pagination</code> + <code>Skeleton</code></p>
+  <p class="why">/admin/customers · /admin/templates · /admin/audit</p>
+  
+  <div class="tags"><span class="tag">màn danh sách có lọc</span><span class="tag">trang liệt kê bản ghi</span></div>
+</div><div class="c"><h3>Trang chi tiết chia tab</h3>
+  <p><b>Ghép từ:</b> <code>PageShell</code> + <code>PageHeader</code> + <code>Breadcrumb</code> + <code>Tabs</code> + <code>TabsNav</code> + <code>Card / CardHeader</code> + <code>DangerZone</code></p>
+  <p class="why">/project/[id]</p>
+  
+  <div class="tags"><span class="tag">màn chi tiết một bản ghi</span><span class="tag">trang có tab tổng quan cấu hình</span></div>
+</div><div class="c"><h3>Luồng tạo mới nhiều bước</h3>
+  <p><b>Ghép từ:</b> <code>PageShell</code> + <code>Stepper</code> + <code>FormField</code> + <code>Input</code> + <code>Select</code> + <code>Button</code> + <code>Alert</code> + <code>ConfirmDialog</code></p>
+  <p class="why">/deploy · /databases/new</p>
+  
+  <div class="tags"><span class="tag">màn tạo mới qua nhiều bước</span><span class="tag">wizard triển khai</span></div>
+</div><div class="c"><h3>Thẻ có tiêu đề và hành động</h3>
+  <p><b>Ghép từ:</b> <code>Card / CardHeader</code> + <code>Button</code> + <code>KebabButton / IconGhostButton / TileKebabDropdown</code> + <code>PeriodPill</code></p>
+  <p class="why">khắp /dashboard và /admin/*</p>
+  
+  <div class="tags"><span class="tag">thẻ có nút ở góc phải</span><span class="tag">khối có tiêu đề kèm thao tác</span></div>
+</div>
+
+<h2 id="luat">Luật</h2><div class="c"><ol><li>Token-only: KHÔNG hardcode hex. Dùng utility token (text-ink, bg-surface, border-stroke, text-orange…). Gate: npm run ds:check.</li><li>DSVH là MẶC ĐỊNH cho mọi UI sản phẩm. shadcn/ui (src/components/ui/**) chỉ được dùng cho primitive DSVH chưa có — xem <code>shadcnBorrowed</code>.</li><li>Mảng màu LIỀN rộng (pill, track, nền khối) phải dùng fill ĐẶC, KHÔNG alpha-blend: alpha lên nền trắng bị khử bão hoà về gần trắng. Alpha chỉ hợp cho chấm/viền nhỏ. (Bài học thật từ Switch onLabel/offLabel.)</li><li>Status tone lấy từ một nguồn: @/components/dsvh/status.ts. success = teal, warning = amber (KHÔNG đỏ), error = đỏ đặc, info = neutral.</li><li>Icon = Phosphor wrapper @/components/dsvh/icons. KHÔNG vẽ SVG tay. Ngoại lệ: logo hãng ở @/components/dsvh/brand-icons.</li><li>Reuse trước, build sau. Có Card/Table/Modal/Select rồi thì dùng lại; chỉ tạo mới khi manifest không có.</li><li>Delta màu: dương = text-teal, âm = text-orange.</li><li>Chấm icon TRANG TRÍ để XÁM (<code>bg-stroke-soft text-ink-2</code>), không tô cam. Màu chỉ dùng khi mang NGHĨA trạng thái — đỏ cho hành động không hoàn tác, teal/amber cho status. Chấm cam cạnh một nút cam thì hai thứ tranh nhau sự chú ý, trong khi thứ đáng nhìn là cái nút. (Chủ dự án nêu 2 lần: /admin/templates 05/08, /profile 06/08.) Gate ACCENT canh luật này: mọi chỗ đặt <code>bg-orange/NN</code> cùng <code>text-orange</code> phải KHAI lý do bằng <code>ds-allow-accent: &lt;vì sao&gt;</code> ngay trên dòng đó, không khai thì mặc định là trang trí ⇒ xám. Vì sao phải có gate: luật này viết ra 05/08 mà tới 07/08 vẫn còn 12 chỗ tô cam ở 9 tệp — luật không có phép kiểm thì chỉ là trí nhớ của người vừa đọc nó.</li><li>Bề rộng nội dung là của KHUNG ỨNG DỤNG (<code>max-w-[1600px]</code>), trang không tự ghim trần. Một trang gõ <code>max-w-7xl</code> thì hẹp hơn hàng xóm 320px — đứng một mình vẫn ổn, chuyển trang mới thấy giật (đúng lỗi ở /deploy và /databases/new, 07/08). Trần hẹp CHÍNH ĐÁNG vẫn có (một cột nhập liệu, một thẻ tiến trình canh giữa) thì khai <code>ds-allow-width: &lt;vì sao hẹp&gt;</code> ngay trên dòng. Gate WIDTHCAP kiểm.</li><li>Dark/Light: component chỉ dùng semantic token nên tự đổi theo data-theme — nhưng LUÔN kiểm cả 2 theme.</li><li>Nhãn NGẮN không bao giờ rớt dòng: Badge · Tag · StatusDot · Kbd · Button · Tabs · SegmentedControl · TableStatusCell đều <code>whitespace-nowrap</code>. (19/08/2026: tên cuối trước đây là <code>TableStatusBadge</code> — component đó bị gộp đi từ 11/08 nên luật trỏ vào khoảng không suốt 8 ngày, và bản kế nhiệm <code>TableStatusCell</code> thì thiếu hẳn <code>whitespace-nowrap</code>. Gate NOWRAP nay đọc chính danh sách này nên một cái tên chết cũng làm gate đỏ.) Chúng là NHÃN, không phải đoạn văn — rớt dòng là hỏng hình (pill cao gấp đôi, hàng bảng so le). Cần xuống dòng thì rút gọn CHỮ hoặc nới cột, đừng để nó tự vỡ.</li><li>Font: MỘT font duy nhất — Inter, tự host qua next/font. KHÔNG <code>font-mono</code>: cần chữ số thẳng cột thì <code>tabular-nums</code>.</li><li>Thang chữ: ĐÚNG 8 bậc CÓ TÊN — text-micro(10) · text-meta(11) · text-caption(12) · text-body(14) · text-title(16) · text-page(24) · text-kpi(28) · text-hero(34). KHÔNG dùng <code>text-[Npx]</code> tuỳ tiện, cũng KHÔNG dùng thang Tailwind gốc (text-xs/sm/base/lg/xl/2xl) — hai thang song song lại thành hai nguồn. Gate TYPESCALE chặn cả hai. (06/08: gom 1139 chỗ từ 23 cỡ về 8 bậc; 95 chỗ từng là cỡ NỬA PIXEL.)</li><li>Trong MỘT HÀNG BẢNG chỉ có ĐÚNG BA vai chữ, không hơn: (1) CHÍNH — thứ người ta quét mắt tìm (tên, địa chỉ) = <code>text-body</code>; (2) PHỤ — bằng chứng đi kèm (chủ sở hữu, loại, chú thích) = <code>text-caption</code> + <code>text-ink-2</code>. NGÀY THÁNG thuộc vai CHÍNH (<code>text-body</code>, 08/08 — chủ dự án chốt): nó là thứ người ta quét mắt để so, không phải chú thích. Một GIÁ TRỊ bị cắt làm hai phần (vd 0/2) thì hai phần CÙNG cỡ, chỉ khác màu; (3) NHÃN — mọi <code>Badge</code> dùng CÙNG một <code>size</code>. KHÔNG dùng <code>text-meta</code>/<code>text-micro</code> trong ô bảng: chúng là cỡ cho chú thích ngoài luồng đọc, nhét vào bảng thì cùng một vai lại hai ba cỡ. Vì sao phải viết luật này ra: <code>Table</code> đã đặt sẵn <code>text-body</code> cho mọi ô, nhưng KHÔNG ai nói ô phụ dùng cỡ nào — nên mỗi bảng tự chọn, và ngày 08/08 đo được cùng một vai ra bốn cỡ khác nhau (10/11/12/14): cột &quot;Địa chỉ&quot; 14px ở /admin/deployments nhưng 12px ở /dashboard, huy hiệu &quot;Gói&quot; 10px trong khi huy hiệu &quot;Trạng thái&quot; 14px, ngay trên cùng một hàng. Thang 8 bậc ràng buộc TỪ VỰNG, luật này ràng buộc NGỮ PHÁP — thiếu nó thì ai cũng đúng luật mà bảng vẫn lệch. <code>density</code> KHÔNG đổi vai, chỉ đổi ĐỆM — nhưng nó CÓ hạ nền cỡ chữ: <code>compact</code> đặt nền ô = <code>text-caption</code>, <code>comfortable</code> = <code>text-body</code>. Nên bảng <code>compact</code> PHẢI khai <code>text-body</code> cho cột CHÍNH, nếu không mọi ô rơi về một cỡ và bảng không còn vai nào nổi lên. Đo 19/08: <code>node-health-table</code> là bảng compact duy nhất quên khai — tên node 12px đúng bằng dòng lý do ngay dưới nó. Gate TABLETYPE kiểm cả hai vế.</li><li>BẬC ĐẬM cho CHỮ NHỎ: <code>orange-strong</code> · <code>teal-strong</code> (cùng khuôn <code>red-strong</code>/<code>amber-strong</code> đã có). Cam thương hiệu <code>#de4400</code> mang chữ TRẮNG chỉ đạt 4.26:1 và <code>text-teal</code> trên <code>bg-teal/12</code> chỉ đạt 2.69:1 — cả hai trượt WCAG AA 4.5 cho chữ thường. Lưu ý bẫy: 14px/600 KHÔNG tính là &quot;chữ lớn&quot; (ngưỡng nới 3:1 chỉ áp cho 18.66px đậm hoặc 24px thường), nên nút và badge đều phải đạt 4.5. Dùng bậc đậm cho: mảng ĐẶC mang chữ trắng (nút solid, Badge accent, track Switch bật) và CHỮ NHỎ màu trên nền sáng — kèm <code>dark:</code> lùi về bậc gốc vì theme tối nền đã tối. KHÔNG đổi <code>--color-orange</code>/<code>--color-teal</code>: bậc gốc giữ nguyên cho viền, icon, chấm và đường chart. Đo bằng <code>npm run ds:probe</code>; đợt 20/08/2026 hạ 85 lỗi tương phản xuống 0.</li><li>GHI CHÚ TĨNH dùng <code>Note</code>, KHÔNG dùng <code>Alert</code> và KHÔNG tự gõ <code>&lt;p className=&quot;flex items-start gap-2 rounded-lg border …&quot;&gt;</code>. Đếm 20/08/2026: khuôn đó viết tay ở 7 chỗ, lệch nhau cỡ icon (14↔16), cỡ chữ (caption↔body) và màu chữ (ink-2↔ink-3). Ranh giới với <code>Alert</code> là NGHĨA chứ không phải hình: <code>Alert</code> mang <code>role=&quot;alert&quot;</code> — vùng live ARIA, trình đọc màn hình NGẮT LỜI đọc ngay, đúng cho &quot;vừa có chuyện xảy ra&quot; và sai cho một câu vốn nằm đó từ đầu; nó cũng thuộc hệ trạng thái (luật 4) trong khi ghi chú không &quot;đang tốt&quot; hay &quot;đang hỏng&quot;. Trạng thái vừa đổi / cần xử lý ⇒ <code>Alert</code>; giải thích luôn đúng ⇒ <code>Note</code>.</li><li>Ô NHÃN + GIÁ TRỊ bên trong một thẻ dùng <code>InfoTile</code>, KHÔNG tự gõ <code>rounded-lg border border-stroke bg-surface-2 p-*</code>. Đếm 20/08/2026: khuôn đó viết tay ở 26 chỗ / 21 tệp, cùng hình dạng nhưng lệch nhau ở gần như mọi chi tiết đo được — nền <code>bg-surface-2</code> ↔ <code>bg-stroke-soft/40</code>, đệm <code>p-3</code> ↔ <code>px-3 py-2</code>, ô icon có/không khung, nhãn <code>text-caption text-ink-3</code> ↔ <code>text-body font-medium</code>. Đó là lý do các màn thông số trông &quot;mỗi nơi một kiểu&quot; dù không màn nào sai token. Chọn bố cục theo CÁCH ĐỌC: xếp lưới để so theo cột giữa nhiều thẻ ⇒ <code>stack</code>; một phép đo có mẫu số ⇒ <code>row</code> kèm thanh. KHÔNG nhét <code>StatCard</code> vào trong <code>Card</code> — đó là ô KPI cấp trang và tự bọc <code>Card</code>.</li><li>KHÔNG có ảnh đại diện ⇒ vẽ LOGO Vibe Host, KHÔNG phải chữ viết tắt. <code>Avatar</code> của DSVH lo việc này (<code>fallback=&#39;logo&#39;</code> mặc định) — nơi gọi không tự dựng avatar, không tự tính hai chữ cái. Luật chốt 06/08/2026 nhưng suốt 14 ngày chỉ áp cho NGƯỜI ĐANG ĐĂNG NHẬP: <code>shared/user-avatar.tsx</code> tự vẽ logo còn <code>Avatar</code> vẫn vẽ chữ cái, nên mọi bảng danh sách hiện chữ. Vì sao chữ viết tắt sai ở đây: nó TRÔNG như một dấu nhận diện nhưng không phân biệt được người — đo ngày 20/08 ở /admin/staff, &quot;Smoke Admin smoke-tokid&quot; và &quot;Smoke Admin settings&quot; đều ra &quot;SS&quot;. Logo nói đúng một điều và nói thật: tài khoản này chưa đặt ảnh. Gate AVATARFALLBACK kiểm.</li><li>LIÊN KẾT dùng token <code>link</code>/<code>link-hover</code> (xanh dương), KHÔNG <code>text-orange</code>. Cam là màu NHẤN của thương hiệu — dùng cho nút chính và điểm cần hút mắt; đem nó làm màu liên kết thì mọi tên dịch vụ trong bảng đều tranh sự chú ý ngang một nút CTA, và người đọc mất luôn dấu hiệu &quot;cái này bấm được&quot; vì cam ở khắp nơi. Token <code>link</code> thêm 13/08/2026 kèm lý do đo được: màu link mặc định của trình duyệt (#0072F5) chỉ đạt 4.44:1 trên nền trắng, TRƯỢT WCAG AA 4.5:1 cho chữ 14px; hệ chọn #0b6bcb (5.28:1). Trong BẢNG thì dùng thẳng <code>TableLinkCell</code>, đừng tự dựng <code>&lt;a&gt;</code>. Chốt 19/08/2026 — token nằm im 6 ngày không luật không gate, nên 15 chỗ vẫn tô cam. Gate LINKCOLOR kiểm.</li><li>Tiêu đề bảng (<code>&lt;thead&gt;</code>) viết THƯỜNG, không <code>uppercase</code>. Chốt 19/08/2026 sau khi chủ dự án bắt được cùng một cột &quot;Gói&quot; hiện &quot;GÓI&quot; ở /admin/service-expiry (bảng DSVH, ép hoa) và &quot;Gói&quot; ở /admin/customers (bảng shadcn cũ, không ép). Bỏ hoa chứ không ép hoa nốt bên kia: tiếng Việt viết hoa toàn bộ mất dấu phụ ở một số mặt chữ và đọc chậm hơn, mà tiêu đề bảng là thứ người ta quét bằng mắt. Thứ bậc tiêu đề ↔ ô đã có <code>font-semibold</code> + <code>text-ink-2</code> lo. Áp cho mọi hàng tiêu đề cột, kể cả bảng dựng bằng grid (DNSRecordTable · KeyValueEditor · bảng KEY/VALUE ở env-vars) — và nhớ chữ hoa có thể nằm trong CHUỖI chứ không chỉ ở CSS.</li><li>Thang chữ phải khai cho tailwind-merge ở CẢ HAI đường gộp class: <code>components/dsvh/tv.ts</code> (component DSVH) VÀ <code>lib/utils.ts</code> → <code>cn()</code> (component shadcn). Thang tự đặt không được nhận là cỡ chữ nên nó đè mất class MÀU — 06/08 vá <code>tv()</code> xong nút CTA của DSVH đúng nhưng nút &quot;Đăng nhập&quot; (shadcn, đi qua <code>cn()</code>) VẪN đen. Gate TVWRAP kiểm cả hai. Thêm bậc mới → khai cả hai chỗ.</li></ol></div>
+
+<h2 id="cong">Cổng tự động <span class="meta">chạy trong CI, đỏ là chặn</span></h2>
+<div class="c"><div class="scroll"><table><tr><th>Cổng</th><th>Chặn điều gì</th></tr>
+<tr><td>TOKEN</td><td>hex tự chế trong toàn bộ code UI</td></tr><tr><td>NGAYTHANG</td><td>tự định dạng ngày/giờ ngoài <code>lib/datetime.ts</code> — app từng có BẢY kiểu ngày</td></tr><tr><td>SRCAPTION</td><td><code>&lt;caption className=&quot;sr-only&quot;&gt;</code> — Chromium neo caption tuyệt đối vào <code>&lt;html&gt;</code> nên nó thoát khung cuộn và kéo dài chiều cao tài liệu (đo 27/08: dôi 868px, sinh thanh cuộn cửa sổ thứ hai + mảng trắng dưới đáy)</td></tr><tr><td>FRAMENEST</td><td><code>List</code> bản có khung đặt trong <code>Card</code> — khung lồng khung</td></tr><tr><td>THEADCASE</td><td>tiêu đề bảng ép <code>uppercase</code> — tiêu đề bảng viết thường</td></tr><tr><td>SHELLCOPY</td><td>chép tay <code>space-y-6 p-4 md:p-5 lg:p-6</code> thay vì dùng <code>PageShell</code></td></tr><tr><td>AVATARFALLBACK</td><td>nơi viết màn hình tự tính chữ viết tắt thay vì dùng <code>Avatar</code> (không ảnh ⇒ logo)</td></tr><tr><td>LINKCOLOR</td><td>thẻ liên kết tô <code>text-orange</code> thay vì token <code>link</code> xanh dương</td></tr><tr><td>NOWRAP</td><td>component nhãn (luật 11) thiếu <code>whitespace-nowrap</code>, hoặc luật gọi tên component không còn tồn tại</td></tr><tr><td>TOKENSDOC</td><td>token có trong CSS nhưng thiếu trong tài liệu (và ngược lại)</td></tr><tr><td>ARIAHARD</td><td><code>aria-label</code> gõ cứng trong component DSVH — tên đọc được không hiện trên màn nên không cổng nào khác bắt được; đo 09/09/2026 có 15 chỗ, phần lớn tiếng Anh</td></tr><tr><td>TOKENMIX</td><td>cỡ chữ ngoài thang 8 bậc · token gắn đuôi <code>-foreground</code> không tồn tại</td></tr><tr><td>MANIFEST</td><td>manifest ↔ file/export thật lệch nhau</td></tr><tr><td>VARIANT</td><td>code có variant mà manifest không kể</td></tr><tr><td>PROPS</td><td>manifest khai prop mà code không có</td></tr><tr><td>REIMPL</td><td>dựng lại thứ DSVH đã có — element thô (button/select/textarea/table) VÀ đồ nhái ghép từ linh kiện hợp lệ (đường kẻ tự vẽ bằng <code>&lt;div border-t&gt;</code> → Separator · CopyButton tự dựng → CopyButton). Kèm mức GỢI Ý không chặn cho hai hình dạng chưa đủ chắc: dải nút solid/ghost → SegmentedControl, khối viền bo có đệm → Card</td></tr><tr><td>TVWRAP</td><td>component DSVH không đi qua <code>tv()</code> nên <code>cn()</code> gộp lớp sai</td></tr><tr><td>RATCHET</td><td>import shadcn trùng chức năng DSVH vượt baseline</td></tr><tr><td>CHARTKIT</td><td>chart đặt màu rời thay vì dùng palette <code>C</code> của kit</td></tr><tr><td>PAGESHELL</td><td>trang render PageHeader mà không có khung/đệm ngoài</td></tr><tr><td>ACCENT</td><td>tô cam cho thứ TRANG TRÍ (chỉ trạng thái mới được mang màu)</td></tr><tr><td>WIDTHCAP</td><td>chặn bề ngang cấp trang mà không khai lý do</td></tr><tr><td>FIELDCLS</td><td>lớp đệm/chiều cao truyền qua className của Input/Select/Textarea — rơi vào div gốc, đẩy ô nhập đi</td></tr><tr><td>INVERTPAIR</td><td>nền <code>bg-ink</code> đảo theo theme mà chữ ghim <code>text-white/black</code> — hỏng ở theme tối</td></tr><tr><td>IMPORTPATH</td><td>import <code>@/…</code> trỏ tới tệp không có thật — trang 500 lúc chạy dù tsc báo xanh</td></tr><tr><td>DEMOEMPTY</td><td>demo chỉ in chữ, không dựng component nào</td></tr><tr><td>DEMODUP</td><td>một khoá demo nhúng ở nhiều mục tài liệu — nhiều trang cùng trả lời một câu hỏi</td></tr><tr><td>RECOGNISE</td><td>mục không tra ngược được, hoặc hai mục cùng nhận một từ khoá</td></tr><tr><td>LINK</td><td>mục đứng một mình, nối một chiều, hoặc tài liệu nền không dẫn tới component nào</td></tr><tr><td>PART</td><td>mục con trỏ vào cha không có thật, hoặc thiếu nhóm chức năng</td></tr><tr><td>RECIPE</td><td>công thức ghép cụm trỏ vào component không có thật, thiếu bước, hoặc trùng địa chỉ</td></tr><tr><td>PAIR</td><td>cặp trùng vai khai ranh giới một chiều, hoặc trỏ vào mục không tồn tại</td></tr><tr><td>CELLDOC</td><td>ô bảng lệch nhau giữa code · manifest · trang giải phẫu</td></tr><tr><td>TABLETYPE</td><td>dùng <code>text-meta</code>/<code>text-micro</code> trong ô bảng, phá ba vai chữ</td></tr><tr><td>ESCSTACK</td><td>lớp phủ đóng theo Esc mà không hỏi sổ <code>overlay-stack</code> — hai lớp mở thì một lần Esc đóng cả hai; ratchet, danh sách chưa chuyển chỉ được ngắn đi</td></tr>
+</table></div></div>
+
+
+
+<h2 id="sothieu">Sổ thiếu <span class="meta">đã biết là thiếu, chưa dựng — công khai để không ai dựng lén một bản riêng</span></h2>
+<div class="c"><h3>HAI thanh phân trang cùng sống — <code>Pagination</code> (chuẩn) và <code>TablePagination</code> (riêng trong Table.tsx)</h3><p class="why">Phát hiện 20/08/2026 khi bật phân trang cho /admin/dashboard. <code>Pagination</code> của DSVH (qua <code>shared/AppPagination</code>) là bản 10+ màn đang dùng: dãy SỐ TRANG có rút gọn &quot;…&quot;, câu &quot;Hiển thị 1–10 / 111 mục&quot;. <code>TablePagination</code> thì nằm ẩn trong <code>Table.tsx</code>, lộ ra qua prop <code>pagination</code>, và vẽ hình dạng KHÁC HẲN: &quot;Trang x / y&quot; + hai mũi tên + ô chọn cỡ trang. Nó có 0 nơi dùng nên không ai thấy sự lệch — cho tới khi có người dùng nó và cả một module lệch khỏi phần còn lại của app.
+
+Đúng lớp lỗi mà <code>Empty</code> ↔ <code>TableEmptyState</code> vừa phải gộp (19/08): một component dùng chung mọc thêm bản thứ hai BÊN TRONG một component khác, nơi <code>ds:find</code> không chỉ tới và trang /dsvh không liệt kê. Chưa gộp ngay vì phải chốt trước: <code>Table</code> có nên tự vẽ thanh phân trang không, hay luôn để nơi gọi đặt <code>AppPagination</code> bên dưới (khi ấy gỡ hẳn prop <code>pagination</code> và sửa cả <code>TablePagination</code> lẫn kiểu <code>PaginationConfig</code>). Trước mắt: prop <code>pagination</code> đã ghi cảnh báo tại chỗ.</p></div><div class="c"><h3>Bản đồ nhiệt (lưới giá trị + thang màu tuần tự + chú giải) — DSVH chưa có</h3><p class="why">Phát hiện 19/08/2026 khi dựng &#39;Bản đồ nhiệt giờ × thứ&#39; cho /admin/dashboard. <code>ds:find &quot;bản đồ nhiệt&quot;</code> không ra gì; chart kit chỉ phục vụ Recharts (SVG), mà lưới nhiệt dựng bằng CSS grid + token thì ĐÚNG HƠN — nó tự đổi theo theme, còn <code>C</code> là hex theme sáng viết cứng. CỐ Ý chưa đưa vào DSVH: đây là bản đồ nhiệt DUY NHẤT của app và trục của nó là nghiệp vụ (giờ × thứ), nên chưa biết hợp đồng chung nên trông thế nào — thang màu mấy bậc, chú giải đặt đâu, nhãn trục do ai truyền, phân biệt &#39;chưa đo được&#39; với &#39;đã đo bằng 0&#39; ra sao. Dựng vội một API chung từ MỘT nơi dùng là cách chắc chắn nhất để có một component chỉ vừa với chính nó. Khi xuất hiện cái thứ hai (ví dụ nhiệt theo node × ngày) thì gom vào DSVH và mang theo bốn quyết định trên. Bản đang dùng: <code>components/modules/admin-dashboard/error-heatmap.tsx</code> — token-only, fill ĐẶC theo luật 4 (ô nhiệt là mảng màu liền, alpha lên nền trắng sẽ khử bão hoà thành gần trắng).</p></div><div class="c"><h3><code>DropdownMenu</code> lồng nút thật trong vùng bấm <code>role=&quot;button&quot;</code> — hai điểm dừng Tab cho một nút</h3><p class="why">Phát hiện 14/08/2026 khi dựng menu chọn giao diện. <code>DropdownMenu</code> bọc <code>trigger</code> trong <code>&lt;div role=&quot;button&quot; tabIndex={0}&gt;</code>, mà MỌI nơi gọi đều truyền vào một nút thật: <code>TableActionsCell</code> truyền <code>&lt;button&gt;</code>, demo và <code>ThemeMenu</code> truyền <code>&lt;Button&gt;</code> của DSVH. Kết quả là một phần tử bấm được nằm trong một phần tử bấm được: người dùng bàn phím phải Tab HAI lần mới qua khỏi một cái nút, và trình đọc màn hình đọc ra hai điều khiển chồng nhau ở cùng một chỗ. Bấm chuột vẫn đúng (click nổi bọt lên div) nên lỗi này không lộ ra khi thử tay. CHƯA sửa vì nó đổi hợp đồng của <code>trigger</code> ở mọi nơi gọi: đường đúng là DropdownMenu tự dựng nút và nhận <code>icon</code>/<code>label</code>/<code>variant</code> (như <code>TableActionsCell</code> đang làm sẵn ở tầng trên), hoặc nhận <code>asChild</code> rồi nhân bản phần tử con kèm handler thay vì bọc thêm một lớp. Cả hai đều phải sửa <code>TableActionsCell</code> + <code>KebabButton</code> + demo cùng lúc, nên tách ra làm riêng có ảnh trước/sau.</p></div><div class="c"><h3>Bỏ shadcn khỏi code ứng dụng — CHỈ CÒN đợt 4: <code>table</code> ở 10 tệp</h3><p class="why">Kế hoạch bốn đợt, chốt 08/08 sau khi đếm được 162 chỗ ở 44 tệp trong lúc gate RATCHET vẫn xanh — vì nó được giao việc &#39;không cho tăng&#39;, không phải &#39;trừ dần&#39;. XONG: đợt 1 (Button·Badge·Separator·Progress) · đợt 2 (Card·Skeleton·Input·Textarea) · đợt 3 ngày 11/08 (Select 16 ô ở 8 tệp · Dialog + AlertDialog ở 6 tệp → Modal/ConfirmDialog · Skeleton 1 tệp). CÒN đợt 4: <code>table</code> ở 10 tệp — nặng nhất vì phải viết lại <code>columns</code>/sắp xếp/trạng thái rỗng cho từng bảng. Hai điều chỉnh phát hiện trong lúc làm đợt 3: (a) <code>alert-dialog</code> nằm nhầm ở nhóm mượn-thoải-mái dù <code>ConfirmDialog</code> đã có — đã chuyển sang nhóm trùng, ngưỡng 0 = cấm tuyệt đối ngay; (b) <code>Label</code> của DSVH bị INFRA miễn trừ nên VÔ HÌNH y hệt bộ ô bảng trước đây (0 nơi dùng, không có trong tài liệu) trong khi 12 tệp vẫn import <code>ui/label</code> của shadcn — đã khai vào manifest và gỡ miễn trừ, việc đổi 12 tệp đó để sang đợt sau. KHI SIẾT GATE cuối đợt 4 phải TÁCH HAI LOẠI: import shadcn nằm trong <code>src/components/ui/**</code> là primitive gọi nhau (button·separator·input·textarea nay chỉ còn ở đó), không phải nợ của code ứng dụng — không tách thì con số 0 không bao giờ đạt được và gate thành thứ ai cũng bỏ qua. Bài học cũ giữ nguyên: <code>--update-baseline</code> chạy ngay sau một lượt gộp sẽ lặng lẽ hợp thức hoá mọi thứ vừa về.</p></div><div class="c"><h3>Trang tài liệu API <code>/docs</code> (Swagger + bảng kiểm kê) dựng ngoài DSVH</h3><p class="why">Về từ dev-test ngày 07/08 (nhánh feat/docs-openapi) — <code>app/docs/api-docs.tsx</code> · <code>try-it.tsx</code> · <code>schema-view.tsx</code>, tổng 96 chỗ dùng token shadcn (<code>text-muted-foreground</code>, <code>bg-muted</code>), màu palette thô, <code>font-mono</code> và cỡ chữ ngoài thang (<code>text-[13px]</code>, <code>text-[12px]</code>). Baseline ratchet nới đúng bằng ngần ấy (__legacyToken 0→3 · __legacyPalette 0→4 · __legacyMono 0→3 · __legacyTypescale 0→3) để GHI NHẬN, KHÔNG phải để quên: <code>--update-baseline</code> chạy sau một lượt gộp sẽ lặng lẽ hợp thức hoá mọi thứ vừa về, nên con số nới phải đi kèm một dòng ở đây nói rõ nới cho cái gì.</p></div><div class="c"><h3>Thẻ chọn engine ở /databases/new tự dựng, KHÔNG dùng <code>DBTypeCard</code> của DSVH</h3><p class="why"><code>modules/deploy-database/deploy-database.tsx</code> dựng tay lưới 4 thẻ engine (~50 dòng JSX). DSVH đã có <code>ui/deploy/DBTypeCard</code> cho đúng việc này nhưng hiện chưa nơi nào dùng — trang này là ca duy nhất có thật.</p></div><div class="c"><h3>Hai màn AI mới về từ dev-test dựng trên shadcn: thẻ số liệu token + tab Cấu hình AI</h3><p class="why">Gộp dev-test ← fontend ngày 06/08 (lượt gom 3 luồng) kéo về <code>modules/admin-reports/ai-usage-card.tsx</code> và <code>modules/admin-settings/tab-ai.tsx</code> — 5 chỗ import shadcn mới: card +2 · button +1 · input +1 · skeleton +1. Baseline ratchet đã nới đúng bằng ngần ấy để GHI NHẬN, không phải để quên.</p></div><div class="c"><h3>Trung tâm hỗ trợ + Cấu hình (+ trang Cụm) còn dựng trên shadcn</h3><p class="why">Gộp fontend ← dev-test ngày 06/08 kéo về <code>modules/admin-dashboard</code> (9 tệp), <code>modules/admin-settings</code> (6 tệp) và <code>modules/stack</code> (2 tệp) — tổng 47 chỗ import shadcn mới: card +8 · button +7 · badge +7 · skeleton +6 · table +6 · input +4 · switch +3 · tabs +2 · alert +2 · select +1 · textarea +1. Baseline ratchet đã nới đúng bằng ngần ấy để ghi nhận, KHÔNG phải để quên.</p></div><div class="c"><h3>Màn đăng nhập (auth.tsx) còn dùng shadcn Button</h3><p class="why">Đến từ nhánh dev-test khi merge 05/08/2026 — 8 chỗ. <code>variant=&quot;link&quot;</code> ĐÃ CÓ trong DSVH từ 06/08 (thêm khi chữa lỗi &quot;Xem tất cả phiên đăng nhập&quot; hiện ra thành một cái hộp có viền); còn thiếu <code>variant=&quot;outline&quot;</code>.</p></div><div class="c"><h3>StatCard — khối DỰNG TRANG chưa vào DSVH (PageHeader · PageShell · EmptyState ĐÃ vào)</h3><p class="why">Đang ở <code>src/components/shared/**</code>. EmptyState XONG ngày 11/08: gộp về <code>Empty</code> của DSVH — trước đó DSVH có một bản 0 nơi dùng còn app chạy bản khác ở 25 chỗ/20 tệp, và bản DSVH còn bọc icon trong chấm CAM, phạm luật #8 (icon trang trí phải xám). Không xoá một bản mà gộp thành hai <code>variant</code> kèm luật chọn, vì chúng phục vụ hai ngữ cảnh thật: nằm trong khối đã có khung ↔ đứng một mình. Khuôn dựng trang thì đã đóng: <code>PageShell</code> vào DSVH ngày 07/08 sau khi hai trang mới nhất (<code>/agent-tokens</code>, <code>/stack/[id]</code>) đều quên đệm ngoài — tiêu đề dính sát mép khung trắng, chủ dự án nhìn thấy trước gate.</p></div><div class="c"><h3>Tooltip dùng chung với Button size=&#39;icon&#39;</h3><p class="why">DSVH đã có <code>ui/Tooltip.tsx</code>, nhưng 1 file vẫn dùng <code>@/components/ui/tooltip</code> của shadcn.</p></div><div class="c"><h3>AvatarGroup (avatar chồng nhau +N)</h3><p class="why">Avatar đã có; bản nhóm chồng nhau thì chưa.</p></div><div class="c"><h3>Chart card mẫu (MonthlyTraffic, UserGrowth, TrendCards…)</h3><p class="why">Hệ cũ có <code>src/components/cards/**</code> — các thẻ chart dựng sẵn dùng làm ví dụ recipe. Chưa port vì đó là MÀN HÌNH mẫu của app cũ, không phải primitive.</p></div>
+
+<p class="meta" style="margin-top:40px">Sinh bằng <code>npm run ds:export</code> từ
+<code>src/components/dsvh/manifest.ts</code>. Chạy lại lệnh đó là có bản mới nhất.</p>
+</div></body></html>

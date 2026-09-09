@@ -1,77 +1,60 @@
-# Design System — "Mắt Bão Mockup Kit" (chính thức)
+# Design system — DSVH (nguồn sự thật)
 
-> **Lịch sử sửa (2026-09-09, 2 lần)**:
-> 1. Bản đầu (Step 1) dùng nhầm `dsvh` (design system nội bộ của Vibe Host, tông
->    Teal/Orange) thay vì bộ user chuẩn bị riêng cho dự án này.
-> 2. Sửa lần 1 chuyển sang `design-system.css` nhưng qua một LỚP ALIAS trung gian
->    (đổi tên `orange`→trỏ indigo, `teal`→trỏ success...) — user phản hồi đây vẫn
->    KHÔNG PHẢI "dùng y chang": một class tên `text-orange` mà render ra màu indigo
->    là gây hiểu lầm, không truy vết được về token gốc. Đã sửa lần 2: bỏ hẳn lớp
->    alias, `tailwind.config.ts` trỏ THẲNG vào biến `--ds-*`, đặt tên class đúng
->    nghĩa gốc (`text-success`, không phải `text-teal`).
-> 3. Đồng thời thay toàn bộ icon emoji (🏠📝🧩...) bằng SVG thật (`lucide-react`) —
->    DESIGN.md không nói rõ bộ icon nhưng "dùng icon có sẵn không phải .svg" bị
->    đánh giá là "dơ", nhất quán với tinh thần "clean SaaS admin" của kit.
+**Nguồn sự thật duy nhất: `DSVH.html`** (bản trích tài liệu design system của VAYS Panel /
+Vibe Host — 94 component · 41 token · 35 cổng tự động). Mọi quyết định về màu, thang chữ, icon,
+component đều tra ở đó trước.
 
-## Nguồn — KHÔNG có bản sao/alias nào khác
+> Lịch sử: dự án từng đi lạc qua hai hệ khác (một bản dsvh port dở, rồi "Mắt Bão Mockup Kit" tông
+> Indigo trong `docs/reference/design-system.css`). Cả hai đã bị gỡ. Hai file trong
+> `docs/reference/` giữ lại chỉ để tra lịch sử, **không phải nguồn sự thật**.
 
-- `docs/reference/design-system.css` — bản gốc do user cung cấp. Copy nguyên văn
-  vào `app/design-system.css`, `@import` trong `app/globals.css`. **Không sửa giá
-  trị token.**
-- `docs/reference/DESIGN.md` — luật cứng: không hex/px thô, mockup trước khi code
-  (nợ thiết kế — các màn đã dựng trước khi phát hiện nhầm hệ, chưa qua bước mockup
-  riêng), responsive 3 cỡ, wording qua BA (chưa có BA review).
-- `lucide-react` — bộ icon SVG dùng cho TOÀN BỘ icon trong app (sidebar nav, empty
-  state, badge, nút bấm, checklist...). Không còn icon nào là emoji/ký tự Unicode
-  giả icon (✓ ○ ↗ → 🌀 🏆 v.v. đều đã thay bằng component SVG tương ứng).
+## Đang dùng thật trong repo
 
-## Cách dùng trong Next.js/Tailwind — trỏ THẲNG, không đổi tên
-
-`tailwind.config.ts` — mỗi key màu/chữ/bo góc/đổ bóng trỏ **trực tiếp** vào 1 biến
-`--ds-*`, tên key giữ nguyên hoặc rất sát nghĩa gốc:
-
-| Tailwind key | Biến `--ds-*` | Ghi chú |
+| Thứ | Ở đâu | Ghi chú |
 |---|---|---|
-| `background` | `--ds-bg` | |
-| `foreground` | `--ds-fg` | |
-| `muted-foreground` | `--ds-fg-mute` | |
-| `subtle` | `--ds-fg-subtle` | tên mới, TRUNG THỰC theo `fg-subtle` gốc, không tái dùng tên khác |
-| `card` | `--ds-surface` | |
-| `primary` / `primary-hover` | `--ds-primary` / `--ds-primary-hover` | |
-| `secondary` | `--ds-surface-raised` | đúng nền `.ds-btn` mặc định trong kit |
-| `accent` | `--ds-primary-light` | đúng hover-state `.ds-btn-ghost` trong kit |
-| `destructive` | `--ds-danger` | |
-| `success` / `warning` / `info` (+ `-bg`) | `--ds-success` / `--ds-warning` / `--ds-info` | tên MỚI trung thực, không tái dùng `teal`/`amber` |
-| `border` / `border-strong` | `--ds-border` / `--ds-border-strong` | |
-| `ring` | `--ds-primary-mute` | |
+| Token màu/chữ/bo góc | `app/globals.css` | Đúng giá trị bảng Token của DSVH.html, có cả theme tối qua `[data-theme="dark"]` |
+| Map token → utility | `tailwind.config.ts` | Giữ nguyên tên: `bg-surface`, `text-ink-2`, `border-stroke`, `text-orange`, `text-body`, `rounded-card`… |
+| `tv()` | `components/dsvh/tv.ts` | Bắt buộc dùng bản này, không import thẳng `tailwind-variants` |
+| `cn()` | `lib/utils.ts` | Khai cùng thang chữ cho tailwind-merge (luật #21 — thiếu thì class cỡ chữ đè mất class màu) |
+| Component | `components/dsvh/**` | Port nguyên văn từ DSVH, ~60 file |
+| Icon | `components/dsvh/icons.tsx` | Phosphor qua wrapper `icon()` |
+| Ngày giờ | `lib/datetime.ts` | Cổng NGAYTHANG: mọi định dạng ngày đi qua đây |
+| Chuỗi component | `lib/i18n.ts` | Thay `react-i18next` bằng module vi một chỗ |
 
-Thang chữ dùng ĐÚNG tên chuẩn Tailwind (`text-xs/sm/base/md/lg/xl/2xl`), chỉ đổi
-GIÁ TRỊ theo `--ds-font-size-*` — không còn vocabulary tự chế (`text-hero`,
-`text-kpi`...).
+## Ba chỗ CỐ Ý lệch bản gốc (và vì sao)
 
-Class `.ds-*` thuần (`.ds-btn`, `.ds-card`, `.ds-badge`, `.ds-table`, `.ds-empty`,
-`.ds-alert`, `.kpi`/`.kpirow`/`.kcard`, `.panel`, `.barlist`, `.ds-nav`) dùng trực
-tiếp làm `className` khi cần đúng pattern trong file gốc — xem `app/admin/page.tsx`,
-`components/app-shell.tsx`, `components/empty-state.tsx`.
+1. **`icons.tsx` không `export *` từ file generated.** Bản gốc re-export cả ~1530 icon; file đó
+   import hết ở module scope nên webpack không tree-shake được — đo thật trên app này: một chunk
+   **4.7 MB**, First Load JS **100 kB → 1.12 MB** trên MỌI trang. Nay khai thẳng 28 icon đang
+   dùng qua đúng wrapper `icon()`; bundle về **164 kB**. Cần icon mới thì thêm một dòng, tra tên
+   ở phosphoricons.com — vẫn KHÔNG vẽ SVG tay (luật #5).
+2. **`react-i18next` → `lib/i18n.ts`.** App chỉ chạy tiếng Việt, không kéo cả framework i18n vào.
+   Giữ nguyên API `useTranslation()` nên code component DSVH không phải sửa, và câu chữ vẫn nằm
+   tập trung một chỗ để BA sửa.
+3. **`Card.tsx` thêm `"use client"`.** Component dùng `useState`/`useRef` (dropdown PeriodPill) —
+   Next.js App Router bắt buộc directive này, bản gốc chạy trong app có cấu hình khác.
 
-## Icon
+Không port nhóm `ui/deploy/**`, `LogViewer`, `MetricGauge`, `ResourceMeter`, `TreeGuide`,
+`charts/kit` — đó là component của panel hosting, app cuộc thi không có màn nào dùng.
 
-Import trực tiếp từ `lucide-react`, `size` theo ngữ cảnh (16px sidebar/inline,
-18-22px tiêu đề/logo, 36px empty state). **Lưu ý RSC**: `NavItem.icon` trong
-`components/app-shell.tsx` nhận `ReactNode` (JSX đã dựng, vd `<Home size={16}/>`),
-KHÔNG nhận component reference (`icon: Home`) — vì `AppShell` là Client Component
-("use client") còn nav được định nghĩa ở Server Component (`layout.tsx`); truyền
-thẳng function qua ranh giới Server→Client Component sẽ lỗi runtime "Functions
-cannot be passed directly to Client Components". `EmptyState` không bị giới hạn
-này (component reference `icon: LucideIcon` OK) vì cả nó lẫn nơi gọi đều là Server
-Component, không qua ranh giới nào.
+## Luật DSVH đang áp trong code này
 
-## Component shadcn cũ (Button/Card/Input/Label/Badge/Table/Textarea/Stepper)
+- Token-only, không hex thô (ngoại lệ đã khai: gradient logo thương hiệu trong `icons.tsx`).
+- Thang chữ ĐÚNG 8 bậc: `text-micro/meta/caption/body/title/page/kpi/hero`. **Không** dùng
+  `text-xs/sm/base/lg/xl` của Tailwind gốc.
+- Liên kết dùng token `link`/`link-hover` (xanh dương), **không** `text-orange` — cam để dành cho
+  nút chính.
+- Icon trang trí để xám (`bg-stroke-soft text-ink-2`), chỉ tô màu khi mang nghĩa trạng thái.
+- Status tone một nguồn (`components/dsvh/status.ts`): success = teal · warning = amber · error =
+  đỏ · info = neutral.
+- `Note` cho ghi chú TĨNH, `Alert` cho trạng thái VỪA đổi / cần xử lý (`Alert` có `role="alert"`,
+  trình đọc màn hình ngắt lời ngay).
+- `Empty` luôn kèm `action` khi có lối đi tiếp; nằm trong `Card` thì dùng variant `inline`.
+- Mọi trang bọc `PageShell` (đệm ngoài + nhịp dọc + `PageHeader`).
+- Nền `canvas` (tối ở CẢ hai theme) đi với chữ `cream`, không ghim `text-white`.
 
-Giữ cấu trúc gốc (copy từ `docs/reference/dsvh-source/ui/`), chỉ dùng token màu ở
-trên — không còn tên biến nào gợi nhớ tới `dsvh`.
+## Chưa làm
 
-## Dark mode
-
-`design-system.css` hỗ trợ cả `prefers-color-scheme: dark` và `[data-theme="dark"]`
-— project hiện **chưa bật toggle** (nội bộ, ít giá trị ưu tiên với iMVP).
+- Chưa có cổng tự động (`ds:check`, `ds:probe`…) như repo gốc — luật hiện dựa vào review, không có
+  phép kiểm. Nếu app lớn thêm thì port `ds:check` là việc đáng làm tiếp.
+- Chưa bật nút chuyển sáng/tối (token đã sẵn, chỉ thiếu `data-theme` toggle).

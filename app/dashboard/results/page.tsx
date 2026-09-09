@@ -2,12 +2,22 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
 import { getLatestIdeaScore, getLatestProductScore } from "@/lib/db/queries/scores";
+import { listAppealsForSubmission } from "@/lib/db/queries/appeals";
 import { engagementTierToScore } from "@/lib/scoring";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/empty-state";
+import { formatDateTimeVN } from "@/lib/datetime";
+import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
+import { Card, CardHeader } from "@/components/dsvh/ui/Card";
+import { Button } from "@/components/dsvh/ui/Button";
+import { Badge } from "@/components/dsvh/ui/Badge";
+import { Empty } from "@/components/dsvh/ui/data/Empty";
+import { Note } from "@/components/dsvh/ui/data/Note";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { Progress } from "@/components/dsvh/ui/Progress";
+import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
+import { NotepadIcon, HourglassIcon } from "@/components/dsvh/icons";
 import { AppealForm } from "./appeal-form";
-import { BarChart3, Clock } from "lucide-react";
+
+const APPEAL_WINDOW_HOURS = 48;
 
 export default async function ResultsPage() {
   const session = await getSession();
@@ -15,93 +25,135 @@ export default async function ResultsPage() {
 
   if (!submission) {
     return (
-      <EmptyState
-        icon={BarChart3}
-        title="Bạn chưa có đề tài"
-        desc="Đăng ký đề tài để bắt đầu hành trình dự thi."
-        action={
-          <Link href="/dashboard/register">
-            <button className="ds-btn ds-btn-primary">Đăng ký ngay</button>
-          </Link>
-        }
-      />
+      <PageShell title="Kết quả">
+        <Card>
+          <Empty
+            icon={<NotepadIcon size={40} />}
+            title="Bạn chưa có đề tài"
+            description="Đăng ký đề tài để bắt đầu hành trình dự thi."
+            action={
+              <Link href="/dashboard/register">
+                <Button variant="solid">Đăng ký đề tài</Button>
+              </Link>
+            }
+          />
+        </Card>
+      </PageShell>
     );
   }
 
   if (!submission.publishedAt) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Kết quả — {submission.productName}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="ds-alert ds-alert-warning">
-            <Clock size={16} className="mt-0.5 shrink-0" />
-            <span>
-              Đang chờ hội đồng xác nhận & công bố điểm. Điểm chỉ hiển thị sau khi BTC bấm công bố.
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      <PageShell title="Kết quả" subtitle={submission.productName}>
+        <Card>
+          <Empty
+            icon={<HourglassIcon size={40} />}
+            title="Chưa công bố điểm"
+            description="Hội đồng đang đối chiếu điểm máy chấm với phần chấm tay. Điểm chỉ hiển thị sau khi BTC bấm công bố — trước đó không ai thấy điểm của bạn."
+            action={
+              <Link href="/dashboard">
+                <Button variant="ghost">Về tổng quan</Button>
+              </Link>
+            }
+          />
+        </Card>
+      </PageShell>
     );
   }
 
-  const ideaScore = await getLatestIdeaScore(submission.id);
-  const productScore = await getLatestProductScore(submission.id);
+  const [ideaScore, productScore, appeals] = await Promise.all([
+    getLatestIdeaScore(submission.id),
+    getLatestProductScore(submission.id),
+    listAppealsForSubmission(submission.id),
+  ]);
+
   const technicalCap = submission.isPrebuiltRepo ? 20 : 40;
   const technical = Math.min(Number(productScore?.moduleScores.chatLuongKyThuat ?? 0), technicalCap);
   const completion = Math.min(Number(productScore?.moduleScores.hoanThien ?? 0), 15);
   const applicationValue = Math.min(Number(ideaScore?.moduleScores.giaTriUngDung ?? 0), 25);
   const engagement = engagementTierToScore(submission.engagementTier);
 
+  const hoursSincePublish = (Date.now() - new Date(submission.publishedAt).getTime()) / 3_600_000;
+  const appealOpen = hoursSincePublish <= APPEAL_WINDOW_HOURS && appeals.length === 0;
+
   return (
-    <div className="flex flex-col gap-6">
+    <PageShell
+      title="Kết quả"
+      subtitle={submission.productName}
+      action={<Badge tone="success">Đã công bố · {formatDateTimeVN(submission.publishedAt)}</Badge>}
+    >
       <Card>
-        <CardHeader>
-          <CardTitle>Kết quả — {submission.productName}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-success">{submission.finalScore}</span>
-            <span className="text-base text-muted-foreground">/100</span>
-          </div>
-          <div className="flex flex-col gap-2 text-sm">
-            <ScoreLine label="Chất lượng kỹ thuật" value={technical} max={technicalCap} />
-            <ScoreLine label="Hoàn thiện & nội dung riêng" value={completion} max={15} />
-            <ScoreLine label="Giá trị ứng dụng" value={applicationValue} max={25} />
-            <ScoreLine label="Lan tỏa cộng đồng" value={engagement} max={20} />
-          </div>
-          {submission.isPrebuiltRepo && (
-            <Badge variant="secondary">Trần kỹ thuật 20đ (deploy từ repo có sẵn)</Badge>
-          )}
-        </CardContent>
+        <CardHeader title="Tổng điểm" subtitle="Thang 100 — barem 40 · 15 · 25 · 20 theo thể lệ" />
+        <div className="flex items-baseline gap-2">
+          <span className="text-kpi font-bold text-orange">{submission.finalScore}</span>
+          <span className="text-body text-ink-2">/100</span>
+        </div>
+        <div className="mt-4 space-y-3">
+          <ScoreLine label="Chất lượng kỹ thuật" value={technical} max={technicalCap} />
+          <ScoreLine label="Độ hoàn thiện & nội dung riêng" value={completion} max={15} />
+          <ScoreLine label="Giá trị ứng dụng" value={applicationValue} max={25} />
+          <ScoreLine label="Lan tỏa cộng đồng" value={engagement} max={20} />
+        </div>
+        {submission.isPrebuiltRepo && (
+          <Note tone="warning" className="mt-4">
+            Bài deploy từ repo/mẫu có sẵn nên mục Chất lượng kỹ thuật tính trần 20 điểm.
+          </Note>
+        )}
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Phản biện (≤48h)</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardHeader
+          title="Phản biện"
+          subtitle={`Một vòng duy nhất, trong ${APPEAL_WINDOW_HOURS}h kể từ lúc công bố, bắt buộc kèm bằng chứng kiểm chứng được`}
+        />
+        {appeals.length > 0 ? (
+          <div className="space-y-3">
+            {appeals.map((a) => (
+              <dl key={a.id} className="divide-y divide-stroke">
+                <InfoRow
+                  label="Trạng thái"
+                  value={
+                    <Badge
+                      tone={
+                        a.status === "accepted" ? "success" : a.status === "rejected" ? "danger" : "warning"
+                      }
+                    >
+                      {a.status === "accepted"
+                        ? "Được chấp nhận"
+                        : a.status === "rejected"
+                          ? "Bị từ chối"
+                          : "Đang chờ xử lý"}
+                    </Badge>
+                  }
+                />
+                <InfoRow label="Tiêu chí phản biện" value={a.criteria} wrap />
+                {a.resolutionNote && <InfoRow label="Kết luận của BTC" value={a.resolutionNote} wrap />}
+              </dl>
+            ))}
+          </div>
+        ) : appealOpen ? (
           <AppealForm submissionId={submission.id} />
-        </CardContent>
+        ) : (
+          <Alert tone="info" title="Đã hết cửa sổ phản biện">
+            Phản biện chỉ nhận trong {APPEAL_WINDOW_HOURS}h kể từ khi công bố điểm. Kết quả hiện tại
+            là chung cuộc.
+          </Alert>
+        )}
       </Card>
-    </div>
+    </PageShell>
   );
 }
 
 function ScoreLine({ label, value, max }: { label: string; value: number; max: number }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
     <div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">{label}</span>
-        <b className="text-foreground">
+      <div className="flex items-baseline justify-between text-caption">
+        <span className="text-ink-2">{label}</span>
+        <span className="font-semibold text-ink tabular-nums">
           {value}/{max}
-        </b>
+        </span>
       </div>
-      <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-success" style={{ width: `${pct}%` }} />
-      </div>
+      <Progress value={max > 0 ? (value / max) * 100 : 0} tone="teal" className="mt-1.5" />
     </div>
   );
 }

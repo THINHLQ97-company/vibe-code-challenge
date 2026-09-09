@@ -1,20 +1,32 @@
 import { eq } from "drizzle-orm";
-import { Home, FileText, UploadCloud, Megaphone, ClipboardList, BarChart3, Trophy } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { AppShell, type NavItem } from "@/components/app-shell";
+import {
+  HouseIcon,
+  NotepadIcon,
+  RocketIcon,
+  MegaphoneIcon,
+  ClipboardTextIcon,
+  ChartBarIcon,
+  TrophyIcon,
+} from "@/components/dsvh/icons";
 
-const ICON_PROPS = { size: 16, strokeWidth: 2 } as const;
 const NAV: NavItem[] = [
-  { href: "/dashboard", label: "Tổng quan", icon: <Home {...ICON_PROPS} /> },
-  { href: "/dashboard/register", label: "Đề tài của tôi", icon: <FileText {...ICON_PROPS} /> },
-  { href: "/dashboard/build", label: "Nộp bài", icon: <UploadCloud {...ICON_PROPS} /> },
-  { href: "/dashboard/share", label: "Chia sẻ & lan tỏa", icon: <Megaphone {...ICON_PROPS} /> },
-  { href: "/dashboard/survey", label: "Phiếu trải nghiệm", icon: <ClipboardList {...ICON_PROPS} /> },
-  { href: "/dashboard/results", label: "Kết quả", icon: <BarChart3 {...ICON_PROPS} /> },
-  { href: "/dashboard/leaderboard", label: "Bảng xếp hạng", icon: <Trophy {...ICON_PROPS} /> },
+  { href: "/dashboard", label: "Tổng quan", icon: <HouseIcon size={17} /> },
+  { href: "/dashboard/register", label: "Đề tài của tôi", icon: <NotepadIcon size={17} /> },
+  { href: "/dashboard/build", label: "Nộp bài", icon: <RocketIcon size={17} /> },
+  { href: "/dashboard/share", label: "Chia sẻ & lan tỏa", icon: <MegaphoneIcon size={17} /> },
+  { href: "/dashboard/survey", label: "Phiếu trải nghiệm", icon: <ClipboardTextIcon size={17} /> },
+  { href: "/dashboard/results", label: "Kết quả", icon: <ChartBarIcon size={17} /> },
+  { href: "/dashboard/leaderboard", label: "Bảng xếp hạng", icon: <TrophyIcon size={17} /> },
 ];
+
+const BOARD_LABEL: Record<string, string> = {
+  ky_thuat: "Bảng Kỹ thuật",
+  van_phong: "Bảng Văn phòng",
+};
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -24,10 +36,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <AppShell
-      brand="Vibe Code Challenge"
-      subtitle="Thí sinh · Mắt Bão"
+      brandTitle="Vibe Code Challenge"
+      brandSubtitle="Khu vực thí sinh"
       nav={NAV}
-      userLine={`${user?.name ?? ""} · ${user?.department ?? ""}`}
+      userName={user?.name ?? ""}
+      userMeta={`${user?.department ?? ""} · ${user?.board ? BOARD_LABEL[user.board] : ""}`}
     >
       {children}
     </AppShell>

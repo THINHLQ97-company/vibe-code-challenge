@@ -2,110 +2,132 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import type { Submission, User } from "@/lib/db/schema";
+import { Button } from "@/components/dsvh/ui/Button";
+import { Input } from "@/components/dsvh/ui/Input";
+import { Badge } from "@/components/dsvh/ui/Badge";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { Note } from "@/components/dsvh/ui/data/Note";
+import { ArrowSquareOutIcon } from "@/components/dsvh/icons";
 
-export function PostRow({ submission }: { submission: Submission & { user: User } }) {
+export function PostRow({
+  submission,
+}: {
+  submission: {
+    id: number;
+    productName: string;
+    userName: string;
+    facebookPostUrl: string;
+    approvedAt: string | null;
+    engagementCount: number | null;
+    engagementTier: number | null;
+    securityClean: boolean;
+    surveyDone: boolean;
+    published: boolean;
+    finalScore: number | null;
+  };
+}) {
   const router = useRouter();
   const [count, setCount] = useState(submission.engagementCount?.toString() ?? "");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function approvePost() {
+  async function call(path: string, body?: unknown) {
+    setError(null);
     setLoading(true);
     try {
-      await fetch(`/api/admin/submissions/${submission.id}/approve-post`, { method: "POST" });
-      router.refresh();
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function submitEngagement() {
-    setLoading(true);
-    try {
-      await fetch(`/api/admin/submissions/${submission.id}/engagement`, {
+      const res = await fetch(`/api/admin/submissions/${submission.id}/${path}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ count: Number(count) }),
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
       });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Thao tác thất bại");
+        return;
+      }
       router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ, thử lại sau");
     } finally {
       setLoading(false);
     }
   }
 
-  async function publish() {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/submissions/${submission.id}/publish`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) alert(data.error);
-      router.refresh();
-    } finally {
-      setLoading(false);
-    }
-  }
+  const blockers: string[] = [];
+  if (!submission.securityClean) blockers.push("chưa qua cổng an toàn (CP4)");
+  if (!submission.approvedAt) blockers.push("chưa duyệt bài đăng (CP5)");
+  if (!submission.surveyDone) blockers.push("chưa nộp phiếu trải nghiệm (CP6)");
+  if (submission.engagementTier == null) blockers.push("chưa chốt điểm lan tỏa");
 
   return (
-    <div className="rounded-card border border-border bg-muted p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <b className="text-foreground">
-          {submission.user.name} · {submission.productName}
-        </b>
+    <div className="rounded-card border border-stroke bg-surface-2 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <div className="text-body font-semibold text-ink">{submission.productName}</div>
+          <div className="mt-0.5 text-caption text-ink-2">{submission.userName}</div>
+        </div>
         <a
-          href={submission.facebookPostUrl!}
+          href={submission.facebookPostUrl}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-1 text-sm text-primary"
+          className="flex items-center gap-1 text-caption text-link hover:text-link-hover"
         >
-          Xem bài đăng <ExternalLink size={13} />
+          Mở bài đăng <ArrowSquareOutIcon size={14} />
         </a>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        {submission.facebookApprovedAt ? (
-          <Badge>
-            <CheckCircle2 size={12} /> Đã duyệt bài
-          </Badge>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {submission.approvedAt ? (
+          <Badge tone="success">Đã duyệt bài · {submission.approvedAt}</Badge>
         ) : (
-          <Button size="sm" onClick={approvePost} disabled={loading}>
+          <Button variant="solid" size="sm" loading={loading} onClick={() => void call("approve-post")}>
             Duyệt bài đăng
           </Button>
         )}
 
-        {submission.facebookApprovedAt && (
-          <div className="flex items-center gap-2">
+        {submission.approvedAt && (
+          <div className="flex flex-wrap items-center gap-2">
             <Input
               type="number"
               min={0}
-              placeholder="Số tương tác sau 7 ngày"
+              placeholder="Tương tác sau 7 ngày"
               value={count}
               onChange={(e) => setCount(e.target.value)}
-              className="w-48"
+              className="w-52"
             />
-            <Button size="sm" variant="outline" onClick={submitEngagement} disabled={loading || !count}>
-              Lưu & tính bậc điểm
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={loading}
+              disabled={!count}
+              onClick={() => void call("engagement", { count: Number(count) })}
+            >
+              Lưu & tính bậc
             </Button>
             {submission.engagementTier != null && (
-              <Badge variant="secondary">Bậc {submission.engagementTier}/4</Badge>
+              <Badge tone="accent">Bậc {submission.engagementTier}/4</Badge>
             )}
           </div>
         )}
+      </div>
 
-        {submission.securityStatus === "clean" && submission.facebookApprovedAt && !submission.publishedAt && (
-          <Button size="sm" onClick={publish} disabled={loading}>
+      <div className="mt-3">
+        {submission.published ? (
+          <Badge tone="success">Đã công bố · {submission.finalScore}/100</Badge>
+        ) : blockers.length > 0 ? (
+          <Note tone="warning">Chưa công bố được: {blockers.join(" · ")}.</Note>
+        ) : (
+          <Button variant="solid" size="sm" loading={loading} onClick={() => void call("publish")}>
             Xác nhận & công bố kết quả
           </Button>
         )}
-        {submission.publishedAt && (
-          <Badge>
-            <CheckCircle2 size={12} /> Đã công bố · {submission.finalScore}/100
-          </Badge>
-        )}
       </div>
+
+      {error && (
+        <div className="mt-3">
+          <Alert tone="error">{error}</Alert>
+        </div>
+      )}
     </div>
   );
 }
