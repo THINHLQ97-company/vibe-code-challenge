@@ -1,7 +1,7 @@
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatTile } from "@/components/ui/stat-tile";
+
+const BAR_COLORS = ["var(--ds-c1)", "var(--ds-c2)", "var(--ds-c3)", "var(--ds-c4)", "var(--ds-c5)", "var(--ds-c6)"];
 
 export default async function AdminDashboardPage() {
   const [submissions, season] = await Promise.all([listSubmissionsWithUser(), getActiveSeason()]);
@@ -16,49 +16,78 @@ export default async function AdminDashboardPage() {
     acc[s.topicGroup] = (acc[s.topicGroup] ?? 0) + 1;
     return acc;
   }, {});
-  const maxTopicCount = Math.max(1, ...Object.values(byTopicGroup));
+  const topicEntries = Object.entries(byTopicGroup);
+  const maxTopicCount = Math.max(1, ...topicEntries.map(([, c]) => c));
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <StatTile label="Tổng đăng ký" value={total} />
-        <StatTile label="Chờ duyệt" value={pending} positive={pending === 0} />
-        <StatTile label="Đang làm/nộp bài" value={submitted} />
-        <StatTile label="Đã công bố" value={published} />
-        <StatTile label="Cảnh báo bảo mật" value={flagged} positive={flagged === 0} />
+    <div className="dash">
+      <div className="dash-head">
+        <div>
+          <div className="dash-h1">Dashboard BTC</div>
+          <div className="dash-sub">
+            {season ? (
+              <>
+                Mùa hiện tại: <b>{season.name}</b> · trần <b>{season.capPerWeek}</b> đề tài duyệt/tuần
+              </>
+            ) : (
+              "Chưa có mùa thi nào"
+            )}
+          </div>
+        </div>
       </div>
 
-      {season && (
-        <Card>
-          <CardContent className="py-4 text-caption text-ink-2">
-            Mùa hiện tại: <b className="text-ink">{season.name}</b> · trần{" "}
-            <b className="text-ink">{season.capPerWeek}</b> đề tài duyệt/tuần
-          </CardContent>
-        </Card>
-      )}
+      <div className="kpirow">
+        <Kpi label="Tổng đăng ký" value={total} />
+        <Kpi label="Chờ duyệt" value={pending} tone={pending > 0 ? "warn" : undefined} />
+        <Kpi label="Đang làm/nộp bài" value={submitted} />
+        <Kpi label="Đã công bố" value={published} />
+        <Kpi label="Cảnh báo bảo mật" value={flagged} tone={flagged > 0 ? "alert" : undefined} />
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Phân bổ theo nhóm chủ đề</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          {Object.entries(byTopicGroup).map(([group, count]) => (
-            <div key={group} className="flex items-center gap-3">
-              <span className="w-48 shrink-0 text-caption text-ink-2">{group}</span>
-              <div className="h-3.5 flex-1 overflow-hidden rounded-full bg-stroke-soft">
-                <div
-                  className="h-full rounded-full bg-teal"
-                  style={{ width: `${(count / maxTopicCount) * 100}%` }}
-                />
-              </div>
-              <span className="w-6 text-right text-caption font-bold text-ink">{count}</span>
+      <div className="panel">
+        <div className="panel-head">
+          <div>
+            <div className="panel-title">Phân bổ theo nhóm chủ đề</div>
+            <div className="panel-desc">Số đề tài đăng ký theo từng nhóm — giúp BTC cân bằng gợi ý chủ đề.</div>
+          </div>
+        </div>
+        <div className="panel-body">
+          {topicEntries.length === 0 ? (
+            <div className="ds-empty">
+              <div className="ds-empty-icon">🗂️</div>
+              <div className="ds-empty-title">Chưa có đăng ký nào</div>
+              <div className="ds-empty-desc">Khi thí sinh đăng ký đề tài, phân bổ theo nhóm chủ đề sẽ hiện ở đây.</div>
             </div>
-          ))}
-          {Object.keys(byTopicGroup).length === 0 && (
-            <p className="text-body text-ink-2">Chưa có đăng ký nào.</p>
+          ) : (
+            <div className="barlist">
+              {topicEntries.map(([group, count], i) => (
+                <div key={group} className="barlist-row">
+                  <span className="barlist-name">{group}</span>
+                  <span className="barlist-val">{count}</span>
+                  <div className="barlist-track">
+                    <div
+                      className="barlist-fill"
+                      style={{
+                        width: `${(count / maxTopicCount) * 100}%`,
+                        background: BAR_COLORS[i % BAR_COLORS.length],
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Kpi({ label, value, tone }: { label: string; value: number; tone?: "warn" | "alert" }) {
+  return (
+    <div className={`kcard${tone ? ` ${tone}` : ""}`}>
+      <span className="kcard-l">{label}</span>
+      <span className={`kcard-v${tone ? ` ${tone}` : ""}`}>{value}</span>
     </div>
   );
 }

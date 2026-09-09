@@ -5,6 +5,7 @@ import { getLatestIdeaScore, getLatestProductScore } from "@/lib/db/queries/scor
 import { engagementTierToScore } from "@/lib/scoring";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/empty-state";
 import { AppealForm } from "./appeal-form";
 
 export default async function ResultsPage() {
@@ -13,15 +14,16 @@ export default async function ResultsPage() {
 
   if (!submission) {
     return (
-      <Card>
-        <CardContent className="py-6 text-body text-ink-2">
-          Bạn chưa có đề tài.{" "}
-          <Link href="/dashboard/register" className="text-link">
-            Đăng ký ngay
+      <EmptyState
+        icon="📊"
+        title="Bạn chưa có đề tài"
+        desc="Đăng ký đề tài để bắt đầu hành trình dự thi."
+        action={
+          <Link href="/dashboard/register">
+            <button className="ds-btn ds-btn-primary">Đăng ký ngay</button>
           </Link>
-          .
-        </CardContent>
-      </Card>
+        }
+      />
     );
   }
 
@@ -31,10 +33,12 @@ export default async function ResultsPage() {
         <CardHeader>
           <CardTitle>Kết quả — {submission.productName}</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2 text-body text-ink-2">
-          <div className="rounded-card border border-amber-strong/30 bg-amber-strong/5 p-3 text-caption text-amber-strong">
-            ⏳ Đang chờ hội đồng xác nhận & công bố điểm. Điểm chỉ hiển thị sau khi BTC bấm công
-            bố.
+        <CardContent>
+          <div className="ds-alert ds-alert-warning">
+            <span>⏳</span>
+            <span>
+              Đang chờ hội đồng xác nhận & công bố điểm. Điểm chỉ hiển thị sau khi BTC bấm công bố.
+            </span>
           </div>
         </CardContent>
       </Card>

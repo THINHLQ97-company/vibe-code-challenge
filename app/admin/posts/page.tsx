@@ -1,5 +1,6 @@
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
 import { PostRow } from "./post-row";
 
 export default async function PostsPage() {
@@ -16,7 +17,9 @@ export default async function PostsPage() {
         </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {relevant.length === 0 && <p className="text-body text-ink-2">Chưa có bài đăng nào.</p>}
+        {relevant.length === 0 && (
+          <EmptyState icon="📣" title="Chưa có bài đăng nào" desc="Khi thí sinh nộp link bài Facebook ở Phase 3, danh sách sẽ hiện ở đây." />
+        )}
         {relevant.map((s) => (
           <PostRow key={s.id} submission={s} />
         ))}

@@ -4,6 +4,7 @@ import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
 import { getLatestProductScore } from "@/lib/db/queries/scores";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/empty-state";
 import { BuildForm } from "./build-form";
 
 export default async function BuildPage() {
@@ -12,24 +13,25 @@ export default async function BuildPage() {
 
   if (!submission) {
     return (
-      <Card>
-        <CardContent className="py-6 text-body text-ink-2">
-          Bạn chưa có đề tài.{" "}
-          <Link href="/dashboard/register" className="text-link">
-            Đăng ký ngay
+      <EmptyState
+        icon="🧩"
+        title="Bạn chưa có đề tài"
+        desc="Đăng ký đề tài trước khi nộp bài Vibe Host & mã nguồn."
+        action={
+          <Link href="/dashboard/register">
+            <button className="ds-btn ds-btn-primary">Đăng ký ngay</button>
           </Link>
-          .
-        </CardContent>
-      </Card>
+        }
+      />
     );
   }
   if (submission.registrationStatus !== "approved") {
     return (
-      <Card>
-        <CardContent className="py-6 text-body text-ink-2">
-          Đề tài của bạn chưa được BTC duyệt — chưa thể nộp bài.
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon="⏳"
+        title="Đề tài chưa được duyệt"
+        desc="BTC cần duyệt đề tài trước khi bạn nộp bài Phase 2."
+      />
     );
   }
 

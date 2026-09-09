@@ -1,5 +1,6 @@
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
 import { SecurityRow } from "./security-row";
 
 export default async function SecurityPage() {
@@ -17,7 +18,9 @@ export default async function SecurityPage() {
         </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {relevant.length === 0 && <p className="text-body text-ink-2">Chưa có bài nào cần rà soát.</p>}
+        {relevant.length === 0 && (
+          <EmptyState icon="🛡️" title="Chưa có bài nào cần rà soát" desc="Bài ở Phase 2 trở lên và đã duyệt đề tài sẽ xuất hiện ở đây." />
+        )}
         {relevant.map((s) => (
           <SecurityRow key={s.id} submission={s} />
         ))}

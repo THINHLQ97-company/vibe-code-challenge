@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { listPublishedByBoard } from "@/lib/db/queries/submissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EmptyState } from "@/components/empty-state";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
@@ -23,7 +24,7 @@ export default async function LeaderboardPage() {
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (
-          <p className="text-body text-ink-2">Chưa có bài nào được công bố.</p>
+          <EmptyState icon="🏆" title="Chưa có bài nào được công bố" desc="Khi BTC công bố kết quả, bảng xếp hạng của bảng bạn sẽ hiện ở đây." />
         ) : (
           <Table>
             <TableHeader>

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
 import { SurveyForm } from "./survey-form";
 
 export default async function SurveyPage() {
@@ -14,15 +15,16 @@ export default async function SurveyPage() {
 
   if (!submission) {
     return (
-      <Card>
-        <CardContent className="py-6 text-body text-ink-2">
-          Bạn chưa có đề tài.{" "}
-          <Link href="/dashboard/register" className="text-link">
-            Đăng ký ngay
+      <EmptyState
+        icon="📋"
+        title="Bạn chưa có đề tài"
+        desc="Đăng ký đề tài trước khi nộp phiếu trải nghiệm."
+        action={
+          <Link href="/dashboard/register">
+            <button className="ds-btn ds-btn-primary">Đăng ký ngay</button>
           </Link>
-          .
-        </CardContent>
-      </Card>
+        }
+      />
     );
   }
 

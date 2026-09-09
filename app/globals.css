@@ -3,113 +3,36 @@
 @tailwind utilities;
 
 /*
- * Token màu/chữ port từ design system Vibe Host (dsvh).
- * Nguồn: docs/reference/dsvh-source/dsvh/dsvh/tokens-data.ts — xem docs/design.md.
- * KHÔNG đổi giá trị tay ở đây trừ khi dsvh gốc cũng đổi — giữ đồng bộ.
+ * Design system CHÍNH THỨC của dự án — "Mắt Bão Mockup Kit" (Indigo, SaaS admin).
+ * Nguồn: docs/reference/design-system.css (bản gốc do BA/user cung cấp trong
+ * docs/reference/DESIGN.md). KHÔNG dùng token/màu nào ngoài file này — luật cứng
+ * trong DESIGN.md mục 2: "Không hex/px thô. Mọi màu/khoảng cách đi qua token."
  */
+@import "./design-system.css";
+
+/* Alias ngữ nghĩa shadcn/ui — map lên đúng token --ds-* ở trên, để các component
+ * (Button/Card/Input/Badge/Table) dùng chung 1 nguồn màu, không tự chế palette khác. */
 :root {
-  /* Surfaces */
-  --color-canvas: #212230;
-  --color-surface: #ffffff;
-  --color-surface-2: #fcfeff;
-  --color-surface-hover: #e4eaea;
-
-  /* Ink / text */
-  --color-ink: #001d21;
-  --color-ink-2: #334a4d;
-  --color-ink-3: #64797c;
-
-  /* Lines */
-  --color-stroke: #dfe6e6;
-  --color-stroke-soft: #eef2f2;
-  --color-stroke-hover: #d3dede;
-  --color-stroke-strong: #cdd7d7;
-  --color-stroke-focus: #c3d0d0;
-
-  /* Cream */
-  --color-cream: #fff3e0;
-  --color-cream-100: #fbf3e6;
-  --color-cream-200: #f7ecda;
-  --color-cream-300: #f0e6d8;
-  --color-cream-ink: #001d21;
-
-  /* Brand + data accents */
-  --color-orange: #de4400;
-  --color-orange-bright: #f5872a;
-  --color-orange-strong: #cf3e00;
-  --color-red: #d92d20;
-  --color-red-strong: #b42318;
-  --color-amber: #f59e0b;
-  --color-amber-strong: #b45309;
-  --color-peach: #ffd8a8;
-  --color-yellow: #ffc84c;
-  --color-teal: #21b37a;
-  --color-teal-strong: #0f7a52;
-  --color-mint: #86f2c8;
-  --color-magenta: #e879c7;
-  --color-link: #0b6bcb;
-  --color-link-hover: #08529c;
-
-  /* Bo góc */
-  --radius-card: 16px;
-
-  /* Alias ngữ nghĩa shadcn/ui — map lên palette dsvh ở trên */
-  --background: var(--color-surface-2);
-  --foreground: var(--color-ink);
-  --card: var(--color-surface);
-  --card-foreground: var(--color-ink);
-  --popover: var(--color-surface);
-  --popover-foreground: var(--color-ink);
-  --primary: var(--color-orange);
+  --background: var(--ds-bg);
+  --foreground: var(--ds-fg);
+  --card: var(--ds-surface);
+  --card-foreground: var(--ds-fg);
+  --popover: var(--ds-surface-overlay);
+  --popover-foreground: var(--ds-fg);
+  --primary: var(--ds-primary);
   --primary-foreground: #ffffff;
-  --secondary: var(--color-surface-hover);
-  --secondary-foreground: var(--color-ink);
-  --muted: var(--color-stroke-soft);
-  --muted-foreground: var(--color-ink-2);
-  --accent: var(--color-cream-100);
-  --accent-foreground: var(--color-ink);
-  --destructive: var(--color-red);
+  --secondary: var(--ds-surface-raised);
+  --secondary-foreground: var(--ds-fg);
+  --muted: var(--ds-bg);
+  --muted-foreground: var(--ds-fg-mute);
+  --accent: var(--ds-primary-light);
+  --accent-foreground: var(--ds-primary);
+  --destructive: var(--ds-danger);
   --destructive-foreground: #ffffff;
-  --border: var(--color-stroke);
-  --input: var(--color-stroke);
-  --ring: var(--color-stroke-focus);
-  --radius: 0.5rem;
-}
-
-.dark {
-  --color-canvas: #0e0f14;
-  --color-surface: #1a1b23;
-  --color-surface-2: #22232e;
-  --color-surface-hover: #2c2e3a;
-
-  --color-ink: #eef1f2;
-  --color-ink-2: #aeb6b8;
-  --color-ink-3: #78838a;
-
-  --color-stroke: #2d2f3d;
-  --color-stroke-soft: #24252f;
-  --color-stroke-hover: #3a3d4d;
-  --color-stroke-strong: #454859;
-  --color-stroke-focus: #565a78;
-
-  --color-link: #6bb6ff;
-  --color-link-hover: #9acbff;
-
-  --background: var(--color-surface-2);
-  --foreground: var(--color-ink);
-  --card: var(--color-surface);
-  --card-foreground: var(--color-ink);
-  --popover: var(--color-surface);
-  --popover-foreground: var(--color-ink);
-  --secondary: var(--color-surface-hover);
-  --secondary-foreground: var(--color-ink);
-  --muted: var(--color-stroke-soft);
-  --muted-foreground: var(--color-ink-2);
-  --accent: var(--color-stroke-soft);
-  --accent-foreground: var(--color-ink);
-  --border: var(--color-stroke);
-  --input: var(--color-stroke);
-  --ring: var(--color-stroke-focus);
+  --border: var(--ds-border);
+  --input: var(--ds-border);
+  --ring: var(--ds-primary-mute);
+  --radius: var(--ds-radius-md);
 }
 
 body {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
 import { ShareForm } from "./share-form";
 
 export default async function SharePage() {
@@ -10,24 +11,25 @@ export default async function SharePage() {
 
   if (!submission) {
     return (
-      <Card>
-        <CardContent className="py-6 text-body text-ink-2">
-          Bạn chưa có đề tài.{" "}
-          <Link href="/dashboard/register" className="text-link">
-            Đăng ký ngay
+      <EmptyState
+        icon="📣"
+        title="Bạn chưa có đề tài"
+        desc="Đăng ký đề tài trước khi chia sẻ & lan tỏa."
+        action={
+          <Link href="/dashboard/register">
+            <button className="ds-btn ds-btn-primary">Đăng ký ngay</button>
           </Link>
-          .
-        </CardContent>
-      </Card>
+        }
+      />
     );
   }
   if (submission.currentPhase < 3) {
     return (
-      <Card>
-        <CardContent className="py-6 text-body text-ink-2">
-          Bạn cần được BTC duyệt Phase 2 (sản phẩm & mã nguồn) trước khi sang bước chia sẻ.
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon="⏳"
+        title="Chưa tới bước chia sẻ"
+        desc="Bạn cần được BTC duyệt Phase 2 (sản phẩm & mã nguồn) trước khi sang bước này."
+      />
     );
   }
 
