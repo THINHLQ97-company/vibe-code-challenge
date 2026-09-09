@@ -1,73 +1,70 @@
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
-import { Empty } from "@/components/dsvh/ui/data/Empty";
-import { Note } from "@/components/dsvh/ui/data/Note";
-import { ShieldCheckIcon } from "@/components/dsvh/icons";
-import { SecurityRow } from "./security-row";
-
-const BAN_LIST = [
-  "Dữ liệu khách hàng thật",
-  "Khoá API / mật khẩu / chuỗi kết nối trong mã",
-  "Thu thập thông tin cá nhân người dùng cuối",
-  "Logo / tên miền / hình ảnh thương hiệu Mắt Bão",
-  "Tuyên bố là sản phẩm chính thức của Mắt Bão",
-  "Lộ việc đang làm tại Mắt Bão",
-  "Tài liệu nội bộ / bảng giá chưa công bố",
-];
+import { StatCard } from "@/components/dsvh/ui/data/StatCard";
+import { ShieldCheckIcon, ShieldWarningIcon, HourglassIcon } from "@/components/dsvh/icons";
+import { SecurityTable, type SecurityRowData } from "./security-table";
+import { BanList } from "./ban-list";
 
 export default async function SecurityPage() {
   const all = await listSubmissionsWithUser();
   const relevant = all.filter((s) => s.registrationStatus === "approved" && s.currentPhase >= 2);
+
+  const rows: SecurityRowData[] = relevant.map((s) => ({
+    id: s.id,
+    productName: s.productName,
+    userName: s.user.name ?? "",
+    department: s.user.department ?? "",
+    securityStatus: s.securityStatus,
+    securityNote: s.securityNote,
+    vibehostUrl: s.vibehostUrl,
+    githubRepoUrl: s.githubRepoUrl,
+  }));
+
+  const pending = rows.filter((r) => r.securityStatus === "pending").length;
+  const flagged = rows.filter((r) => r.securityStatus === "flagged").length;
+  const clean = rows.filter((r) => r.securityStatus === "clean").length;
 
   return (
     <PageShell
       title="Cổng rà soát an toàn (CP4)"
       subtitle="Máy quét trước, người chỉ xử những bài bị gắn cờ"
     >
-      <Card>
-        <CardHeader title="7 điều cấm" subtitle="Vi phạm bất kỳ điều nào là chưa qua cổng" />
-        <ol className="list-decimal space-y-1 pl-5 text-caption text-ink-2">
-          {BAN_LIST.map((b) => (
-            <li key={b}>{b}</li>
-          ))}
-        </ol>
-        <Note tone="danger" className="mt-3">
-          Vibe Host v2 có cơ chế AI tự sửa mã khi deploy lỗi — mã nguồn được gửi ra nhà cung cấp AI
-          nước ngoài. Vì vậy điều cấm 1 và 7 là tuyệt đối, không có ngoại lệ.
-        </Note>
-      </Card>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <StatCard
+          icon={HourglassIcon}
+          label="Chưa rà soát"
+          value={pending}
+          desc="đang chặn công bố"
+          tone={pending > 0 ? "danger" : "default"}
+        />
+        <StatCard
+          icon={ShieldWarningIcon}
+          label="Bị gắn cờ"
+          value={flagged}
+          desc="cần thí sinh sửa"
+          tone={flagged > 0 ? "danger" : "default"}
+        />
+        <StatCard
+          icon={ShieldCheckIcon}
+          label="Đã qua cổng"
+          value={clean}
+          desc="đủ điều kiện công bố"
+          tone="success"
+        />
+      </div>
 
       <Card>
         <CardHeader
-          title={`${relevant.length} bài trong diện rà soát`}
+          title={`${rows.length} bài trong diện rà soát`}
           subtitle="Bài đã duyệt đề tài và đang ở Phase 2 trở lên"
         />
-        {relevant.length === 0 ? (
-          <Empty
-            icon={<ShieldCheckIcon size={40} />}
-            title="Chưa có bài nào cần rà soát"
-            description="Bài sẽ vào đây khi thí sinh nộp sản phẩm ở Phase 2."
-          />
-        ) : (
-          <div className="space-y-3">
-            {relevant.map((s) => (
-              <SecurityRow
-                key={s.id}
-                submission={{
-                  id: s.id,
-                  productName: s.productName,
-                  userName: s.user.name ?? "",
-                  securityStatus: s.securityStatus,
-                  securityNote: s.securityNote,
-                  vibehostUrl: s.vibehostUrl,
-                  githubRepoUrl: s.githubRepoUrl,
-                }}
-              />
-            ))}
-          </div>
-        )}
+        <SecurityTable rows={rows} />
       </Card>
+
+      {/* Danh sách 7 điều cấm là TÀI LIỆU TRA CỨU, không phải việc cần làm — trước đây nó chiếm
+          nguyên màn hình đầu tiên và đẩy danh sách bài xuống dưới nếp gấp. Thu lại, mở khi cần. */}
+      <BanList />
     </PageShell>
   );
 }

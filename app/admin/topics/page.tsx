@@ -54,6 +54,8 @@ export default async function TopicsPage() {
                   isPrebuiltRepo: s.isPrebuiltRepo,
                   requestedDeadlineDays: s.requestedDeadlineDays,
                   riskSelfAssessment: s.riskSelfAssessment,
+                  prdContent: s.prdContent,
+                  prdFileName: s.prdFileName,
                   createdAt: formatDateVN(s.createdAt),
                   userName: s.user.name ?? "",
                   department: s.user.department ?? "",

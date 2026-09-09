@@ -9,6 +9,7 @@ import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { InfoTile } from "@/components/dsvh/ui/data/InfoTile";
+import { CandidatesTable, type CandidateRow } from "./_components/candidates-table";
 import {
   NotepadIcon,
   HourglassIcon,
@@ -18,6 +19,32 @@ import {
   FolderIcon,
   ArrowRightIcon,
 } from "@/components/dsvh/icons";
+
+const BOARD_LABEL: Record<string, string> = {
+  ky_thuat: "Kỹ thuật",
+  van_phong: "Văn phòng",
+};
+
+/** Trạng thái gọn cho một dòng — thứ BTC cần liếc là bài đang kẹt ở đâu. */
+function stageOf(s: {
+  registrationStatus: string;
+  currentPhase: number;
+  githubVerifiedAt: Date | null;
+  securityStatus: string;
+  facebookApprovedAt: Date | null;
+  surveySubmittedAt: Date | null;
+  publishedAt: Date | null;
+}): { label: string; tone: "neutral" | "accent" | "success" | "warning" | "danger" } {
+  if (s.publishedAt) return { label: "Đã công bố", tone: "success" };
+  if (s.registrationStatus === "pending") return { label: "Chờ duyệt đề tài", tone: "warning" };
+  if (s.registrationStatus === "returned") return { label: "Trả về sửa", tone: "danger" };
+  if (!s.githubVerifiedAt) return { label: "Đang làm bài", tone: "neutral" };
+  if (s.securityStatus === "flagged") return { label: "Gắn cờ an toàn", tone: "danger" };
+  if (s.currentPhase < 3) return { label: "Chờ chấm Phase 2", tone: "accent" };
+  if (!s.facebookApprovedAt) return { label: "Chờ duyệt bài đăng", tone: "accent" };
+  if (!s.surveySubmittedAt) return { label: "Thiếu phiếu trải nghiệm", tone: "warning" };
+  return { label: "Chờ công bố", tone: "accent" };
+}
 
 export default async function AdminDashboardPage() {
   const [submissions, season] = await Promise.all([listSubmissionsWithUser(), getActiveSeason()]);
@@ -37,6 +64,26 @@ export default async function AdminDashboardPage() {
   const maxTopic = Math.max(1, ...topicEntries.map(([, c]) => c));
 
   const capLeft = season ? Math.max(0, season.capPerWeek - approvedThisWeek) : 0;
+
+  // Danh sách thí sinh nằm NGAY TRÊN dashboard chứ không phải một menu riêng: nó là cùng một tập
+  // dữ liệu với các ô thống kê phía trên, tách ra thành trang riêng chỉ bắt BTC bấm thêm một lần
+  // để xem chi tiết của con số họ vừa đọc.
+  const candidateRows: CandidateRow[] = submissions.map((s) => {
+    const stage = stageOf(s);
+    return {
+      id: s.id,
+      userName: s.user.name ?? "",
+      department: s.user.department ?? "",
+      board: s.user.board ? BOARD_LABEL[s.user.board] : "—",
+      productName: s.productName,
+      stageLabel: stage.label,
+      stageTone: stage.tone,
+      finalScore: s.finalScore,
+      // Đậu = công bố điểm + đã đăng ký Google AI Pro (điều kiện hoàn phí theo thể lệ mục C).
+      reimburse: !!s.publishedAt && s.googleAiPro,
+    };
+  });
+  const reimbursable = candidateRows.filter((r) => r.reimburse).length;
 
   return (
     <PageShell
@@ -122,6 +169,19 @@ export default async function AdminDashboardPage() {
         )}
         <Note className="mt-3">
           Trần 30–40 bài/tuần là để hội đồng và hệ chấm kham nổi — không phải để loại người.
+        </Note>
+      </Card>
+
+      <Card>
+        <CardHeader
+          title="Thí sinh"
+          subtitle={`${candidateRows.length} người đã đăng ký · ${published.length} bài đã công bố`}
+        />
+        <CandidatesTable rows={candidateRows} />
+        <Note className="mt-3">
+          Cột hoàn phí chỉ bật khi bài ĐÃ công bố và thí sinh có khai đăng ký Google AI Pro lúc đăng
+          ký đề tài — đây là dữ liệu HR đọc để chi hoàn 130.000đ qua lương, hiện có {reimbursable}{" "}
+          người đủ điều kiện.
         </Note>
       </Card>
     </PageShell>

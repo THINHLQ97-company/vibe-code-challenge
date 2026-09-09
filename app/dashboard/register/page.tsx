@@ -6,6 +6,7 @@ import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
+import { PrdViewer } from "@/components/prd-viewer";
 import { RegisterForm } from "./register-form";
 
 const REG_STATUS: Record<string, { tone: "neutral" | "success" | "warning" | "danger"; label: string }> = {
@@ -76,6 +77,14 @@ export default async function RegisterPage() {
             }
           />
         </dl>
+      </Card>
+
+      <Card>
+        <CardHeader
+          title="Tài liệu PRD đã nộp"
+          subtitle="Đây là căn cứ BTC và hệ chấm dùng để chấm điểm ý tưởng ở Phase 1"
+        />
+        <PrdViewer content={submission.prdContent} fileName={submission.prdFileName} />
       </Card>
 
       {submission.isPrebuiltRepo && (

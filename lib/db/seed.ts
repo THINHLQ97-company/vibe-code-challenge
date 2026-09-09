@@ -11,6 +11,40 @@ import {
   departmentToBoard,
 } from "./schema";
 
+/** PRD mẫu — đủ dài và đủ mục để demo màn chấm Phase 1 đọc ra thứ có nghĩa. */
+function samplePrd(name: string, problem: string, users: string, features: string[]) {
+  return `# ${name}
+
+## 1. Bài toán
+${problem}
+
+## 2. Người dùng
+${users}
+
+## 3. Phạm vi phiên bản đầu
+${features.map((f) => `- ${f}`).join("\n")}
+
+## 4. Luồng chính
+1. Người dùng đăng nhập bằng tài khoản nội bộ.
+2. Tạo bản ghi mới và điền các trường bắt buộc.
+3. Xem lại danh sách, lọc theo trạng thái và thời gian.
+4. Xuất kết quả ra file để gửi cho người liên quan.
+
+## 5. Dữ liệu
+Toàn bộ là dữ liệu giả do tôi tự sinh, không lấy từ hệ thống thật. Lưu trên Postgres,
+mỗi bảng có khoá chính và mốc thời gian tạo/sửa.
+
+## 6. Ngoài phạm vi
+- Không phân quyền nhiều cấp.
+- Không tích hợp hệ thống nội bộ nào của Mắt Bão.
+- Không thu thập thông tin cá nhân người dùng cuối.
+
+## 7. Tiêu chí hoàn thành
+Chạy được trên Vibe Host, ba chức năng chính dùng thật với dữ liệu trong database,
+không có khoá API hay chuỗi kết nối nằm trong mã nguồn.
+`;
+}
+
 const DEV_PASSWORD = "Test@1234";
 
 async function main() {
@@ -163,6 +197,13 @@ async function main() {
       confirmFakeData: true,
       confirmNoMatbaoInfo: true,
       confirmTemplateConsent: true,
+      prdContent: samplePrd(
+        "Chẩn đoán lỗi website mini",
+        "Đồng nghiệp TS mất nhiều thời gian tra cứu triệu chứng lỗi website phổ biến.",
+        "Đồng nghiệp phòng TS, ước lượng ~15 người gặp đúng vấn đề.",
+        ["Nhập triệu chứng lỗi", "Gợi ý hướng khắc phục", "Lưu lịch sử tra cứu"]
+      ),
+      prdFileName: "chan-doan-loi-website.md",
       registrationStatus: "approved",
       approvedAt: new Date(),
       submissionDeadline: new Date(Date.now() + 10 * 24 * 3600 * 1000),
@@ -198,6 +239,13 @@ async function main() {
     confirmFakeData: true,
     confirmNoMatbaoInfo: true,
     confirmTemplateConsent: true,
+    prdContent: samplePrd(
+      "Lịch nội dung Marketing mini",
+      "Tự sắp lịch đăng bài nhiều kênh, hay quên hạn đăng.",
+      "Chính bản thân, ước lượng nhiều đồng nghiệp MK khác cũng gặp.",
+      ["Lên lịch theo kênh", "Nhắc hạn đăng", "Xem lịch theo tuần"]
+    ),
+    prdFileName: "lich-noi-dung-marketing.md",
     registrationStatus: "pending",
   });
 
@@ -224,6 +272,13 @@ async function main() {
       confirmFakeData: true,
       confirmNoMatbaoInfo: true,
       confirmTemplateConsent: true,
+      prdContent: samplePrd(
+        "Trợ lý báo giá nhanh",
+        "Sales mất nhiều thời gian soạn báo giá thủ công cho từng khách.",
+        "Đội Sales, ~10 người dùng thường xuyên.",
+        ["Chọn gói dịch vụ", "Tự tính giá theo combo", "Xuất PDF báo giá"]
+      ),
+      prdFileName: "tro-ly-bao-gia.md",
       registrationStatus: "approved",
       approvedAt: new Date(Date.now() - 12 * 24 * 3600 * 1000),
       submissionDeadline: new Date(Date.now() - 5 * 24 * 3600 * 1000),
@@ -308,6 +363,13 @@ async function main() {
       confirmFakeData: true,
       confirmNoMatbaoInfo: true,
       confirmTemplateConsent: true,
+      prdContent: samplePrd(
+        "CRM cá nhân mini",
+        "Khó theo dõi khách đang chăm tới đâu, hay quên follow-up.",
+        "Chính bản thân, nhiều Sales khác cũng gặp.",
+        ["Ghi chú theo khách", "Nhắc lịch follow-up", "Lọc theo trạng thái"]
+      ),
+      prdFileName: "crm-ca-nhan-mini.md",
       registrationStatus: "approved",
       approvedAt: new Date(Date.now() - 10 * 24 * 3600 * 1000),
       submissionDeadline: new Date(Date.now() - 3 * 24 * 3600 * 1000),
@@ -365,6 +427,13 @@ async function main() {
     confirmFakeData: true,
     confirmNoMatbaoInfo: true,
     confirmTemplateConsent: true,
+    prdContent: samplePrd(
+      "Checklist onboarding",
+      "Onboarding nhân viên mới còn thủ công, dễ sót bước.",
+      "Nhân viên mới + quản lý trực tiếp.",
+      ["Tạo checklist theo phòng ban", "Tick tiến độ", "Nhắc hạn"]
+    ),
+    prdFileName: "checklist-onboarding.md",
     registrationStatus: "returned",
     registrationNote: "Chưa nêu rõ 3 chức năng cụ thể để chấm ngưỡng sàn — bổ sung chi tiết hơn.",
   });

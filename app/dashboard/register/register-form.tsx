@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/dsvh/ui/form/Checkbox";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
+import { UploadSimpleIcon, FileTextIcon } from "@/components/dsvh/icons";
 
 const TOPIC_GROUPS = [
   "Tài chính cá nhân & DN",
@@ -49,7 +50,13 @@ type Initial = {
   dataUsed: string | null;
   riskSelfAssessment: string | null;
   requestedDeadlineDays: number;
+  prdContent: string | null;
+  prdFileName: string | null;
 };
+
+/** Chỉ nhận định dạng chữ thuần — hệ chấm ngoài phải đọc được nội dung mới chấm được Phase 1. */
+const PRD_ACCEPT = ".md,.markdown,.txt,text/markdown,text/plain";
+const PRD_MAX_BYTES = 200_000;
 
 export function RegisterForm({ initial }: { initial?: Initial }) {
   const router = useRouter();
@@ -74,6 +81,9 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
   const [requestedDeadlineDays, setRequestedDeadlineDays] = useState(
     initial?.requestedDeadlineDays ?? 15
   );
+  const [prdContent, setPrdContent] = useState(initial?.prdContent ?? "");
+  const [prdFileName, setPrdFileName] = useState(initial?.prdFileName ?? "");
+  const [prdError, setPrdError] = useState<string | null>(null);
   const [confirmFakeData, setConfirmFakeData] = useState(false);
   const [confirmNoMatbaoInfo, setConfirmNoMatbaoInfo] = useState(false);
   const [confirmTemplateConsent, setConfirmTemplateConsent] = useState(false);
@@ -95,6 +105,10 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
       setError("Chọn nhóm chủ đề.");
       return;
     }
+    if (prdContent.trim().length < 200) {
+      setError("Cần đính tài liệu PRD — đây là căn cứ chấm điểm ý tưởng ở Phase 1.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/submissions", {
@@ -107,6 +121,8 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
           problemDesc,
           targetUsers,
           features,
+          prdContent,
+          prdFileName: prdFileName || undefined,
           databasePlan,
           hasWorkflow,
           workflowDesc: hasWorkflow ? workflowDesc : undefined,
@@ -134,6 +150,24 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function readPrdFile(file: File | undefined) {
+    setPrdError(null);
+    if (!file) return;
+    if (file.size > PRD_MAX_BYTES) {
+      setPrdError("File quá lớn (giới hạn 200 KB chữ). Rút gọn còn phần mô tả sản phẩm.");
+      return;
+    }
+    // Đọc ngay ở trình duyệt rồi gửi NỘI DUNG lên — không upload file nhị phân. Nhờ vậy hệ chấm
+    // ngoài đọc được tài liệu qua API, và app không phải nuôi thêm ổ lưu trữ file.
+    const text = await file.text();
+    if (text.trim().length < 200) {
+      setPrdError("Nội dung file quá ngắn để chấm điểm ý tưởng.");
+      return;
+    }
+    setPrdContent(text);
+    setPrdFileName(file.name);
   }
 
   const allConfirmed = confirmFakeData && confirmNoMatbaoInfo && confirmTemplateConsent;
@@ -182,6 +216,48 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
             onChange={(e) => setFeaturesText(e.target.value)}
             required
           />
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader
+          title="Tài liệu PRD"
+          subtitle="Phase 1 chấm điểm ý tưởng dựa trên tài liệu này — bắt buộc có"
+        />
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-stroke bg-surface px-3 py-2 text-caption font-medium text-ink hover:border-stroke-hover hover:bg-surface-hover">
+              <UploadSimpleIcon size={16} className="text-ink-2" />
+              Chọn file .md
+              <input
+                type="file"
+                accept={PRD_ACCEPT}
+                className="sr-only"
+                onChange={(e) => void readPrdFile(e.target.files?.[0])}
+              />
+            </label>
+            {prdFileName && (
+              <span className="flex items-center gap-1.5 text-caption text-ink-2">
+                <FileTextIcon size={15} className="text-ink-3" />
+                {prdFileName}
+              </span>
+            )}
+          </div>
+          <Textarea
+            label="Nội dung PRD (markdown)"
+            hint="Nêu bài toán, người dùng, phạm vi, luồng chính, dữ liệu. Chọn file ở trên sẽ tự điền vào đây, và bạn vẫn sửa được."
+            value={prdContent}
+            onChange={(e) => {
+              setPrdContent(e.target.value);
+              setPrdError(null);
+            }}
+            required
+          />
+          {prdError && <Alert tone="error">{prdError}</Alert>}
+          <Note>
+            Hệ chấm điểm đọc thẳng nội dung này nên chỉ nhận chữ (.md / .txt), không nhận .docx hay
+            .pdf. Đừng dán dữ liệu khách thật hay thông tin nội bộ vào đây.
+          </Note>
         </div>
       </Card>
 

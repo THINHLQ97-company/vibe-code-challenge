@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { getSubmissionById } from "@/lib/db/queries/submissions";
 import { addIdeaScore, addProductScore } from "@/lib/db/queries/scores";
@@ -14,9 +15,17 @@ const schema = z.object({
   summary: z.string().optional(),
 });
 
+/** So sánh theo thời gian hằng định — `!==` thường lộ dần khoá qua thời gian phản hồi. */
+function validApiKey(header: string | null) {
+  const expected = process.env.SCORING_API_KEY;
+  if (!expected || !header) return false;
+  const a = Buffer.from(header);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 export async function POST(req: NextRequest) {
-  const apiKey = req.headers.get("x-api-key");
-  if (!apiKey || apiKey !== process.env.SCORING_API_KEY) {
+  if (!validApiKey(req.headers.get("x-api-key"))) {
     return NextResponse.json({ error: "API key không hợp lệ" }, { status: 401 });
   }
 

@@ -152,6 +152,7 @@ import {
   Copy,
   Export,
   File,
+  FileText,
   Folder,
   GitBranch,
   Hourglass,
@@ -160,6 +161,7 @@ import {
   Pause,
   Play,
   Plus,
+  PencilSimple,
   Robot,
   Scales,
   ShieldWarning,
@@ -179,6 +181,7 @@ export const ClipboardTextIcon = icon(ClipboardText);
 export const CopyIcon = icon(Copy);
 export const ExportIcon = icon(Export);
 export const FileIcon = icon(File);
+export const FileTextIcon = icon(FileText);
 export const FolderIcon = icon(Folder);
 export const GitBranchIcon = icon(GitBranch);
 export const HourglassIcon = icon(Hourglass);
@@ -188,6 +191,7 @@ export const MinusIcon = icon(Minus);
 export const PauseIcon = icon(Pause);
 export const PlayIcon = icon(Play);
 export const PlusIcon = icon(Plus);
+export const PencilSimpleIcon = icon(PencilSimple);
 export const RobotIcon = icon(Robot);
 export const ScalesIcon = icon(Scales);
 export const ShieldCheckIcon = icon(ShieldCheck);

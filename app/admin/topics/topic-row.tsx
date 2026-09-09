@@ -8,6 +8,7 @@ import { Textarea } from "@/components/dsvh/ui/form/Textarea";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
+import { PrdViewer } from "@/components/prd-viewer";
 
 export type PendingTopic = {
   id: number;
@@ -21,6 +22,8 @@ export type PendingTopic = {
   isPrebuiltRepo: boolean;
   requestedDeadlineDays: number;
   riskSelfAssessment: string | null;
+  prdContent: string | null;
+  prdFileName: string | null;
   createdAt: string;
   userName: string;
   department: string;
@@ -71,16 +74,51 @@ export function TopicRow({ submission, capLeft }: { submission: PendingTopic; ca
         </div>
       </div>
 
-      <dl className="mt-3 divide-y divide-stroke">
-        <InfoRow label="Bài toán" value={submission.problemDesc} wrap size="sm" />
-        <InfoRow label="Người dùng" value={submission.targetUsers} wrap size="sm" />
-        <InfoRow label="Chức năng" value={submission.features.join(" · ") || "—"} wrap size="sm" />
-        <InfoRow label="Database" value={submission.databasePlan} wrap size="sm" />
-        <InfoRow label="Hạn nộp xin" value={`${submission.requestedDeadlineDays} ngày`} size="sm" />
+      {/* `layout="stack"` chứ không phải mặc định `row`: thẻ này rộng gần hết màn hình, mà `row` là
+          `justify-between` — nhãn dính mép trái, giá trị dính mép phải, ở giữa là một khoảng trống
+          hàng ngàn pixel và mắt phải quét ngang cả màn để ghép một cặp. `stack` xếp nhãn trên giá
+          trị dưới, hai cột, đọc theo chiều dọc tự nhiên. */}
+      <dl className="mt-3 grid gap-x-6 gap-y-3 border-t border-stroke pt-3 sm:grid-cols-2">
+        <InfoRow layout="stack" label="Bài toán" value={submission.problemDesc} wrap size="sm" />
+        <InfoRow layout="stack" label="Người dùng" value={submission.targetUsers} wrap size="sm" />
+        <InfoRow
+          layout="stack"
+          label="Chức năng"
+          value={
+            submission.features.length > 0 ? (
+              <ul className="space-y-0.5">
+                {submission.features.map((f) => (
+                  <li key={f}>· {f}</li>
+                ))}
+              </ul>
+            ) : (
+              "—"
+            )
+          }
+          size="sm"
+        />
+        <InfoRow layout="stack" label="Database" value={submission.databasePlan} wrap size="sm" />
+        <InfoRow
+          layout="stack"
+          label="Hạn nộp xin"
+          value={`${submission.requestedDeadlineDays} ngày`}
+          size="sm"
+          numeric
+        />
         {submission.riskSelfAssessment && (
-          <InfoRow label="Tự đánh giá rủi ro" value={submission.riskSelfAssessment} wrap size="sm" />
+          <InfoRow
+            layout="stack"
+            label="Tự đánh giá rủi ro"
+            value={submission.riskSelfAssessment}
+            wrap
+            size="sm"
+          />
         )}
       </dl>
+
+      <div className="mt-3">
+        <PrdViewer content={submission.prdContent} fileName={submission.prdFileName} />
+      </div>
 
       {capLeft === 0 && (
         <Note tone="warning" className="mt-3">

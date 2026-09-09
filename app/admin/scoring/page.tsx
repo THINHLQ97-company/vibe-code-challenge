@@ -3,10 +3,10 @@ import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { getScoreOverviews } from "@/lib/db/queries/scores";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
-import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { Note } from "@/components/dsvh/ui/data/Note";
-import { RobotIcon } from "@/components/dsvh/icons";
-import { ScoringRow } from "./scoring-row";
+import { StatCard } from "@/components/dsvh/ui/data/StatCard";
+import { RobotIcon, HourglassIcon, CheckCircleIcon, ScalesIcon } from "@/components/dsvh/icons";
+import { ScoringTable, type ScoringRowData } from "./scoring-table";
 
 export default async function ScoringPage() {
   const session = await getSession();
@@ -17,62 +17,79 @@ export default async function ScoringPage() {
     session?.userId ?? 0
   );
 
+  const rows: ScoringRowData[] = approved.map((s) => {
+    const o = overviews.get(s.id)!;
+    return {
+      id: s.id,
+      productName: s.productName,
+      userName: s.user.name ?? "",
+      department: s.user.department ?? "",
+      currentPhase: s.currentPhase,
+      isPrebuiltRepo: s.isPrebuiltRepo,
+      hasPrd: !!s.prdContent,
+      ideaValue: o.hasIdeaScore ? o.giaTriUngDung.value : null,
+      ideaBasis: o.giaTriUngDung.basis,
+      productValue: o.hasProductScore
+        ? o.chatLuongKyThuat.value + o.hoanThien.value
+        : null,
+      productBasis: o.chatLuongKyThuat.basis,
+      judgeCount: Math.max(o.giaTriUngDung.judgeCount, o.chatLuongKyThuat.judgeCount),
+      iScored: o.myIdea != null || o.myProduct != null,
+      feedbackStatus: s.feedbackStatus,
+    };
+  });
+
+  const waitingAi = rows.filter((r) => r.ideaValue == null).length;
+  const waitingJudge = rows.filter((r) => r.ideaValue != null && r.judgeCount === 0).length;
+  const notScoredByMe = rows.filter((r) => !r.iScored).length;
+  const approvedPhase2 = rows.filter((r) => r.feedbackStatus === "approved").length;
+
   return (
     <PageShell
       title="Chấm điểm & phản hồi"
-      subtitle="Phase 1 (ý tưởng /25) và Phase 2 (kỹ thuật /40 + hoàn thiện /15)"
+      subtitle="Máy chấm điểm sơ bộ, hội đồng xác nhận hoặc điều chỉnh — điểm chốt là trung bình các phiếu"
     >
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          icon={ScalesIcon}
+          label="Bài đã duyệt đề tài"
+          value={rows.length}
+          desc="đang trong vòng chấm"
+        />
+        <StatCard
+          icon={RobotIcon}
+          label="Chờ máy chấm"
+          value={waitingAi}
+          desc="chưa có điểm sơ bộ Phase 1"
+          tone={waitingAi > 0 ? "danger" : "default"}
+        />
+        <StatCard
+          icon={HourglassIcon}
+          label="Bạn chưa chấm"
+          value={notScoredByMe}
+          desc="chưa có phiếu của bạn"
+          tone={notScoredByMe > 0 ? "danger" : "success"}
+        />
+        <StatCard
+          icon={CheckCircleIcon}
+          label="Đã duyệt đạt Phase 2"
+          value={approvedPhase2}
+          desc="đạt mốc 90% KPI 3P"
+          tone="success"
+        />
+      </div>
+
       <Card>
         <CardHeader
-          title={`${approved.length} bài đã duyệt đề tài`}
-          subtitle="Mỗi giám khảo chấm độc lập một phiếu; điểm chốt là trung bình các phiếu"
+          title="Danh sách bài dự thi"
+          subtitle="Bấm vào một bài để đọc tài liệu, xem điểm máy chấm và chấm phiếu của bạn"
         />
-        {approved.length === 0 ? (
-          <Empty
-            icon={<RobotIcon size={40} />}
-            title="Chưa có bài nào để chấm"
-            description="Duyệt đề tài ở mục Duyệt đề tài trước — bài được duyệt sẽ xuất hiện ở đây."
-          />
-        ) : (
-          <div className="space-y-3">
-            {approved.map((s) => {
-              const o = overviews.get(s.id)!;
-              return (
-                <ScoringRow
-                  key={s.id}
-                  submission={{
-                    id: s.id,
-                    productName: s.productName,
-                    currentPhase: s.currentPhase,
-                    isPrebuiltRepo: s.isPrebuiltRepo,
-                    vibehostUrl: s.vibehostUrl,
-                    githubRepoUrl: s.githubRepoUrl,
-                    githubVerified: !!s.githubVerifiedAt,
-                    githubVerifyError: s.githubVerifyError,
-                    userName: s.user.name ?? "",
-                    department: s.user.department ?? "",
-                  }}
-                  scores={{
-                    giaTriUngDung: o.giaTriUngDung,
-                    chatLuongKyThuat: o.chatLuongKyThuat,
-                    hoanThien: o.hoanThien,
-                    hasIdeaScore: o.hasIdeaScore,
-                    hasProductScore: o.hasProductScore,
-                    judgeNames: o.judgeNames,
-                    myIdea: o.myIdea ? Number(o.myIdea.giaTriUngDung ?? 0) : null,
-                    myProduct: o.myProduct
-                      ? {
-                          chatLuongKyThuat: Number(o.myProduct.chatLuongKyThuat ?? 0),
-                          hoanThien: Number(o.myProduct.hoanThien ?? 0),
-                        }
-                      : null,
-                    feedbackStatus: s.feedbackStatus,
-                    btcFeedback: s.btcFeedback,
-                  }}
-                />
-              );
-            })}
-          </div>
+        <ScoringTable rows={rows} />
+        {waitingJudge > 0 && (
+          <Note tone="warning" className="mt-3">
+            {waitingJudge} bài đang lấy nguyên điểm máy vì chưa giám khảo nào chấm. Thể lệ yêu cầu
+            hội đồng xác nhận trước khi công bố.
+          </Note>
         )}
         <Note className="mt-3">
           Duyệt đạt Phase 2 là mốc thí sinh được tính 90% Ứng dụng AI theo KPI 3P — hệ HRM đọc dữ

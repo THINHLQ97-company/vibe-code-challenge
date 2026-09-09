@@ -10,7 +10,6 @@ import {
   ShieldCheckIcon,
   MegaphoneIcon,
   ScalesIcon,
-  UsersThreeIcon,
 } from "@/components/dsvh/icons";
 
 const NAV: NavItem[] = [
@@ -20,7 +19,6 @@ const NAV: NavItem[] = [
   { href: "/admin/security", label: "Cổng an toàn", icon: <ShieldCheckIcon size={17} /> },
   { href: "/admin/posts", label: "Bài đăng & lan tỏa", icon: <MegaphoneIcon size={17} /> },
   { href: "/admin/appeals", label: "Phản biện", icon: <ScalesIcon size={17} /> },
-  { href: "/admin/candidates", label: "Thí sinh", icon: <UsersThreeIcon size={17} /> },
 ];
 
 const ROLE_LABEL: Record<string, string> = { admin: "Ban tổ chức", judge: "Giám khảo" };
