@@ -21,6 +21,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
   }
 
+  // Không chặn cứng giữa các phase (BTC đã chốt), nhưng phải có sản phẩm rồi mới lan tỏa được:
+  // nộp link bài đăng khi chưa nộp Vibe Host là quảng bá một thứ chưa tồn tại, và BTC không có
+  // gì để đối chiếu khi duyệt bài (CP5).
+  if (!submission.vibehostUrl) {
+    return NextResponse.json(
+      { error: "Cần nộp sản phẩm Phase 2 (link Vibe Host + mã nguồn) trước khi nộp bài lan tỏa" },
+      { status: 409 }
+    );
+  }
+  if (submission.facebookApprovedAt) {
+    return NextResponse.json(
+      { error: "Bài đăng đã được BTC duyệt, không đổi link được nữa" },
+      { status: 409 }
+    );
+  }
+
   const row = await submitFacebookPost(submission.id, parsed.data.facebookPostUrl);
   return NextResponse.json({ submission: row });
 }

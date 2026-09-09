@@ -7,6 +7,7 @@ import {
   boolean,
   jsonb,
   pgEnum,
+  real,
   unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -125,6 +126,14 @@ export const submissions = pgTable("submissions", {
   githubVerifyError: text("github_verify_error"),
   githubLastCheckedAt: timestamp("github_last_checked_at"),
 
+  // Phản hồi Phase 2 là quyết định CHUNG của BTC về cả bài, không phải ý kiến riêng của một
+  // giám khảo — để trên phiếu chấm thì mỗi phiếu mang một cờ KPI khác nhau và hệ HRM đọc
+  // "đạt 90% Ứng dụng AI" theo đúng phiếu nào nó bắt được trước.
+  btcFeedback: text("btc_feedback"),
+  feedbackStatus: feedbackStatusEnum("feedback_status").notNull().default("pending"),
+  /** Cờ cho hệ HRM đọc: đã đạt mốc 90% "Ứng dụng AI" theo KPI 3P. App chỉ gắn cờ, không đẩy đi. */
+  kpi3pFlag: boolean("kpi3p_flag").notNull().default(false),
+
   // CP4 — cổng rà soát an toàn (7 điều cấm), điền từ hệ chấm ngoài hoặc admin
   securityStatus: securityStatusEnum("security_status").notNull().default("pending"),
   securityNote: text("security_note"),
@@ -139,37 +148,54 @@ export const submissions = pgTable("submissions", {
   surveySubmittedAt: timestamp("survey_submitted_at"),
 
   // Công bố
-  finalScore: integer("final_score"),
+  // `real` chứ không phải `integer`: điểm chốt là TRUNG BÌNH nhiều giám khảo nên hay ra .5.
+  // Làm tròn về số nguyên sẽ tạo đồng hạng giả ở bảng xếp hạng (87.5 và 88 cùng thành 88).
+  finalScore: real("final_score"),
   publishedAt: timestamp("published_at"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const ideaScores = pgTable("idea_scores", {
-  id: serial("id").primaryKey(),
-  submissionId: integer("submission_id")
-    .notNull()
-    .references(() => submissions.id),
-  moduleScores: jsonb("module_scores").$type<Record<string, number>>().notNull(), // { giaTriUngDung: number, ... }
-  summary: text("summary"),
-  source: scoreSourceEnum("source").notNull().default("external_ai"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const ideaScores = pgTable(
+  "idea_scores",
+  {
+    id: serial("id").primaryKey(),
+    submissionId: integer("submission_id")
+      .notNull()
+      .references(() => submissions.id),
+    /**
+     * NULL = điểm do hệ chấm ngoài đẩy về. Có giá trị = một giám khảo chấm tay.
+     * Thể lệ: nhiều giám khảo chấm ĐỘC LẬP, điểm cuối là TRUNG BÌNH — thiếu cột này thì
+     * ba người chấm chỉ có người cuối được tính (xem lib/db/queries/scores.ts#aggregateModule).
+     */
+    judgeId: integer("judge_id").references(() => users.id),
+    moduleScores: jsonb("module_scores").$type<Record<string, number>>().notNull(), // { giaTriUngDung: number, ... }
+    summary: text("summary"),
+    source: scoreSourceEnum("source").notNull().default("external_ai"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  // Mỗi giám khảo đúng MỘT phiếu cho mỗi bài. Postgres coi các NULL là khác nhau nên điểm hệ
+  // chấm ngoài (judge_id NULL) vẫn đẩy về được nhiều lần — chỉ chặn giám khảo tự nhân phiếu.
+  (table) => [unique("idea_scores_submission_judge_uq").on(table.submissionId, table.judgeId)]
+);
 
-export const productScores = pgTable("product_scores", {
-  id: serial("id").primaryKey(),
-  submissionId: integer("submission_id")
-    .notNull()
-    .references(() => submissions.id),
-  moduleScores: jsonb("module_scores").$type<Record<string, number>>().notNull(), // { chatLuongKyThuat: number, hoanThien: number }
-  summary: text("summary"),
-  btcFeedback: text("btc_feedback"),
-  feedbackStatus: feedbackStatusEnum("feedback_status").notNull().default("pending"),
-  kpi3pFlag: boolean("kpi3p_flag").notNull().default(false),
-  source: scoreSourceEnum("source").notNull().default("external_ai"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const productScores = pgTable(
+  "product_scores",
+  {
+    id: serial("id").primaryKey(),
+    submissionId: integer("submission_id")
+      .notNull()
+      .references(() => submissions.id),
+    /** NULL = hệ chấm ngoài; có giá trị = giám khảo chấm tay (điểm cuối lấy trung bình). */
+    judgeId: integer("judge_id").references(() => users.id),
+    moduleScores: jsonb("module_scores").$type<Record<string, number>>().notNull(), // { chatLuongKyThuat: number, hoanThien: number }
+    summary: text("summary"),
+    source: scoreSourceEnum("source").notNull().default("external_ai"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [unique("product_scores_submission_judge_uq").on(table.submissionId, table.judgeId)]
+);
 
 export const appeals = pgTable("appeals", {
   id: serial("id").primaryKey(),
@@ -220,6 +246,7 @@ export const ideaScoresRelations = relations(ideaScores, ({ one }) => ({
     fields: [ideaScores.submissionId],
     references: [submissions.id],
   }),
+  judge: one(users, { fields: [ideaScores.judgeId], references: [users.id] }),
 }));
 
 export const productScoresRelations = relations(productScores, ({ one }) => ({
@@ -227,6 +254,7 @@ export const productScoresRelations = relations(productScores, ({ one }) => ({
     fields: [productScores.submissionId],
     references: [submissions.id],
   }),
+  judge: one(users, { fields: [productScores.judgeId], references: [users.id] }),
 }));
 
 export const appealsRelations = relations(appeals, ({ one }) => ({

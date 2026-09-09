@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
-import { getLatestProductScore } from "@/lib/db/queries/scores";
 import { formatDateTimeVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
@@ -54,8 +53,6 @@ export default async function BuildPage() {
     );
   }
 
-  const productScore = await getLatestProductScore(submission.id);
-
   return (
     <PageShell
       title="Nộp bài — sản phẩm & mã nguồn"
@@ -83,17 +80,17 @@ export default async function BuildPage() {
         </Note>
       </Card>
 
-      {productScore && (
+      {submission.feedbackStatus !== "pending" && (
         <Card>
           <CardHeader
             title="Phản hồi của BTC"
             subtitle={
-              productScore.feedbackStatus === "approved"
+              submission.feedbackStatus === "approved"
                 ? "Đã duyệt — bạn được sang bước chia sẻ & lan tỏa"
                 : "Cần chỉnh sửa trước khi qua bước tiếp theo"
             }
             action={
-              productScore.feedbackStatus === "approved" ? (
+              submission.feedbackStatus === "approved" ? (
                 <Link href="/dashboard/share">
                   <Button variant="solid" size="sm" rightIcon={<ArrowRightIcon size={15} />}>
                     Sang bước chia sẻ
@@ -102,12 +99,12 @@ export default async function BuildPage() {
               ) : undefined
             }
           />
-          {productScore.btcFeedback ? (
+          {submission.btcFeedback ? (
             <Alert
-              tone={productScore.feedbackStatus === "approved" ? "success" : "warning"}
-              title={productScore.feedbackStatus === "approved" ? "Đạt yêu cầu" : "Điểm cần sửa"}
+              tone={submission.feedbackStatus === "approved" ? "success" : "warning"}
+              title={submission.feedbackStatus === "approved" ? "Đạt yêu cầu" : "Điểm cần sửa"}
             >
-              {productScore.btcFeedback}
+              {submission.btcFeedback}
             </Alert>
           ) : (
             <Note>BTC đã chấm nhưng chưa ghi phản hồi chi tiết.</Note>

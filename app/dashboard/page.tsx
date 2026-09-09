@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
 import { getLatestIdeaScore, getLatestProductScore } from "@/lib/db/queries/scores";
+import { getCheckpoints } from "@/lib/checkpoints";
 import { formatDateVN, formatDeadlineDistance } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
@@ -62,14 +63,7 @@ export default async function DashboardOverviewPage() {
     getLatestProductScore(submission.id),
   ]);
 
-  const checklist = [
-    { label: "CP1 · Đăng ký dự thi", done: true },
-    { label: "CP2 · Đề tài được duyệt", done: submission.registrationStatus === "approved" },
-    { label: "CP3 · Nộp Vibe Host + mã nguồn", done: !!submission.githubVerifiedAt },
-    { label: "CP4 · Qua cổng an toàn", done: submission.securityStatus === "clean" },
-    { label: "CP5 · Đăng bài & BGK duyệt", done: !!submission.facebookApprovedAt },
-    { label: "CP6 · Phiếu trải nghiệm", done: !!submission.surveySubmittedAt },
-  ];
+  const checklist = getCheckpoints(submission);
 
   const nextAction = getNextAction(submission);
   const status = REG_STATUS[submission.registrationStatus];

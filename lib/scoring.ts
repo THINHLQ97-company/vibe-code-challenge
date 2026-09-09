@@ -45,5 +45,8 @@ export function computeFinalScore(params: {
   const completion = Math.min(params.completion, 15);
   const applicationValue = Math.min(params.applicationValue, 25);
   const engagement = engagementTierToScore(params.engagementTier);
-  return Math.min(technical + completion + applicationValue + engagement, 100);
+  const total = Math.min(technical + completion + applicationValue + engagement, 100);
+  // Trung bình nhiều giám khảo hay ra số lẻ dài (vd 3 người → x.6666). Chốt 1 chữ số thập phân
+  // để bảng xếp hạng và khiếu nại đối chiếu được cùng một con số.
+  return Math.round(total * 10) / 10;
 }

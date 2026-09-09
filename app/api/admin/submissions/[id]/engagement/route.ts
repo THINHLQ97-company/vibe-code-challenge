@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireSession } from "@/lib/api-auth";
-import { setEngagement, getEngagementCohort } from "@/lib/db/queries/submissions";
+import {
+  getSubmissionById,
+  setEngagement,
+  getEngagementCohort,
+} from "@/lib/db/queries/submissions";
 import { engagementTierFromCount } from "@/lib/scoring";
 
 const schema = z.object({ count: z.number().int().min(0) });
@@ -17,6 +21,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   const { id } = await params;
+  const submission = await getSubmissionById(Number(id));
+  if (!submission) {
+    return NextResponse.json({ error: "Không tìm thấy bài dự thi" }, { status: 404 });
+  }
+  // Điểm lan tỏa so trung vị của CÙNG khung tuần đăng bài. Nhập số tương tác trước khi BTC duyệt
+  // bài đăng (CP5) là đếm cho một bài chưa chắc hợp lệ, và nó kéo lệch trung vị của cả nhóm.
+  if (!submission.facebookApprovedAt) {
+    return NextResponse.json(
+      { error: "Cần duyệt bài đăng (CP5) trước khi nhập số tương tác" },
+      { status: 409 }
+    );
+  }
+
   const cohort = await getEngagementCohort(Number(id));
   const tier = engagementTierFromCount(parsed.data.count, cohort);
   const row = await setEngagement(Number(id), parsed.data.count, tier);

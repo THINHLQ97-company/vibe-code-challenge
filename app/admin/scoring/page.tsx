@@ -1,5 +1,6 @@
+import { getSession } from "@/lib/auth/session";
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
-import { getLatestIdeaScore, getLatestProductScore } from "@/lib/db/queries/scores";
+import { getScoreOverviews } from "@/lib/db/queries/scores";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Empty } from "@/components/dsvh/ui/data/Empty";
@@ -8,26 +9,12 @@ import { RobotIcon } from "@/components/dsvh/icons";
 import { ScoringRow } from "./scoring-row";
 
 export default async function ScoringPage() {
+  const session = await getSession();
   const all = await listSubmissionsWithUser();
   const approved = all.filter((s) => s.registrationStatus === "approved");
-
-  const rows = await Promise.all(
-    approved.map(async (s) => ({
-      submission: {
-        id: s.id,
-        productName: s.productName,
-        currentPhase: s.currentPhase,
-        isPrebuiltRepo: s.isPrebuiltRepo,
-        vibehostUrl: s.vibehostUrl,
-        githubRepoUrl: s.githubRepoUrl,
-        githubVerified: !!s.githubVerifiedAt,
-        githubVerifyError: s.githubVerifyError,
-        userName: s.user.name ?? "",
-        department: s.user.department ?? "",
-      },
-      ideaScore: (await getLatestIdeaScore(s.id)) ?? null,
-      productScore: (await getLatestProductScore(s.id)) ?? null,
-    }))
+  const overviews = await getScoreOverviews(
+    approved.map((s) => s.id),
+    session?.userId ?? 0
   );
 
   return (
@@ -37,10 +24,10 @@ export default async function ScoringPage() {
     >
       <Card>
         <CardHeader
-          title={`${rows.length} bài đã duyệt đề tài`}
-          subtitle="Điểm đến từ hệ chấm ngoài qua API; chưa kết nối thì BTC nhập tay để không chặn tiến độ"
+          title={`${approved.length} bài đã duyệt đề tài`}
+          subtitle="Mỗi giám khảo chấm độc lập một phiếu; điểm chốt là trung bình các phiếu"
         />
-        {rows.length === 0 ? (
+        {approved.length === 0 ? (
           <Empty
             icon={<RobotIcon size={40} />}
             title="Chưa có bài nào để chấm"
@@ -48,32 +35,43 @@ export default async function ScoringPage() {
           />
         ) : (
           <div className="space-y-3">
-            {rows.map((r) => (
-              <ScoringRow
-                key={r.submission.id}
-                submission={r.submission}
-                ideaScore={
-                  r.ideaScore
-                    ? {
-                        giaTriUngDung: Number(r.ideaScore.moduleScores.giaTriUngDung ?? 0),
-                        source: r.ideaScore.source,
-                        summary: r.ideaScore.summary,
-                      }
-                    : null
-                }
-                productScore={
-                  r.productScore
-                    ? {
-                        chatLuongKyThuat: Number(r.productScore.moduleScores.chatLuongKyThuat ?? 0),
-                        hoanThien: Number(r.productScore.moduleScores.hoanThien ?? 0),
-                        source: r.productScore.source,
-                        feedbackStatus: r.productScore.feedbackStatus,
-                        btcFeedback: r.productScore.btcFeedback,
-                      }
-                    : null
-                }
-              />
-            ))}
+            {approved.map((s) => {
+              const o = overviews.get(s.id)!;
+              return (
+                <ScoringRow
+                  key={s.id}
+                  submission={{
+                    id: s.id,
+                    productName: s.productName,
+                    currentPhase: s.currentPhase,
+                    isPrebuiltRepo: s.isPrebuiltRepo,
+                    vibehostUrl: s.vibehostUrl,
+                    githubRepoUrl: s.githubRepoUrl,
+                    githubVerified: !!s.githubVerifiedAt,
+                    githubVerifyError: s.githubVerifyError,
+                    userName: s.user.name ?? "",
+                    department: s.user.department ?? "",
+                  }}
+                  scores={{
+                    giaTriUngDung: o.giaTriUngDung,
+                    chatLuongKyThuat: o.chatLuongKyThuat,
+                    hoanThien: o.hoanThien,
+                    hasIdeaScore: o.hasIdeaScore,
+                    hasProductScore: o.hasProductScore,
+                    judgeNames: o.judgeNames,
+                    myIdea: o.myIdea ? Number(o.myIdea.giaTriUngDung ?? 0) : null,
+                    myProduct: o.myProduct
+                      ? {
+                          chatLuongKyThuat: Number(o.myProduct.chatLuongKyThuat ?? 0),
+                          hoanThien: Number(o.myProduct.hoanThien ?? 0),
+                        }
+                      : null,
+                    feedbackStatus: s.feedbackStatus,
+                    btcFeedback: s.btcFeedback,
+                  }}
+                />
+              );
+            })}
           </div>
         )}
         <Note className="mt-3">

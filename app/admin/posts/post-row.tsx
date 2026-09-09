@@ -20,10 +20,9 @@ export function PostRow({
     approvedAt: string | null;
     engagementCount: number | null;
     engagementTier: number | null;
-    securityClean: boolean;
-    surveyDone: boolean;
     published: boolean;
     finalScore: number | null;
+    missing: string[];
   };
 }) {
   const router = useRouter();
@@ -53,10 +52,7 @@ export function PostRow({
     }
   }
 
-  const blockers: string[] = [];
-  if (!submission.securityClean) blockers.push("chưa qua cổng an toàn (CP4)");
-  if (!submission.approvedAt) blockers.push("chưa duyệt bài đăng (CP5)");
-  if (!submission.surveyDone) blockers.push("chưa nộp phiếu trải nghiệm (CP6)");
+  const blockers = [...submission.missing];
   if (submission.engagementTier == null) blockers.push("chưa chốt điểm lan tỏa");
 
   return (

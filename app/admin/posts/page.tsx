@@ -1,4 +1,5 @@
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
+import { missingCheckpoints } from "@/lib/checkpoints";
 import { formatDateVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
@@ -40,10 +41,11 @@ export default async function PostsPage() {
                   approvedAt: s.facebookApprovedAt ? formatDateVN(s.facebookApprovedAt) : null,
                   engagementCount: s.engagementCount,
                   engagementTier: s.engagementTier,
-                  securityClean: s.securityStatus === "clean",
-                  surveyDone: !!s.surveySubmittedAt,
                   published: !!s.publishedAt,
                   finalScore: s.finalScore,
+                  // Cùng danh sách mốc mà API công bố dùng — trước đây màn này chỉ soi CP4/CP5/CP6
+                  // nên nút "Công bố" vẫn sáng cho bài thiếu CP2/CP3 rồi API mới trả lỗi.
+                  missing: missingCheckpoints(s),
                 }}
               />
             ))}

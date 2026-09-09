@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db } from "./index";
 import {
@@ -13,6 +14,16 @@ import {
 const DEV_PASSWORD = "Test@1234";
 
 async function main() {
+  // Seed phải chạy lại được nhiều lần (mỗi lần sửa luồng là phải dựng lại dữ liệu demo).
+  // Chặn ở production vì lệnh này XOÁ SẠCH dữ liệu — đặt SEED_FORCE=1 nếu thật sự muốn.
+  if (process.env.NODE_ENV === "production" && process.env.SEED_FORCE !== "1") {
+    console.error("Từ chối seed trên production (lệnh này xoá sạch dữ liệu). Đặt SEED_FORCE=1 nếu chắc chắn.");
+    process.exit(1);
+  }
+  await db.execute(
+    sql`TRUNCATE TABLE appeals, experience_surveys, idea_scores, product_scores, submissions, seasons, users RESTART IDENTITY CASCADE`
+  );
+
   const passwordHash = await bcrypt.hash(DEV_PASSWORD, 10);
 
   const [admin] = await db
@@ -28,6 +39,8 @@ async function main() {
     .returning();
   void admin;
 
+  // Hai giám khảo, không phải một: thể lệ chấm ĐỘC LẬP rồi lấy trung bình, nên seed phải có đủ
+  // hai phiếu thì mới demo được đúng cách tính điểm (và mới lộ ra nếu code lại lấy phiếu mới nhất).
   const [judge] = await db
     .insert(users)
     .values({
@@ -36,6 +49,18 @@ async function main() {
       passwordHash,
       department: "DE",
       board: departmentToBoard.DE,
+      role: "judge",
+    })
+    .returning();
+
+  const [judge2] = await db
+    .insert(users)
+    .values({
+      email: "giamkhao2@matbao.com",
+      name: "Giám khảo Demo 2",
+      passwordHash,
+      department: "TS",
+      board: departmentToBoard.TS,
       role: "judge",
     })
     .returning();
@@ -211,26 +236,55 @@ async function main() {
       facebookApprovedAt: new Date(Date.now() - 6 * 24 * 3600 * 1000),
       engagementCount: 95,
       engagementTier: 4,
+      btcFeedback: "Không cần sửa gì thêm.",
+      feedbackStatus: "approved",
+      kpi3pFlag: true,
       surveySubmittedAt: new Date(Date.now() - 5 * 24 * 3600 * 1000),
-      finalScore: 88,
+      finalScore: 91.5,
       publishedAt: new Date(Date.now() - 4 * 24 * 3600 * 1000),
     })
     .returning();
-  await db.insert(ideaScores).values({
-    submissionId: sub3.id,
-    moduleScores: { giaTriUngDung: 24 },
-    summary: "Bài toán rất sát nghiệp vụ Sales hằng ngày.",
-    source: "external_ai",
-  });
-  await db.insert(productScores).values({
-    submissionId: sub3.id,
-    moduleScores: { chatLuongKyThuat: 38, hoanThien: 14 },
-    summary: "Chạy tốt, database dùng thật, workflow tự động chạy ổn định.",
-    btcFeedback: "Không cần sửa gì thêm.",
-    feedbackStatus: "approved",
-    kpi3pFlag: true,
-    source: "external_ai",
-  });
+  // Điểm hệ chấm ngoài đẩy về trước, rồi hai giám khảo chấm tay đè lên — đúng thứ tự thực tế.
+  // Điểm chốt = trung bình HAI phiếu giám khảo: giá trị ứng dụng (22+24)/2 = 23,
+  // kỹ thuật (36+34)/2 = 35, hoàn thiện (14+13)/2 = 13.5, lan tỏa bậc 4 = 20 → 91.5.
+  await db.insert(ideaScores).values([
+    {
+      submissionId: sub3.id,
+      moduleScores: { giaTriUngDung: 24 },
+      summary: "Máy chấm: bài toán rất sát nghiệp vụ Sales hằng ngày.",
+      source: "external_ai",
+    },
+    {
+      submissionId: sub3.id,
+      judgeId: judge.id,
+      moduleScores: { giaTriUngDung: 22 },
+      summary: "Đúng nhu cầu thật, nhưng phạm vi còn hẹp.",
+      source: "judge",
+    },
+    {
+      submissionId: sub3.id,
+      judgeId: judge2.id,
+      moduleScores: { giaTriUngDung: 24 },
+      summary: "Giá trị rõ, đo được thời gian tiết kiệm.",
+      source: "judge",
+    },
+  ]);
+  await db.insert(productScores).values([
+    {
+      submissionId: sub3.id,
+      judgeId: judge.id,
+      moduleScores: { chatLuongKyThuat: 36, hoanThien: 14 },
+      summary: "Chạy tốt, database dùng thật, workflow tự động chạy ổn định.",
+      source: "judge",
+    },
+    {
+      submissionId: sub3.id,
+      judgeId: judge2.id,
+      moduleScores: { chatLuongKyThuat: 34, hoanThien: 13 },
+      summary: "Code sạch, thiếu kiểm thử tự động.",
+      source: "judge",
+    },
+  ]);
 
   // 4) SALES — đã công bố, điểm thấp hơn (demo bảng xếp hạng có thứ hạng)
   const [sub4] = await db
@@ -266,25 +320,28 @@ async function main() {
       facebookApprovedAt: new Date(Date.now() - 6 * 24 * 3600 * 1000),
       engagementCount: 40,
       engagementTier: 2,
+      btcFeedback: "Đạt yêu cầu.",
+      feedbackStatus: "approved",
+      kpi3pFlag: true,
       surveySubmittedAt: new Date(Date.now() - 4 * 24 * 3600 * 1000),
-      finalScore: 62,
+      finalScore: 60,
       publishedAt: new Date(Date.now() - 3 * 24 * 3600 * 1000),
     })
     .returning();
+  // Chỉ một giám khảo chấm — trung bình của một phiếu vẫn là chính nó. 20 + 10 + 20 + 10 = 60.
   await db.insert(ideaScores).values({
     submissionId: sub4.id,
+    judgeId: judge.id,
     moduleScores: { giaTriUngDung: 20 },
     summary: "Ý tưởng ổn, khá phổ biến trong nhóm chủ đề này.",
-    source: "external_ai",
+    source: "judge",
   });
   await db.insert(productScores).values({
     submissionId: sub4.id,
+    judgeId: judge.id,
     // Deploy từ repo có sẵn -> trần kỹ thuật 20 (dù chấm gốc có thể cao hơn)
-    moduleScores: { chatLuongKyThuat: 20, hoanThien: 10 },
+    moduleScores: { chatLuongKyThuat: 24, hoanThien: 10 },
     summary: "Dùng lại repo mẫu, có chỉnh sửa nhưng chưa nhiều.",
-    btcFeedback: "Đạt yêu cầu.",
-    feedbackStatus: "approved",
-    kpi3pFlag: true,
     source: "judge",
   });
 
@@ -326,10 +383,11 @@ async function main() {
   console.log("✓ Seed xong:");
   console.log(`  admin:            admin@matbao.com / ${DEV_PASSWORD}`);
   console.log(`  judge:            giamkhao@matbao.com / ${DEV_PASSWORD}`);
+  console.log(`  judge 2:          giamkhao2@matbao.com / ${DEV_PASSWORD}`);
   console.log(`  candidate TS      thisinh.ts@matbao.com / ${DEV_PASSWORD}     (Phase 2, chưa nộp Vibe Host)`);
   console.log(`  candidate MK      thisinh.mk@matbao.com / ${DEV_PASSWORD}     (chờ duyệt CP2)`);
-  console.log(`  candidate DE      thisinh.de@matbao.com / ${DEV_PASSWORD}     (đã công bố · 88đ)`);
-  console.log(`  candidate SALES   thisinh.sales@matbao.com / ${DEV_PASSWORD}  (đã công bố · 62đ, repo có sẵn)`);
+  console.log(`  candidate DE      thisinh.de@matbao.com / ${DEV_PASSWORD}     (đã công bố · 91.5đ, 2 giám khảo)`);
+  console.log(`  candidate SALES   thisinh.sales@matbao.com / ${DEV_PASSWORD}  (đã công bố · 60đ, repo có sẵn)`);
   console.log(`  candidate HR      thisinh.hr@matbao.com / ${DEV_PASSWORD}     (bị trả về CP2)`);
   process.exit(0);
 }

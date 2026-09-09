@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
-import { getLatestIdeaScore, getLatestProductScore } from "@/lib/db/queries/scores";
+import { getAggregatedScores } from "@/lib/db/queries/scores";
 import { listAppealsForSubmission } from "@/lib/db/queries/appeals";
+import { APPEAL_WINDOW_HOURS, checkAppealGate } from "@/lib/appeal-policy";
 import { engagementTierToScore } from "@/lib/scoring";
 import { formatDateTimeVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
@@ -16,8 +17,6 @@ import { Progress } from "@/components/dsvh/ui/Progress";
 import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
 import { NotepadIcon, HourglassIcon } from "@/components/dsvh/icons";
 import { AppealForm } from "./appeal-form";
-
-const APPEAL_WINDOW_HOURS = 48;
 
 export default async function ResultsPage() {
   const session = await getSession();
@@ -61,20 +60,27 @@ export default async function ResultsPage() {
     );
   }
 
-  const [ideaScore, productScore, appeals] = await Promise.all([
-    getLatestIdeaScore(submission.id),
-    getLatestProductScore(submission.id),
+  // Cùng nguồn tổng hợp với API công bố — nếu trang này tự lấy phiếu mới nhất thì bảng phân rã
+  // điểm sẽ không cộng ra đúng tổng điểm đang hiển thị ngay bên trên nó.
+  const [scores, appeals] = await Promise.all([
+    getAggregatedScores(submission.id),
     listAppealsForSubmission(submission.id),
   ]);
 
   const technicalCap = submission.isPrebuiltRepo ? 20 : 40;
-  const technical = Math.min(Number(productScore?.moduleScores.chatLuongKyThuat ?? 0), technicalCap);
-  const completion = Math.min(Number(productScore?.moduleScores.hoanThien ?? 0), 15);
-  const applicationValue = Math.min(Number(ideaScore?.moduleScores.giaTriUngDung ?? 0), 25);
+  const technical = Math.min(scores.chatLuongKyThuat.value, technicalCap);
+  const completion = Math.min(scores.hoanThien.value, 15);
+  const applicationValue = Math.min(scores.giaTriUngDung.value, 25);
   const engagement = engagementTierToScore(submission.engagementTier);
+  const judgeCount = Math.max(
+    scores.giaTriUngDung.judgeCount,
+    scores.chatLuongKyThuat.judgeCount
+  );
 
-  const hoursSincePublish = (Date.now() - new Date(submission.publishedAt).getTime()) / 3_600_000;
-  const appealOpen = hoursSincePublish <= APPEAL_WINDOW_HOURS && appeals.length === 0;
+  const appealGate = checkAppealGate({
+    publishedAt: submission.publishedAt,
+    existingAppeals: appeals.length,
+  });
 
   return (
     <PageShell
@@ -94,6 +100,11 @@ export default async function ResultsPage() {
           <ScoreLine label="Giá trị ứng dụng" value={applicationValue} max={25} />
           <ScoreLine label="Lan tỏa cộng đồng" value={engagement} max={20} />
         </div>
+        {judgeCount > 0 && (
+          <Note className="mt-4">
+            Điểm là trung bình của {judgeCount} giám khảo chấm độc lập.
+          </Note>
+        )}
         {submission.isPrebuiltRepo && (
           <Note tone="warning" className="mt-4">
             Bài deploy từ repo/mẫu có sẵn nên mục Chất lượng kỹ thuật tính trần 20 điểm.
@@ -131,12 +142,11 @@ export default async function ResultsPage() {
               </dl>
             ))}
           </div>
-        ) : appealOpen ? (
+        ) : appealGate.open ? (
           <AppealForm submissionId={submission.id} />
         ) : (
-          <Alert tone="info" title="Đã hết cửa sổ phản biện">
-            Phản biện chỉ nhận trong {APPEAL_WINDOW_HOURS}h kể từ khi công bố điểm. Kết quả hiện tại
-            là chung cuộc.
+          <Alert tone="info" title="Không mở phản biện">
+            {appealGate.reason}.
           </Alert>
         )}
       </Card>

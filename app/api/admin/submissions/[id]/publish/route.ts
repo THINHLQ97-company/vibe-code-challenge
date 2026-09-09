@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/api-auth";
 import { getSubmissionById, publishSubmission } from "@/lib/db/queries/submissions";
-import { getLatestIdeaScore, getLatestProductScore } from "@/lib/db/queries/scores";
+import { getAggregatedScores } from "@/lib/db/queries/scores";
+import { missingCheckpoints } from "@/lib/checkpoints";
 import { computeFinalScore } from "@/lib/scoring";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -13,27 +14,35 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   if (!submission) {
     return NextResponse.json({ error: "Không tìm thấy bài dự thi" }, { status: 404 });
   }
-  if (submission.securityStatus !== "clean") {
-    return NextResponse.json({ error: "Chưa qua cổng rà soát an toàn (CP4)" }, { status: 409 });
-  }
-  if (!submission.facebookApprovedAt) {
-    return NextResponse.json({ error: "Chưa duyệt bài đăng Facebook (CP5)" }, { status: 409 });
+  if (submission.publishedAt) {
+    return NextResponse.json({ error: "Bài này đã công bố kết quả" }, { status: 409 });
   }
 
-  const ideaScore = await getLatestIdeaScore(submission.id);
-  const productScore = await getLatestProductScore(submission.id);
-  if (!ideaScore || !productScore) {
+  // Thể lệ: phải đủ CP1–CP6 mới được công nhận đậu — kiểm một lượt, báo hết các mốc còn thiếu
+  // thay vì bắt admin bấm lại từng lần để lộ ra từng lỗi.
+  const missing = missingCheckpoints(submission);
+  if (missing.length > 0) {
+    return NextResponse.json(
+      { error: `Chưa đủ mốc bắt buộc: ${missing.join(", ")}`, missing },
+      { status: 409 }
+    );
+  }
+
+  // Điểm chốt = TRUNG BÌNH các phiếu giám khảo (thể lệ), chỉ rơi về điểm hệ chấm ngoài khi
+  // chưa ai chấm tay. Trước đây lấy phiếu mới nhất nên hội đồng ba người chỉ tính được một.
+  const scores = await getAggregatedScores(submission.id);
+  if (!scores.hasIdeaScore || !scores.hasProductScore) {
     return NextResponse.json({ error: "Chưa đủ điểm Phase 1/2 để công bố" }, { status: 409 });
   }
 
   const finalScore = computeFinalScore({
-    technicalRaw: Number(productScore.moduleScores.chatLuongKyThuat ?? 0),
+    technicalRaw: scores.chatLuongKyThuat.value,
     isPrebuiltRepo: submission.isPrebuiltRepo,
-    completion: Number(productScore.moduleScores.hoanThien ?? 0),
-    applicationValue: Number(ideaScore.moduleScores.giaTriUngDung ?? 0),
+    completion: scores.hoanThien.value,
+    applicationValue: scores.giaTriUngDung.value,
     engagementTier: submission.engagementTier,
   });
 
   const row = await publishSubmission(submission.id, finalScore);
-  return NextResponse.json({ submission: row });
+  return NextResponse.json({ submission: row, scoreBasis: scores });
 }

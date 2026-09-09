@@ -23,28 +23,46 @@ type SubmissionInfo = {
   department: string;
 };
 
-type IdeaScoreInfo = { giaTriUngDung: number; source: string; summary: string | null };
-type ProductScoreInfo = {
-  chatLuongKyThuat: number;
-  hoanThien: number;
-  source: string;
-  feedbackStatus: string;
+type ModuleAgg = { value: number; basis: "judges" | "external_ai" | "none"; judgeCount: number };
+
+type ScoreInfo = {
+  giaTriUngDung: ModuleAgg;
+  chatLuongKyThuat: ModuleAgg;
+  hoanThien: ModuleAgg;
+  hasIdeaScore: boolean;
+  hasProductScore: boolean;
+  judgeNames: string[];
+  /** Phiếu của chính người đang đăng nhập — null nghĩa là chưa chấm. */
+  myIdea: number | null;
+  myProduct: { chatLuongKyThuat: number; hoanThien: number } | null;
+  feedbackStatus: string | null;
   btcFeedback: string | null;
 };
 
+function basisLabel(a: ModuleAgg) {
+  if (a.basis === "judges") return `trung bình ${a.judgeCount} giám khảo`;
+  if (a.basis === "external_ai") return "hệ chấm ngoài";
+  return "chưa có điểm";
+}
+
 export function ScoringRow({
   submission,
-  ideaScore,
-  productScore,
+  scores,
 }: {
   submission: SubmissionInfo;
-  ideaScore: IdeaScoreInfo | null;
-  productScore: ProductScoreInfo | null;
+  scores: ScoreInfo;
 }) {
   const router = useRouter();
-  const [giaTri, setGiaTri] = useState("");
-  const [kyThuat, setKyThuat] = useState("");
-  const [hoanThien, setHoanThien] = useState("");
+  // Ô nhập LUÔN hiển thị, mồi sẵn phiếu cũ của chính mình. Trước đây ô nhập biến mất ngay khi
+  // có một phiếu bất kỳ — giám khảo thứ hai không còn đường nào chấm, nên "điểm trung bình
+  // nhiều giám khảo" trên giấy tờ không bao giờ xảy ra được trên thực tế.
+  const [giaTri, setGiaTri] = useState(scores.myIdea != null ? String(scores.myIdea) : "");
+  const [kyThuat, setKyThuat] = useState(
+    scores.myProduct ? String(scores.myProduct.chatLuongKyThuat) : ""
+  );
+  const [hoanThien, setHoanThien] = useState(
+    scores.myProduct ? String(scores.myProduct.hoanThien) : ""
+  );
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -122,99 +140,98 @@ export function ScoringRow({
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div className="rounded-lg border border-stroke bg-surface p-3">
           <div className="text-caption font-semibold text-ink">Phase 1 · Giá trị ứng dụng (/25)</div>
-          {ideaScore ? (
-            <div className="mt-1.5 text-caption text-ink-2">
-              <span className="text-title font-bold text-ink tabular-nums">
-                {ideaScore.giaTriUngDung}
-              </span>
-              /25 · nguồn: {ideaScore.source === "external_ai" ? "hệ chấm ngoài" : "BTC nhập tay"}
-              {ideaScore.summary && <div className="mt-1">{ideaScore.summary}</div>}
-            </div>
-          ) : (
-            <div className="mt-2 flex gap-2">
-              <Input
-                type="number"
-                min={0}
-                max={25}
-                placeholder="/25"
-                value={giaTri}
-                onChange={(e) => setGiaTri(e.target.value)}
-                className="w-24"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                loading={loading}
-                disabled={!giaTri}
-                onClick={() =>
-                  void call("manual-score", {
-                    phase: 1,
-                    moduleScores: { giaTriUngDung: Number(giaTri) },
-                  })
-                }
-              >
-                Nhập tay
-              </Button>
-            </div>
-          )}
+          <div className="mt-1.5 text-caption text-ink-2">
+            <span className="text-title font-bold text-ink tabular-nums">
+              {scores.hasIdeaScore ? scores.giaTriUngDung.value : "—"}
+            </span>
+            /25 · {basisLabel(scores.giaTriUngDung)}
+          </div>
+          <div className="mt-2 flex gap-2">
+            <Input
+              type="number"
+              min={0}
+              max={25}
+              placeholder="/25"
+              value={giaTri}
+              onChange={(e) => setGiaTri(e.target.value)}
+              className="w-24"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={loading}
+              disabled={!giaTri}
+              onClick={() =>
+                void call("manual-score", {
+                  phase: 1,
+                  moduleScores: { giaTriUngDung: Number(giaTri) },
+                })
+              }
+            >
+              {scores.myIdea != null ? "Sửa phiếu của tôi" : "Chấm phiếu của tôi"}
+            </Button>
+          </div>
         </div>
 
         <div className="rounded-lg border border-stroke bg-surface p-3">
           <div className="text-caption font-semibold text-ink">
             Phase 2 · Kỹ thuật (/{technicalCap}) + Hoàn thiện (/15)
           </div>
-          {productScore ? (
-            <div className="mt-1.5 text-caption text-ink-2">
-              <span className="text-title font-bold text-ink tabular-nums">
-                {Math.min(productScore.chatLuongKyThuat, technicalCap)}
-              </span>
-              /{technicalCap} ·{" "}
-              <span className="text-title font-bold text-ink tabular-nums">
-                {productScore.hoanThien}
-              </span>
-              /15
-            </div>
-          ) : (
-            <div className="mt-2 flex flex-wrap gap-2">
-              <Input
-                type="number"
-                min={0}
-                max={40}
-                placeholder="KT"
-                value={kyThuat}
-                onChange={(e) => setKyThuat(e.target.value)}
-                className="w-20"
-              />
-              <Input
-                type="number"
-                min={0}
-                max={15}
-                placeholder="HT"
-                value={hoanThien}
-                onChange={(e) => setHoanThien(e.target.value)}
-                className="w-20"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                loading={loading}
-                disabled={!kyThuat || !hoanThien}
-                onClick={() =>
-                  void call("manual-score", {
-                    phase: 2,
-                    moduleScores: {
-                      chatLuongKyThuat: Number(kyThuat),
-                      hoanThien: Number(hoanThien),
-                    },
-                  })
-                }
-              >
-                Nhập tay
-              </Button>
-            </div>
-          )}
+          <div className="mt-1.5 text-caption text-ink-2">
+            <span className="text-title font-bold text-ink tabular-nums">
+              {scores.hasProductScore ? Math.min(scores.chatLuongKyThuat.value, technicalCap) : "—"}
+            </span>
+            /{technicalCap} ·{" "}
+            <span className="text-title font-bold text-ink tabular-nums">
+              {scores.hasProductScore ? scores.hoanThien.value : "—"}
+            </span>
+            /15 · {basisLabel(scores.chatLuongKyThuat)}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Input
+              type="number"
+              min={0}
+              max={40}
+              placeholder="KT"
+              value={kyThuat}
+              onChange={(e) => setKyThuat(e.target.value)}
+              className="w-20"
+            />
+            <Input
+              type="number"
+              min={0}
+              max={15}
+              placeholder="HT"
+              value={hoanThien}
+              onChange={(e) => setHoanThien(e.target.value)}
+              className="w-20"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={loading}
+              disabled={!kyThuat || !hoanThien}
+              onClick={() =>
+                void call("manual-score", {
+                  phase: 2,
+                  moduleScores: {
+                    chatLuongKyThuat: Number(kyThuat),
+                    hoanThien: Number(hoanThien),
+                  },
+                })
+              }
+            >
+              {scores.myProduct ? "Sửa phiếu của tôi" : "Chấm phiếu của tôi"}
+            </Button>
+          </div>
         </div>
       </div>
+
+      {scores.judgeNames.length > 0 && (
+        <p className="mt-2 text-caption text-ink-2">
+          Đã chấm: {scores.judgeNames.join(", ")}
+        </p>
+      )}
 
       {submission.isPrebuiltRepo && (
         <Note tone="warning" className="mt-3">
@@ -222,13 +239,13 @@ export function ScoringRow({
         </Note>
       )}
 
-      {productScore && productScore.feedbackStatus === "approved" ? (
+      {scores.feedbackStatus === "approved" ? (
         <div className="mt-3">
           <Alert tone="success" title="Đã duyệt Phase 2">
-            {productScore.btcFeedback}
+            {scores.btcFeedback}
           </Alert>
         </div>
-      ) : productScore ? (
+      ) : scores.hasProductScore ? (
         <div className="mt-3 space-y-2">
           <Textarea
             label="Phản hồi cho thí sinh"
