@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark } from "@/components/brand";
 import { HeroBackdrop } from "@/components/hero-backdrop";
-import { GlassCard, Pill, DarkNote, ImageSlot } from "@/components/landing-ui";
+import { GlassCard, Pill, DarkNote, ImageSlot, BackToTop } from "@/components/landing-ui";
 import { KPI_CATEGORY } from "@/lib/kpi";
 import {
   MarkArrowRight,
@@ -57,7 +57,7 @@ const PRD_SECTIONS = [
 
 export default function HuongDanPage() {
   return (
-    <main className="landing-scale relative isolate min-h-screen overflow-hidden bg-canvas">
+    <main id="top" className="landing-scale relative isolate min-h-screen overflow-hidden bg-canvas">
       <HeroBackdrop image="/home-bg.webp" position="top" scrim />
 
       <div className="relative">
@@ -174,6 +174,7 @@ export default function HuongDanPage() {
           </GlassCard>
         </section>
       </div>
+      <BackToTop />
     </main>
   );
 }

@@ -35,7 +35,9 @@ export function candidateScoreView(
     return {
       visible: false,
       label: "Đang đối chiếu",
-      hint: "Máy đã chấm sơ bộ, hội đồng đang xác nhận. Điểm hiện sau khi chốt.",
+      // Câu hiển thị cho THÍ SINH cố ý không nêu cơ chế chấm — công bố cơ chế ra ngoài là biến
+      // một cách vận hành nội bộ thành cam kết phải giữ đúng từng chữ. Chỉ nói trạng thái.
+      hint: "Hội đồng đang chấm mục này. Điểm hiện ra sau khi chốt.",
     };
   }
   return { visible: true, value: agg.value, judgeCount: agg.judgeCount };

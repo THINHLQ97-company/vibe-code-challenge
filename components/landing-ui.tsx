@@ -127,3 +127,35 @@ export function ImageSlot({
     </div>
   );
 }
+
+/**
+ * Nút trở về đầu trang.
+ *
+ * Là một thẻ `<a href="#top">` chứ không phải nút chạy JavaScript: cuộn tới neo là hành vi sẵn có
+ * của trình duyệt, chạy cả khi JS chưa tải, và người dùng bàn phím tab tới được như mọi liên kết.
+ * Trang này dài hơn 5000px nên nút luôn hiện, không cần bắt sự kiện cuộn để ẩn/hiện.
+ */
+export function BackToTop() {
+  return (
+    <a
+      href="#top"
+      aria-label="Trở về đầu trang"
+      className="fixed bottom-5 right-5 z-40 flex size-11 items-center justify-center rounded-full border border-cream/20 bg-canvas/85 text-cream/80 backdrop-blur-md transition-colors hover:border-orange/50 hover:bg-orange/15 hover:text-orange-bright"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M12 19.5V5.5" />
+        <path d="M5.8 11.7L12 5.5l6.2 6.2" />
+      </svg>
+    </a>
+  );
+}

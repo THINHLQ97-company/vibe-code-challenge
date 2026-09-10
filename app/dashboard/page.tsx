@@ -126,7 +126,7 @@ export default async function DashboardOverviewPage() {
         <Card className="p-4">
           <InfoTile
             layout="stack"
-            label="Điểm ý tưởng (Phase 1)"
+            label="Giá trị ứng dụng · Phase 1"
             value={ideaView.visible ? `${ideaView.value}/25` : ideaView.label}
           />
           <p className="mt-1 text-caption text-ink-2">
@@ -138,7 +138,7 @@ export default async function DashboardOverviewPage() {
         <Card className="p-4">
           <InfoTile
             layout="stack"
-            label="Điểm sản phẩm (Phase 2)"
+            label="Kỹ thuật & hoàn thiện · Phase 2"
             value={productView.visible ? `${productView.value}/55` : productView.label}
           />
           <p className="mt-1 text-caption text-ink-2">

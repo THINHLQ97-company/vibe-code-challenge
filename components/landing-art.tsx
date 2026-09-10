@@ -393,3 +393,116 @@ export function BoardOffice(p: MarkProps) {
     </Mark>
   );
 }
+
+/* ── Phòng ban ───────────────────────────────────────────────────────────────────────────────
+   Mỗi phòng một hình để thí sinh nhận ra phòng mình ngay, không phải đọc chữ viết tắt.       */
+
+/** TS — Hỗ trợ Kỹ thuật. */
+export function DeptSupport(p: MarkProps) {
+  return (
+    <Mark {...p}>
+      <path d="M4.4 14.4v-2.6a7.6 7.6 0 0 1 15.2 0v2.6" />
+      <path d="M4.4 13.2h1.7a1.4 1.4 0 0 1 1.4 1.4v3a1.4 1.4 0 0 1-1.4 1.4H5.8a1.4 1.4 0 0 1-1.4-1.4z" />
+      <path d="M19.6 13.2h-1.7a1.4 1.4 0 0 0-1.4 1.4v3a1.4 1.4 0 0 0 1.4 1.4h.3a1.4 1.4 0 0 0 1.4-1.4z" />
+      <path d="M19.6 18.2v.6a2 2 0 0 1-2 2h-3.2" />
+    </Mark>
+  );
+}
+
+/** DE — Lập trình / Dev. */
+export function DeptDev(p: MarkProps) {
+  return (
+    <Mark {...p}>
+      <rect x="3" y="4.4" width="18" height="15.2" rx="2.2" />
+      <path d="M3 8.6h18" />
+      <path d="M8.4 12.4l-1.9 1.9 1.9 1.9M12.4 12.4l1.9 1.9-1.9 1.9" />
+    </Mark>
+  );
+}
+
+/** OP — Vận hành. */
+export function DeptOps(p: MarkProps) {
+  return (
+    <Mark {...p}>
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M12 2.8v2.6M12 18.6v2.6M4.5 12H2M22 12h-2.5M6.7 6.7L4.9 4.9M19.1 19.1l-1.8-1.8M17.3 6.7l1.8-1.8M4.9 19.1l1.8-1.8" />
+    </Mark>
+  );
+}
+
+/** MK — Marketing. */
+export function DeptMarketing(p: MarkProps) {
+  return (
+    <Mark {...p}>
+      <path d="M20.4 5.6v10.2c0 1-1.1 1.6-2 1.1L13 13.8H6.6A2.6 2.6 0 0 1 4 11.2v-1a2.6 2.6 0 0 1 2.6-2.6H13l5.4-3.1c.9-.5 2 .1 2 1.1z" />
+      <path d="M8.4 13.8v4.4a1.8 1.8 0 0 0 3.6 0v-4.4" />
+    </Mark>
+  );
+}
+
+/** FI — Tài chính / Kế toán. */
+export function DeptFinance(p: MarkProps) {
+  return (
+    <Mark {...p}>
+      <rect x="5" y="3" width="14" height="18" rx="2.2" />
+      <rect x="8" y="6.2" width="8" height="3" rx="1" />
+      <path d="M8.6 13h.01M12 13h.01M15.4 13h.01M8.6 17h.01M12 17h.01M15.4 17h.01" />
+    </Mark>
+  );
+}
+
+/** HR — Nhân sự. */
+export function DeptHR(p: MarkProps) {
+  return (
+    <Mark {...p}>
+      <circle cx="10.4" cy="8" r="3.4" />
+      <path d="M3.8 19.6c0-3.3 3-5.6 6.6-5.6 1.3 0 2.5.3 3.5.8" />
+      <path d="M14.6 17.6l1.7 1.7 3.6-3.8" />
+    </Mark>
+  );
+}
+
+/** Kinh doanh — Sales. */
+export function DeptSales(p: MarkProps) {
+  return (
+    <Mark {...p}>
+      <path d="M3.4 11.6l3-2.4a2 2 0 0 1 2.5 0l1.5 1.2a1.6 1.6 0 0 0 2.1-.1l2.6-2.4a2 2 0 0 1 2.7 0l2.3 2.1" />
+      <path d="M10.4 13.6l1.9 1.9a1.5 1.5 0 0 0 2.2-2l-.4-.4" />
+      <path d="M14.1 13.1l1.6 1.6a1.5 1.5 0 0 0 2.1-2.1l-1.6-1.6" />
+      <path d="M3.4 11.6v4.2a2 2 0 0 0 2 2h1.3M20.6 10v5.8a2 2 0 0 1-2 2h-1" />
+    </Mark>
+  );
+}
+
+/**
+ * Quầng sáng riêng cho dải GIẢI THƯỞNG — đậm hơn `DarkBandArt` và đặt đúng sau con số tổng.
+ *
+ * Toàn bộ dựng bằng gradient của token `orange`/`amber`, không thêm ảnh: quầng phải co giãn theo
+ * bề ngang màn hình, và độ sáng phải đổi theo theme nếu sau này bật chế độ sáng.
+ */
+export function PrizeGlow() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+      <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
+        <defs>
+          <radialGradient id="pz-core" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="var(--color-orange-bright)" stopOpacity="0.42" />
+            <stop offset="55%" stopColor="var(--color-orange)" stopOpacity="0.14" />
+            <stop offset="100%" stopColor="var(--color-orange)" stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id="pz-warm" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="var(--color-amber)" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="var(--color-amber)" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        {/* Quầng chính ngay sau con số tổng giá trị. */}
+        <ellipse cx="50%" cy="20%" rx="46%" ry="30%" fill="url(#pz-core)" />
+        <ellipse cx="22%" cy="72%" rx="34%" ry="34%" fill="url(#pz-warm)" />
+        <ellipse cx="80%" cy="76%" rx="30%" ry="30%" fill="url(#pz-warm)" />
+      </svg>
+      {/* Hai vạch sáng mảnh ôm lấy dải, cùng vai trò với đường viền nhưng mềm hơn. */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange/50 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-orange/35 to-transparent" />
+    </div>
+  );
+}

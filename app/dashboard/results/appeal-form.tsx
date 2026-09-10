@@ -47,7 +47,7 @@ export function AppealForm({ submissionId }: { submissionId: number }) {
       <Textarea
         label="Tiêu chí muốn phản biện"
         hint="Nêu rõ mục điểm nào và vì sao bạn cho là chấm chưa đúng"
-        placeholder="VD: chức năng nhắc hạn có chạy thật, máy chấm không bấm tới"
+        placeholder="VD: chức năng nhắc hạn có chạy thật nhưng chưa được tính điểm"
         value={criteria}
         onChange={(e) => setCriteria(e.target.value)}
         required

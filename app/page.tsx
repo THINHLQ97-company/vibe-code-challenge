@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/dsvh/ui/Button";
-import { LogoWideDark } from "@/components/brand";
+import { LogoWideDark, LogoSquare } from "@/components/brand";
 import { KPI_CATEGORY } from "@/lib/kpi";
 import {
   MarkSpark,
@@ -32,9 +32,17 @@ import {
   StepSurvey,
   BoardTech,
   BoardOffice,
+  DeptSupport,
+  DeptDev,
+  DeptOps,
+  DeptMarketing,
+  DeptFinance,
+  DeptHR,
+  DeptSales,
+  PrizeGlow,
 } from "@/components/landing-art";
 import { HeroBackdrop } from "@/components/hero-backdrop";
-import { GlassCard, Pill, DarkNote, Band } from "@/components/landing-ui";
+import { GlassCard, Pill, DarkNote, Band, BackToTop } from "@/components/landing-ui";
 
 /**
  * Trang giới thiệu cuộc thi. Nguồn nội dung: `docs/reference/the-le-v3.html`.
@@ -136,11 +144,15 @@ const FLOOR = [
   "Có nội dung riêng, không phải mẫu có sẵn chỉ đổi tên.",
 ];
 
+/**
+ * CHỈ nêu nhóm nội dung và trọng số. Cố ý KHÔNG nói ai/cái gì chấm từng mục: cơ chế chấm là việc
+ * vận hành nội bộ, công bố ra ngoài thì thành cam kết mà ban tổ chức phải giữ đúng từng chữ.
+ */
 const RUBRIC = [
-  { module: "Chất lượng kỹ thuật", point: 40, by: "Máy chấm tự động" },
-  { module: "Giá trị ứng dụng", point: 25, by: "AI chấm theo rubric, người đối chiếu" },
-  { module: "Lan tỏa cộng đồng", point: 20, by: "Máy đếm tương tác 7 ngày" },
-  { module: "Độ hoàn thiện & nội dung riêng", point: 15, by: "Máy + AI đối chiếu" },
+  { module: "Chất lượng kỹ thuật", point: 40, note: "Chức năng chạy · database dùng thật · workflow tự động · mở tốt trên di động" },
+  { module: "Giá trị ứng dụng", point: 25, note: "Bài toán có thật và sản phẩm giải được nó" },
+  { module: "Lan tỏa cộng đồng", point: 20, note: "Tương tác bài chia sẻ trong bảy ngày" },
+  { module: "Độ hoàn thiện & nội dung riêng", point: 15, note: "Không còn phần dang dở, nội dung là của bạn" },
 ];
 
 const PITFALLS = [
@@ -203,7 +215,7 @@ const FAQ = [
 
 export default function LandingPage() {
   return (
-    <main className="landing-scale relative isolate min-h-screen overflow-hidden bg-canvas">
+    <main id="top" className="landing-scale relative isolate min-h-screen overflow-hidden bg-canvas">
       {/* MỘT ảnh nền cho cả trang, neo đỉnh và mờ dần xuống — thay vì mỗi dải một lớp nền. */}
       <HeroBackdrop image="/home-bg.webp" position="top" scrim />
 
@@ -250,14 +262,13 @@ export default function LandingPage() {
             Mắt Bão · Toàn công ty · Thi cá nhân
           </Pill>
           <h1 className="mx-auto mt-5 max-w-3xl text-hero font-bold leading-tight tracking-tight text-cream">
-            Mỗi người một sản phẩm,
+            Tự tay làm ra một sản phẩm.
             <br />
-            vận hành thật trên <span className="text-orange-bright">Vibe Host</span>.
+            Đưa lên <span className="text-orange-bright">Vibe Host</span>.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-body text-cream/70">
-            Cuộc thi vibe coding nội bộ dành cho toàn thể nhân sự Mắt Bão. Bạn tự chọn một bài
-            toán có thật, dựng thành sản phẩm chạy được với cơ sở dữ liệu thật, rồi đưa lên Vibe
-            Host. Đề tài mở cho mọi phòng ban — không yêu cầu kinh nghiệm lập trình.
+            Chỉ khi tự làm mới đủ hiểu để tư vấn, bán và hỗ trợ khách. Mỗi người một sản phẩm có
+            database chạy thật — đề tài mở, không cần biết code trước.
           </p>
 
           <div className="mt-7 flex flex-col items-center gap-3">
@@ -287,14 +298,27 @@ export default function LandingPage() {
         <HairlineDivider />
 
         {/* ── GIẢI THƯỞNG ────────────────────────────────────────────────────────────────── */}
-        <section id="giai-thuong" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-12 sm:px-6">
+        {/* Dải giải thưởng có quầng sáng RIÊNG, đậm hơn phần còn lại — đây là điểm nhấn của trang. */}
+        <section id="giai-thuong" className="relative isolate scroll-mt-20 overflow-hidden">
+          <PrizeGlow />
+          <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-6">
           <div className="text-center">
             <p className="flex items-center justify-center gap-2 text-caption font-semibold uppercase tracking-wide text-cream/50">
               <MarkTrophy size={16} className="text-orange-bright" />
               Tổng giá trị đến tay người dự thi
             </p>
-            <p className="mt-2 bg-gradient-to-r from-orange-bright via-orange to-orange-bright bg-clip-text text-hero font-bold tracking-tight text-transparent">
-              Hơn 45 triệu đồng
+            <p className="relative mt-2 inline-block">
+              {/* Bản mờ đặt phía sau tạo hào quang quanh chữ — `blur` trên chính chữ đó, không
+                  phải một hình nền riêng, nên hào quang luôn ôm đúng nét chữ ở mọi cỡ màn hình. */}
+              <span
+                aria-hidden
+                className="absolute inset-0 select-none text-hero font-bold tracking-tight text-orange-bright opacity-60 blur-[18px]"
+              >
+                Hơn 45 triệu đồng
+              </span>
+              <span className="relative bg-gradient-to-r from-orange-bright via-orange to-orange-bright bg-clip-text text-hero font-bold tracking-tight text-transparent">
+                Hơn 45 triệu đồng
+              </span>
             </p>
             <p className="mx-auto mt-2.5 max-w-2xl text-body text-cream/65">
               Bao gồm giải thưởng tiền mặt theo tháng và giải chung cuối chương trình, khoản hoàn
@@ -317,6 +341,7 @@ export default function LandingPage() {
               prizes={FINAL_PRIZES}
               footer="Cơ cấu và mức giải căn cứ thể lệ đã công bố; số đợt giải tháng phụ thuộc lịch chương trình và sẽ được ban tổ chức chốt chính thức."
             />
+          </div>
           </div>
         </section>
 
@@ -398,7 +423,7 @@ export default function LandingPage() {
           id="cham-diem"
           eyebrow="Cách chấm"
           title="Đậu được chấm thế nào"
-          subtitle="Sản phẩm phải vượt ngưỡng sàn kỹ thuật trước — đây là bộ tiêu chí đạt hoặc không đạt, không có điểm trung gian. Vượt qua rồi mới được đưa vào thang điểm 100 để xếp hạng."
+          subtitle="Sản phẩm phải vượt ngưỡng sàn kỹ thuật trước — đây là bộ tiêu chí đạt hoặc không đạt, không có điểm trung gian. Vượt qua rồi mới được đưa vào thang điểm 100 chia theo bốn nhóm nội dung dưới đây."
         >
           <div className="grid gap-3 lg:grid-cols-2">
             <GlassCard className="p-4">
@@ -419,34 +444,31 @@ export default function LandingPage() {
             <GlassCard className="p-4">
               <h3 className="text-body font-semibold text-cream">Thang điểm 100</h3>
               <p className="mt-0.5 text-caption text-cream/50">
-                Máy chấm là chính; hội đồng xác nhận trước khi công bố.
+                Bốn nhóm nội dung và trọng số của từng nhóm.
               </p>
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full text-caption">
-                  <thead>
-                    <tr className="border-b border-cream/12 text-left text-cream/50">
-                      <th className="pb-2 font-medium">Module</th>
-                      <th className="pb-2 text-right font-medium">Điểm</th>
-                      <th className="pb-2 pl-3 font-medium">Chấm bằng</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {RUBRIC.map((r) => (
-                      <tr key={r.module} className="border-b border-cream/8 last:border-0">
-                        <td className="py-2 pr-3 text-cream/85">{r.module}</td>
-                        <td className="py-2 text-right font-semibold tabular-nums text-orange-bright">
-                          {r.point}
-                        </td>
-                        <td className="py-2 pl-3 text-cream/55">{r.by}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-3">
+              <ul className="mt-3.5 space-y-2.5">
+                {RUBRIC.map((r) => (
+                  <li key={r.module}>
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-caption font-medium text-cream/90">{r.module}</span>
+                      <span className="shrink-0 text-body font-bold tabular-nums text-orange-bright">
+                        {r.point}
+                      </span>
+                    </div>
+                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-cream/10">
+                      <div
+                        className="h-full rounded-full bg-orange/70"
+                        style={{ width: `${r.point}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-meta text-cream/50">{r.note}</p>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4">
                 <DarkNote>
-                  Có điểm rồi bạn được phản biện một vòng duy nhất, trong 48h, bắt buộc kèm bằng
-                  chứng kiểm chứng được.
+                  Sau khi có điểm, bạn được phản biện một vòng duy nhất trong 48 giờ, kèm bằng chứng
+                  có thể kiểm chứng.
                 </DarkNote>
               </div>
             </GlassCard>
@@ -489,7 +511,10 @@ export default function LandingPage() {
               icon={<BoardTech size={22} />}
               name="Bảng Kỹ thuật"
               tagline="Khối làm kỹ thuật"
-              departments={["TS — Hỗ trợ Kỹ thuật", "DE — Lập trình / Dev"]}
+              departments={[
+                { icon: <DeptSupport size={18} />, code: "TS", name: "Hỗ trợ Kỹ thuật" },
+                { icon: <DeptDev size={18} />, code: "DE", name: "Lập trình / Dev" },
+              ]}
               expectation="Nền tảng tốt nên kỳ vọng khai thác sâu database và workflow tự động của Vibe Host."
             />
             <BoardCard
@@ -497,11 +522,11 @@ export default function LandingPage() {
               name="Bảng Văn phòng"
               tagline="Khối văn phòng & kinh doanh"
               departments={[
-                "OP — Vận hành",
-                "MK — Marketing",
-                "FI — Tài chính / Kế toán",
-                "HR — Nhân sự",
-                "Kinh doanh — Sales",
+                { icon: <DeptOps size={18} />, code: "OP", name: "Vận hành" },
+                { icon: <DeptMarketing size={18} />, code: "MK", name: "Marketing" },
+                { icon: <DeptFinance size={18} />, code: "FI", name: "Tài chính / Kế toán" },
+                { icon: <DeptHR size={18} />, code: "HR", name: "Nhân sự" },
+                { icon: <DeptSales size={18} />, code: "KD", name: "Kinh doanh" },
               ]}
               expectation="Không cần biết code trước. Vibe coding cùng AI đủ để dựng sản phẩm giải đúng việc bạn hay làm."
             />
@@ -521,7 +546,7 @@ export default function LandingPage() {
           title="Câu hỏi thường gặp"
           subtitle="Những thắc mắc ban tổ chức nhận được nhiều nhất trong đợt mở đăng ký."
         >
-          <div className="grid gap-2 lg:grid-cols-2">
+          <div className="mx-auto max-w-4xl space-y-2">
             {FAQ.map((f) => (
               /* `<details>` chứ không dựng accordion bằng JS: đóng mở là hành vi sẵn có của trình
                  duyệt, chạy cả khi JS chưa tải và trình đọc màn hình hiểu đúng ngay. */
@@ -545,7 +570,7 @@ export default function LandingPage() {
         {/* ── CTA CUỐI ───────────────────────────────────────────────────────────────────── */}
         <section className="mx-auto max-w-6xl px-5 pb-16 pt-6 sm:px-6">
           <GlassCard className="p-8 text-center">
-            <LogoWideDark height={34} className="mx-auto" />
+            <LogoSquare size={64} className="mx-auto" />
             <h2 className="mx-auto mt-5 max-w-xl text-page font-bold tracking-tight text-cream">
               Sẵn sàng đăng ký đề tài?
             </h2>
@@ -576,6 +601,7 @@ export default function LandingPage() {
           </GlassCard>
         </section>
       </div>
+      <BackToTop />
     </main>
   );
 }
@@ -591,7 +617,7 @@ function BoardCard({
   icon: React.ReactNode;
   name: string;
   tagline: string;
-  departments: string[];
+  departments: { icon: React.ReactNode; code: string; name: string }[];
   expectation: string;
 }) {
   return (
@@ -610,13 +636,19 @@ function BoardCard({
         <p className="text-meta font-semibold uppercase tracking-wide text-cream/45">
           Phòng ban thuộc bảng
         </p>
-        <ul className="mt-2.5 flex flex-wrap gap-2">
+        <ul className="mt-2.5 grid gap-2 sm:grid-cols-2">
           {departments.map((d) => (
             <li
-              key={d}
-              className="rounded-lg border border-cream/12 bg-cream/[0.06] px-2.5 py-1.5 text-caption text-cream/80"
+              key={d.code}
+              className="flex items-center gap-2.5 rounded-lg border border-cream/12 bg-cream/[0.06] px-2.5 py-2"
             >
-              {d}
+              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-orange/12 text-orange-bright">
+                {d.icon}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-caption font-semibold text-cream">{d.code}</span>
+                <span className="block truncate text-meta text-cream/55">{d.name}</span>
+              </span>
             </li>
           ))}
         </ul>
@@ -656,7 +688,9 @@ function PrizeCard({
           <li
             key={p.rank}
             className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${
-              i === 0 ? "border border-orange/40 bg-orange/12" : "border border-transparent bg-cream/[0.06]"
+              i === 0
+              ? "border border-orange/50 bg-orange/[0.16] shadow-[0_0_24px_-6px_var(--color-orange)]"
+              : "border border-transparent bg-cream/[0.06]"
             }`}
           >
             <span className={i === 0 ? "text-body font-medium text-cream" : "text-body text-cream/80"}>
