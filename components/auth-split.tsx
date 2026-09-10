@@ -27,7 +27,7 @@ const HIGHLIGHTS = [
   {
     icon: <TrophyIcon size={18} />,
     title: "Đậu là có quyền lợi",
-    desc: "Hoàn phí AI qua lương + 110% Năng lực AI",
+    desc: "Hoàn phí công cụ AI qua lương và ghi nhận vào KPI",
   },
 ];
 

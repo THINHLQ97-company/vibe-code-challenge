@@ -10,14 +10,18 @@ const registerSchema = z.object({
   topicGroup: z.string().min(1),
   problemDesc: z.string().min(10),
   targetUsers: z.string().min(3),
-  features: z.array(z.string().min(1)).min(3, "Cần liệt kê tối thiểu 3 chức năng"),
+  /**
+   * NGƯNG thu thập từ form (10/09/2026) — PRD đã mô tả phạm vi và chức năng. Vẫn nhận nếu có, để
+   * bản ghi cũ và các công cụ ngoài không gãy, nhưng không còn bắt buộc.
+   */
+  features: z.array(z.string().min(1)).optional().default([]),
   // Đầu vào chấm Phase 1. Chặn trên 200 000 ký tự để một file dán nhầm không thổi bay request.
   prdContent: z
     .string({ required_error: "Cần đính tài liệu PRD — đây là căn cứ chấm điểm ý tưởng ở Phase 1" })
     .min(200, "Tài liệu PRD quá ngắn — đây là căn cứ chấm điểm ý tưởng ở Phase 1")
     .max(200_000, "Tài liệu quá dài, rút gọn còn phần mô tả sản phẩm"),
   prdFileName: z.string().max(255).optional(),
-  databasePlan: z.string().min(3),
+  databasePlan: z.string().optional(),
   hasWorkflow: z.boolean().optional().default(false),
   workflowDesc: z.string().optional(),
   // Chỉ còn một cách hợp lệ; `isPrebuiltRepo` KHÔNG nhận từ thí sinh nữa — nay là cờ do BTC gắn

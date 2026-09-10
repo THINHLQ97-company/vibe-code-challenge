@@ -36,21 +36,14 @@ const BRANCHES = [
  */
 const DEPLOY_METHOD = "Tự dựng mới trong kỳ thi";
 
+/** Chỉ liệt kê các trường form CÒN thu thập — trường đã ngưng không cần điền lại khi sửa. */
 type Initial = {
   productName: string;
   branch: "A" | "B";
   topicGroup: string;
   problemDesc: string;
   targetUsers: string;
-  features: unknown;
-  databasePlan: string;
-  hasWorkflow: boolean;
-  workflowDesc: string | null;
-  deployMethod: string;
   aiTool: string | null;
-  googleAiPro: boolean;
-  dataUsed: string | null;
-  riskSelfAssessment: string | null;
   requestedDeadlineDays: number;
   prdContent: string | null;
   prdFileName: string | null;
@@ -67,16 +60,7 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
   const [topicGroup, setTopicGroup] = useState<string | null>(initial?.topicGroup ?? null);
   const [problemDesc, setProblemDesc] = useState(initial?.problemDesc ?? "");
   const [targetUsers, setTargetUsers] = useState(initial?.targetUsers ?? "");
-  const [featuresText, setFeaturesText] = useState(
-    Array.isArray(initial?.features) ? (initial!.features as string[]).join("\n") : ""
-  );
-  const [databasePlan, setDatabasePlan] = useState(initial?.databasePlan ?? "");
-  const [hasWorkflow, setHasWorkflow] = useState(initial?.hasWorkflow ?? false);
-  const [workflowDesc, setWorkflowDesc] = useState(initial?.workflowDesc ?? "");
   const [aiTool, setAiTool] = useState(initial?.aiTool ?? "");
-  const [googleAiPro, setGoogleAiPro] = useState(initial?.googleAiPro ?? true);
-  const [dataUsed, setDataUsed] = useState(initial?.dataUsed ?? "");
-  const [riskSelfAssessment, setRiskSelfAssessment] = useState(initial?.riskSelfAssessment ?? "");
   const [requestedDeadlineDays, setRequestedDeadlineDays] = useState(
     initial?.requestedDeadlineDays ?? 15
   );
@@ -93,14 +77,6 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    const features = featuresText
-      .split("\n")
-      .map((f) => f.trim())
-      .filter(Boolean);
-    if (features.length < 3) {
-      setError("Liệt kê tối thiểu 3 chức năng — đây là căn cứ chấm ngưỡng sàn.");
-      return;
-    }
     if (!topicGroup) {
       setError("Chọn nhóm chủ đề.");
       return;
@@ -120,17 +96,10 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
           topicGroup,
           problemDesc,
           targetUsers,
-          features,
           prdContent,
           prdFileName: prdFileName || undefined,
-          databasePlan,
-          hasWorkflow,
-          workflowDesc: hasWorkflow ? workflowDesc : undefined,
           deployMethod: DEPLOY_METHOD,
           aiTool,
-          googleAiPro,
-          dataUsed,
-          riskSelfAssessment,
           requestedDeadlineDays,
           confirmFakeData,
           confirmNoMatbaoInfo,
@@ -208,14 +177,6 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
             onChange={(e) => setTargetUsers(e.target.value)}
             required
           />
-          <Textarea
-            label="Chức năng chính"
-            hint="Mỗi dòng một chức năng, tối thiểu 3 — ba chức năng đầu dùng để chấm ngưỡng sàn"
-            placeholder={"Ghi nhận thu/chi theo ngày\nXem biểu đồ theo tháng\nXuất báo cáo PDF"}
-            value={featuresText}
-            onChange={(e) => setFeaturesText(e.target.value)}
-            required
-          />
         </div>
       </Card>
 
@@ -262,67 +223,33 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
       </Card>
 
       <Card>
-        <CardHeader title="Kỹ thuật & an toàn" subtitle="Sản phẩm bắt buộc có database chạy thật" />
+        <CardHeader
+          title="Thông tin thi"
+          subtitle="Hai mục còn lại — phần mô tả sản phẩm đã nằm trong tài liệu PRD ở trên"
+        />
         <div className="space-y-4">
-          <Textarea
-            label="Database sẽ dùng"
-            hint="Loại dữ liệu lưu và dùng để làm gì trong sản phẩm"
-            value={databasePlan}
-            onChange={(e) => setDatabasePlan(e.target.value)}
-            required
-          />
-          <Checkbox
-            checked={hasWorkflow}
-            onChange={setHasWorkflow}
-            label="Có workflow tự động chạy (cron / tự động gửi / xử lý nền) — cộng điểm chất lượng"
-          />
-          {hasWorkflow && (
-            <Textarea
-              label="Mô tả workflow"
-              value={workflowDesc}
-              onChange={(e) => setWorkflowDesc(e.target.value)}
-            />
-          )}
-          <Input
-            label="Hạn nộp mong muốn (ngày kể từ khi duyệt)"
-            type="number"
-            min={1}
-            max={15}
-            value={String(requestedDeadlineDays)}
-            onChange={(e) => setRequestedDeadlineDays(Number(e.target.value))}
-            className="sm:max-w-xs"
-          />
-          <Note tone="warning">
-            Sản phẩm phải được <b>tự dựng mới trong kỳ thi</b>. Bài bị phát hiện dùng lại repo hoặc
-            mẫu có sẵn sẽ không qua được Phase 2 — BTC đối chiếu lịch sử commit khi chấm mã nguồn.
-          </Note>
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
+              label="Hạn nộp mong muốn (ngày kể từ khi duyệt)"
+              type="number"
+              min={1}
+              max={15}
+              value={String(requestedDeadlineDays)}
+              onChange={(e) => setRequestedDeadlineDays(Number(e.target.value))}
+            />
+            <Input
               label="Công cụ AI dự định dùng"
-              placeholder="VD: Google AI Pro / Claude / Cursor"
+              hint="Liệt kê là đủ, không bắt buộc"
+              placeholder="VD: Google AI Pro, Claude, Cursor"
               value={aiTool}
               onChange={(e) => setAiTool(e.target.value)}
             />
-            <div className="flex items-end pb-2">
-              <Checkbox
-                checked={googleAiPro}
-                onChange={setGoogleAiPro}
-                label="Có đăng ký Google AI Pro (điều kiện được hoàn phí khi đậu)"
-              />
-            </div>
           </div>
-          <Textarea
-            label="Dữ liệu sản phẩm sẽ dùng"
-            hint="Liệt kê từng loại — chỉ được dùng dữ liệu giả"
-            value={dataUsed}
-            onChange={(e) => setDataUsed(e.target.value)}
-          />
-          <Textarea
-            label="Tự đánh giá rủi ro"
-            hint="Có chạm dữ liệu khách thật / thông tin nội bộ / bảng giá chưa công bố / thương hiệu Mắt Bão không?"
-            value={riskSelfAssessment}
-            onChange={(e) => setRiskSelfAssessment(e.target.value)}
-          />
+          <Note tone="warning">
+            Sản phẩm phải được <b>tự dựng mới trong kỳ thi</b>. Bài bị phát hiện dùng lại repo hoặc
+            mẫu có sẵn sẽ không qua được Phase 2 — ban tổ chức đối chiếu lịch sử commit khi chấm mã
+            nguồn.
+          </Note>
         </div>
       </Card>
 

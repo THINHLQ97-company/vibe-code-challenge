@@ -92,7 +92,9 @@ export default async function AdminDashboardPage() {
       cpBlocked: blocked ? blocked.label : null,
       finalScore: s.finalScore,
       // Đậu = công bố điểm + đã đăng ký Google AI Pro (điều kiện hoàn phí theo thể lệ mục C).
-      reimburse: !!s.publishedAt && s.googleAiPro,
+      // Form không còn hỏi "có đăng ký Google AI Pro không" (bỏ 10/09/2026), nên app chỉ đánh dấu
+      // ĐÃ ĐẬU; việc đối chiếu hoá đơn đăng ký thật là của HR khi chi hoàn phí.
+      reimburse: !!s.publishedAt,
     };
   });
   const reimbursable = candidateRows.filter((r) => r.reimburse).length;
@@ -168,9 +170,9 @@ export default async function AdminDashboardPage() {
         />
         <CandidatesTable rows={candidateRows} />
         <Note className="mt-3">
-          Cột hoàn phí chỉ bật khi bài ĐÃ công bố và thí sinh có khai đăng ký Google AI Pro lúc đăng
-          ký đề tài — đây là dữ liệu HR đọc để chi hoàn 130.000đ qua lương, hiện có {reimbursable}{" "}
-          người đủ điều kiện.
+          Cột &quot;Diện hoàn phí&quot; bật khi bài ĐÃ công bố kết quả. Form đăng ký không còn hỏi thí sinh
+          có đăng ký Google AI Pro hay không, nên việc đối chiếu hoá đơn thật là của HR khi chi
+          hoàn phí — hiện có {reimbursable} người đã đậu.
         </Note>
       </Card>
     </PageShell>

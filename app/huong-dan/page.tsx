@@ -3,6 +3,7 @@ import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark } from "@/components/brand";
 import { HeroBackdrop } from "@/components/hero-backdrop";
 import { GlassCard, Pill, DarkNote, ImageSlot, BackToTop } from "@/components/landing-ui";
+import { VscodeMockup } from "@/components/vscode-mockup";
 import { KPI_CATEGORY } from "@/lib/kpi";
 import {
   MarkArrowRight,
@@ -18,7 +19,7 @@ import {
 } from "@/components/landing-art";
 
 export const metadata = {
-  title: { absolute: "Hướng dẫn dự thi · Vibe Code Challenge" },
+  title: { absolute: "Hướng dẫn dự thi Vibe Code Challenge" },
   description:
     "Hướng dẫn từng bước cho thí sinh Vibe Code Challenge: viết PRD, chọn công cụ AI, vibe code, đưa sản phẩm lên Vibe Host và nộp bài theo từng phase.",
 };
@@ -208,11 +209,18 @@ const STEPS = [
           Chỉ khoản đăng ký Google One AI Pro nằm trong diện hoàn phí khi bạn đậu. Các công cụ khác
           vẫn được dùng tự do nhưng do bạn tự chi trả.
         </DarkNote>
-        <ImageSlot
-          alt="Màn hình đăng ký tài khoản Google One AI Pro"
-          ratio="16/9"
-          note="Ảnh chụp trang đăng ký Google One AI Pro, làm nổi gói và mức giá để thí sinh đối chiếu."
-        />
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.86fr)_1fr] lg:items-start">
+          <ImageSlot
+            src="/huong-dan/buoc1-google-ai-pro.webp"
+            alt="Ưu đãi Google AI Pro dành cho thí sinh"
+            ratio="803/932"
+          />
+          <DarkNote tone="warning">
+            Ưu đãi chỉ áp dụng cho tài khoản Google <b>chưa từng đăng ký Google One</b>. Nếu bạn mở
+            trang đăng ký mà không thấy mức giá khuyến mãi, hãy tạo một tài khoản Google mới rồi
+            đăng ký lại từ tài khoản đó.
+          </DarkNote>
+        </div>
       </div>
     ),
   },
@@ -262,11 +270,13 @@ const STEPS = [
           </GlassCard>
         </div>
 
-        <ImageSlot
-          alt="Phiên trò chuyện với AI để dựng tài liệu PRD"
-          ratio="16/9"
-          note="Ảnh chụp một phiên chat với AI: bên trái là câu mô tả bài toán, bên phải là tài liệu PRD được sinh ra."
-        />
+        <div>
+          <p className="mb-2.5 text-caption text-cream/55">
+            Màn hình khi bạn vibe code trông như thế này: bên trái là mã nguồn AI dựng ra, bên phải
+            là chỗ bạn nói chuyện với nó bằng tiếng Việt thường ngày.
+          </p>
+          <VscodeMockup />
+        </div>
 
         <DarkNote tone="warning">
           Hệ thống chỉ nhận PRD ở dạng chữ thuần (.md hoặc .txt), tối thiểu 200 ký tự. Không nhận
@@ -287,20 +297,26 @@ const STEPS = [
             <h3 className="text-body font-semibold text-cream">Form đăng ký hỏi những gì</h3>
             <ul className="mt-2.5 space-y-1.5 text-caption text-cream/65">
               <li>· Tên sản phẩm, nhánh đề tài và nhóm chủ đề</li>
-              <li>· Bài toán, người dùng và tối thiểu ba chức năng chính</li>
+              <li>· Bài toán đang giải và người dùng của sản phẩm</li>
               <li>· Tài liệu PRD — tải file .md hoặc dán thẳng nội dung</li>
-              <li>· Phương án cơ sở dữ liệu và công cụ AI bạn dùng</li>
               <li>· Thời gian làm bài bạn xin, tối đa 15 ngày</li>
+              <li>· Công cụ AI dự định dùng (liệt kê, không bắt buộc)</li>
               <li>· Bốn cam kết bắt buộc, thiếu một mục là không gửi được</li>
             </ul>
+            <div className="mt-3">
+              <DarkNote>
+                Form cố ý ngắn: phạm vi, chức năng và dữ liệu đã nằm trong PRD, hỏi lại là bắt bạn
+                khai hai lần cùng một nội dung.
+              </DarkNote>
+            </div>
           </GlassCard>
           <GlassCard className="p-4">
             <h3 className="text-body font-semibold text-cream">Ban tổ chức xét theo tiêu chí nào</h3>
             <ul className="mt-2.5 space-y-1.5 text-caption text-cream/65">
               <li>· Bài toán có thật, không phải tình huống giả định</li>
               <li>· Phạm vi làm được trong thời gian bạn xin</li>
-              <li>· Ba chức năng đủ cụ thể để chấm đạt hoặc không đạt</li>
-              <li>· Có phương án cơ sở dữ liệu rõ ràng</li>
+              <li>· PRD nêu đủ ba chức năng cụ thể để chấm đạt hoặc không đạt</li>
+              <li>· PRD có phương án dữ liệu rõ ràng</li>
               <li>· Không thuộc nhóm trò chơi, không chạm bảy điều cấm</li>
             </ul>
           </GlassCard>
@@ -308,7 +324,7 @@ const STEPS = [
         <ImageSlot
           alt="Form đăng ký đề tài trong khu vực thí sinh"
           ratio="16/10"
-          note="Ảnh chụp form đăng ký đề tài, thấy rõ ô tải tài liệu PRD và khối cam kết bắt buộc."
+          note="Ảnh chụp form đăng ký đề tài sau khi rút gọn — thấy rõ ô tải tài liệu PRD và khối cam kết bắt buộc."
         />
         <DarkNote>
           Đề tài bị trả về sẽ kèm lý do cụ thể; bạn chỉnh sửa rồi nộp lại. Thời gian làm bài chỉ bắt
@@ -346,9 +362,9 @@ const STEPS = [
           ))}
         </div>
         <ImageSlot
-          alt="Quá trình vibe code một chức năng"
-          ratio="16/9"
-          note="Ảnh chụp màn hình chia đôi: bên trái là yêu cầu gửi cho AI, bên phải là sản phẩm đang chạy với chức năng vừa dựng."
+          src="/huong-dan/buoc4-vibe-code.webp"
+          alt="Vibe code là gì"
+          ratio="800/476"
         />
         <DarkNote tone="warning">
           Toàn bộ dữ liệu trong sản phẩm phải là dữ liệu giả do bạn tự tạo. Vibe Host tự gọi AI sửa
@@ -390,9 +406,9 @@ const STEPS = [
           </GlassCard>
         </div>
         <ImageSlot
-          alt="Bảng điều khiển Vibe Host sau khi triển khai thành công"
-          ratio="16/9"
-          note="Ảnh chụp Vibe Host: dự án ở trạng thái đã triển khai, thấy rõ đường dẫn sản phẩm và suất cơ sở dữ liệu."
+          src="/huong-dan/buoc5-quan-ly-bai-thi.webp"
+          alt="Giao diện quản lý bài thi trên Vibe Host"
+          ratio="1274/941"
         />
       </div>
     ),
@@ -429,11 +445,6 @@ const STEPS = [
             </GlassCard>
           ))}
         </div>
-        <ImageSlot
-          alt="Khu vực thí sinh hiển thị tiến độ qua các phase"
-          ratio="16/10"
-          note="Ảnh chụp trang tổng quan của thí sinh, thấy rõ sáu mốc bắt buộc và trạng thái hiện tại."
-        />
         <DarkNote>
           Duyệt đạt Phase 2 là mốc sản phẩm của bạn được ghi nhận vào {KPI_CATEGORY}. Hệ thống nhân
           sự đọc dữ liệu trực tiếp từ nền tảng này.

@@ -94,6 +94,7 @@ export const submissions = pgTable("submissions", {
   topicGroup: text("topic_group").notNull(),
   problemDesc: text("problem_desc").notNull(),
   targetUsers: text("target_users").notNull(),
+  /** Ngưng thu thập — ba chức năng chính nay nằm trong PRD. Giữ cột cho dữ liệu cũ. */
   features: jsonb("features").$type<string[]>().notNull().default([]),
 
   /**
@@ -107,8 +108,17 @@ export const submissions = pgTable("submissions", {
   prdContent: text("prd_content"),
   prdFileName: text("prd_file_name"),
 
-  // Phần 3 — Kỹ thuật & an toàn
-  databasePlan: text("database_plan").notNull(),
+  /**
+   * ── CÁC TRƯỜNG NGƯNG THU THẬP (từ 10/09/2026) ──────────────────────────────────────────────
+   *
+   * PRD nay là tài liệu bắt buộc và đã mô tả đầy đủ phạm vi, dữ liệu và cách làm. Hỏi lại những
+   * điều đó trong form là bắt thí sinh khai hai lần cùng một nội dung, và hai bản khai lệch nhau
+   * thì hội đồng không biết tin bản nào.
+   *
+   * GIỮ CỘT chứ không xoá: các mùa/bài trước đã có dữ liệu ở đây và màn BTC vẫn hiển thị nếu có.
+   * Chỉ nới `database_plan` từ NOT NULL sang cho phép trống, vì bài mới không còn khai nữa.
+   */
+  databasePlan: text("database_plan"),
   hasWorkflow: boolean("has_workflow").notNull().default(false),
   workflowDesc: text("workflow_desc"),
   deployMethod: text("deploy_method").notNull(), // luôn là "Tự dựng mới trong kỳ thi" — xem dưới

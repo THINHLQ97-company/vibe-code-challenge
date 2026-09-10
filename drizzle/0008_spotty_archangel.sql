@@ -1,0 +1,1 @@
+ALTER TABLE "submissions" ALTER COLUMN "database_plan" DROP NOT NULL;

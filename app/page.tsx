@@ -137,7 +137,7 @@ const CHECKPOINTS = [
 
 const FLOOR = [
   "Link mở được và hiện ra nội dung — trang trắng không tính.",
-  "Có ít nhất 3 chức năng chạy đúng như mô tả trong form đăng ký.",
+  "Có ít nhất 3 chức năng chạy đúng như mô tả trong tài liệu PRD.",
   "Database hoạt động thật — đọc/ghi thật, không gắn cứng trong mã.",
   "Mở được trên điện thoại, không vỡ tới mức không dùng được.",
   "Không còn chữ mẫu, nút bấm không làm gì, phần dang dở lộ ra ngoài.",

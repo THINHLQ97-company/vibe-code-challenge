@@ -101,7 +101,8 @@ export function ImageSlot({
   src?: string;
   alt: string;
   ratio?: string;
-  note: string;
+  /** Mô tả ảnh cần chụp — chỉ bắt buộc khi CHƯA có `src`. */
+  note?: string;
 }) {
   if (src) {
     return (

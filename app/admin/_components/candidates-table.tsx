@@ -116,11 +116,11 @@ export function CandidatesTable({ rows }: { rows: CandidateRow[] }) {
           },
           {
             key: "reimburse",
-            header: "Hoàn phí AI",
+            header: "Diện hoàn phí",
             hideBelow: "lg",
             render: (r) =>
               r.reimburse ? (
-                <Badge tone="success">Đủ điều kiện</Badge>
+                <Badge tone="success">Đã đậu</Badge>
               ) : (
                 <span className="text-caption text-ink-3">Chưa</span>
               ),
