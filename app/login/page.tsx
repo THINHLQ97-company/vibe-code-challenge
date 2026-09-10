@@ -3,12 +3,12 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AuthCard } from "@/components/dsvh/ui/auth/AuthCard";
-import { LogoWide } from "@/components/brand";
+import { AuthSplit } from "@/components/auth-split";
 import { PasswordInput } from "@/components/dsvh/ui/auth/PasswordInput";
 import { Input } from "@/components/dsvh/ui/Input";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { EnvelopeIcon, ArrowRightIcon } from "@/components/dsvh/icons";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,15 +42,14 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthCard
-      brand={<LogoWide height={34} />}
+    <AuthSplit
       title="Đăng nhập"
-      subtitle="Vibe Code Challenge · Mắt Bão"
+      subtitle="Chào mừng trở lại! Nhập thông tin để tiếp tục."
       footer={
         <span>
           Chưa có tài khoản?{" "}
-          <Link href="/signup" className="text-link hover:text-link-hover">
-            Đăng ký
+          <Link href="/signup" className="font-medium text-link hover:text-link-hover">
+            Đăng ký ngay
           </Link>
         </span>
       }
@@ -59,6 +58,7 @@ export default function LoginPage() {
         <Input
           label="Email công ty"
           type="email"
+          leftIcon={<EnvelopeIcon size={16} />}
           placeholder="ten@matbao.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -71,10 +71,16 @@ export default function LoginPage() {
           required
         />
         {error && <Alert tone="error">{error}</Alert>}
-        <Button type="submit" variant="solid" loading={loading} className="w-full">
+        <Button
+          type="submit"
+          variant="solid"
+          loading={loading}
+          rightIcon={<ArrowRightIcon size={16} />}
+          className="w-full"
+        >
           Đăng nhập
         </Button>
       </form>
-    </AuthCard>
+    </AuthSplit>
   );
 }

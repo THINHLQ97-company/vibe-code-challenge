@@ -46,9 +46,11 @@ export function AppShell({
       <aside className="hidden w-60 shrink-0 flex-col bg-canvas md:flex">
         {/* Logo NGANG bản tối: đọc được tên cuộc thi ngay trên cột điều hướng, thay vì một khối
             vuông cụt kèm chữ gõ tay. `brandTitle` giờ chỉ còn dùng cho thanh đầu ở mobile. */}
-        <div className="px-4 py-4">
-          <LogoWideDark height={26} />
-          <div className="mt-1.5 truncate text-meta text-cream/60">{brandSubtitle}</div>
+        <div className="px-4 py-5">
+          {/* Cột rộng 240px, trừ đệm còn 208px — logo tỉ lệ 3,62:1 ở chiều cao 40 chiếm 145px,
+              vừa đủ thoáng mà vẫn đọc rõ chữ. */}
+          <LogoWideDark height={40} />
+          <div className="mt-2 truncate text-meta text-cream/60">{brandSubtitle}</div>
         </div>
 
         <nav className="flex flex-col gap-0.5 px-2 py-2">
@@ -77,7 +79,7 @@ export function AppShell({
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between gap-3 border-b border-stroke bg-surface px-4 py-2.5 md:px-6">
           <div className="flex items-center gap-2 md:hidden">
-            <LogoSquare size={26} />
+            <LogoSquare size={30} />
             <span className="text-caption font-semibold text-ink">{brandTitle}</span>
           </div>
           <div className="ml-auto flex items-center gap-2.5">

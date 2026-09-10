@@ -3,13 +3,13 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AuthCard } from "@/components/dsvh/ui/auth/AuthCard";
-import { LogoWide } from "@/components/brand";
+import { AuthSplit } from "@/components/auth-split";
 import { PasswordInput } from "@/components/dsvh/ui/auth/PasswordInput";
 import { Input } from "@/components/dsvh/ui/Input";
 import { Select } from "@/components/dsvh/ui/form/Select";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { EnvelopeIcon, UserIcon, ArrowRightIcon } from "@/components/dsvh/icons";
 import { Note } from "@/components/dsvh/ui/data/Note";
 
 const DEPARTMENTS = [
@@ -67,14 +67,13 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthCard
-      brand={<LogoWide height={34} />}
-      title="Đăng ký tài khoản"
-      subtitle="Vibe Code Challenge · Mắt Bão"
+    <AuthSplit
+      title="Tạo tài khoản"
+      subtitle="Dùng email công ty @matbao.com để đăng ký dự thi."
       footer={
         <span>
           Đã có tài khoản?{" "}
-          <Link href="/login" className="text-link hover:text-link-hover">
+          <Link href="/login" className="font-medium text-link hover:text-link-hover">
             Đăng nhập
           </Link>
         </span>
@@ -83,6 +82,7 @@ export default function SignupPage() {
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <Input
           label="Họ tên"
+          leftIcon={<UserIcon size={16} />}
           placeholder="Nguyễn Văn A"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -91,6 +91,7 @@ export default function SignupPage() {
         <Input
           label="Email công ty"
           type="email"
+          leftIcon={<EnvelopeIcon size={16} />}
           placeholder="ten@matbao.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -119,10 +120,16 @@ export default function SignupPage() {
         />
         <Note>Hệ thống tự xếp bạn vào bảng Kỹ thuật hay Văn phòng dựa trên phòng ban.</Note>
         {error && <Alert tone="error">{error}</Alert>}
-        <Button type="submit" variant="solid" loading={loading} className="w-full">
+        <Button
+          type="submit"
+          variant="solid"
+          loading={loading}
+          rightIcon={<ArrowRightIcon size={16} />}
+          className="w-full"
+        >
           Đăng ký
         </Button>
       </form>
-    </AuthCard>
+    </AuthSplit>
   );
 }
