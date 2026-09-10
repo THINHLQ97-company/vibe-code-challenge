@@ -57,6 +57,14 @@ export const users = pgTable("users", {
   department: text("department"), // TS, DE, OP, MK, FI, HR, SALES
   board: boardEnum("board"),
   role: roleEnum("role").notNull().default("candidate"),
+  /**
+   * Ảnh đại diện lưu dạng data URI (image/jpeg base64) ngay trong DB cuộc thi.
+   *
+   * Không dựng ổ lưu trữ file riêng cho một tấm ảnh nhỏ: trình duyệt đã resize về ≤512px và nén
+   * JPEG trước khi gửi nên mỗi ảnh chỉ vài chục KB. Khi chuyển sang đăng nhập MS365, Graph API có
+   * endpoint `/me/photo/$value` — lúc đó nạp một lần vào đúng cột này, không phải đổi schema.
+   */
+  avatarUrl: text("avatar_url"),
   oauthProvider: text("oauth_provider"),
   oauthSubject: text("oauth_subject"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -103,8 +111,18 @@ export const submissions = pgTable("submissions", {
   databasePlan: text("database_plan").notNull(),
   hasWorkflow: boolean("has_workflow").notNull().default(false),
   workflowDesc: text("workflow_desc"),
-  deployMethod: text("deploy_method").notNull(), // tự dựng mới / deploy từ repo có sẵn / ...
-  isPrebuiltRepo: boolean("is_prebuilt_repo").notNull().default(false), // trần 50% điểm kỹ thuật nếu true
+  deployMethod: text("deploy_method").notNull(), // luôn là "Tự dựng mới trong kỳ thi" — xem dưới
+  /**
+   * BTC PHÁT HIỆN bài dùng repo/mẫu có sẵn ⇒ VI PHẠM, không qua được Phase 2.
+   *
+   * Đây là cuộc thi vibe code: giá trị nằm ở việc tự dựng trong kỳ thi. Bản trước cho thí sinh
+   * TỰ KHAI "deploy từ repo có sẵn" rồi chỉ hạ trần điểm kỹ thuật xuống 20/40 — tức là vẫn hợp lệ,
+   * chỉ thiệt điểm. Nay bỏ hẳn lựa chọn đó ở form đăng ký, và cột này đổi vai: do BTC gắn khi soi
+   * mã nguồn thấy dùng lại repo cũ. Gắn cờ thì `feedbackStatus` không được duyệt đạt và không công
+   * bố được (xem app/api/admin/submissions/[id]/prebuilt/route.ts).
+   */
+  isPrebuiltRepo: boolean("is_prebuilt_repo").notNull().default(false),
+  prebuiltNote: text("prebuilt_note"),
   aiTool: text("ai_tool"),
   googleAiPro: boolean("google_ai_pro").notNull().default(false),
   dataUsed: text("data_used"),

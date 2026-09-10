@@ -29,10 +29,12 @@ const BRANCHES = [
   { value: "B", label: "Nhánh B — Giải bài toán của chính mình" },
 ];
 
-const DEPLOY_METHODS = [
-  { value: "Tự dựng mới trong kỳ thi", label: "Tự dựng mới trong kỳ thi" },
-  { value: "Deploy từ Git-repo / mẫu có sẵn trước đó", label: "Deploy từ Git-repo / mẫu có sẵn trước đó" },
-];
+/**
+ * Chỉ còn MỘT cách hợp lệ. Thể lệ đã chốt: đây là cuộc thi vibe code, bài bị phát hiện dùng
+ * repo/mẫu có sẵn không qua được Phase 2. Trước đây form cho chọn "deploy từ repo có sẵn" rồi chỉ
+ * hạ trần điểm kỹ thuật — tức là vẫn hợp lệ, chỉ thiệt điểm. Bỏ hẳn lựa chọn đó.
+ */
+const DEPLOY_METHOD = "Tự dựng mới trong kỳ thi";
 
 type Initial = {
   productName: string;
@@ -71,9 +73,6 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
   const [databasePlan, setDatabasePlan] = useState(initial?.databasePlan ?? "");
   const [hasWorkflow, setHasWorkflow] = useState(initial?.hasWorkflow ?? false);
   const [workflowDesc, setWorkflowDesc] = useState(initial?.workflowDesc ?? "");
-  const [deployMethod, setDeployMethod] = useState<string | null>(
-    initial?.deployMethod ?? DEPLOY_METHODS[0].value
-  );
   const [aiTool, setAiTool] = useState(initial?.aiTool ?? "");
   const [googleAiPro, setGoogleAiPro] = useState(initial?.googleAiPro ?? true);
   const [dataUsed, setDataUsed] = useState(initial?.dataUsed ?? "");
@@ -87,6 +86,7 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
   const [confirmFakeData, setConfirmFakeData] = useState(false);
   const [confirmNoMatbaoInfo, setConfirmNoMatbaoInfo] = useState(false);
   const [confirmTemplateConsent, setConfirmTemplateConsent] = useState(false);
+  const [confirmSelfBuilt, setConfirmSelfBuilt] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -126,8 +126,7 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
           databasePlan,
           hasWorkflow,
           workflowDesc: hasWorkflow ? workflowDesc : undefined,
-          deployMethod,
-          isPrebuiltRepo: deployMethod === DEPLOY_METHODS[1].value,
+          deployMethod: DEPLOY_METHOD,
           aiTool,
           googleAiPro,
           dataUsed,
@@ -170,7 +169,8 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
     setPrdFileName(file.name);
   }
 
-  const allConfirmed = confirmFakeData && confirmNoMatbaoInfo && confirmTemplateConsent;
+  const allConfirmed =
+    confirmFakeData && confirmNoMatbaoInfo && confirmTemplateConsent && confirmSelfBuilt;
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -283,28 +283,19 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
               onChange={(e) => setWorkflowDesc(e.target.value)}
             />
           )}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Select
-              label="Cách đưa lên Vibe Host"
-              options={DEPLOY_METHODS}
-              value={deployMethod}
-              onChange={setDeployMethod}
-            />
-            <Input
-              label="Hạn nộp mong muốn (ngày kể từ khi duyệt)"
-              type="number"
-              min={1}
-              max={15}
-              value={String(requestedDeadlineDays)}
-              onChange={(e) => setRequestedDeadlineDays(Number(e.target.value))}
-            />
-          </div>
-          {deployMethod === DEPLOY_METHODS[1].value && (
-            <Note tone="warning">
-              Deploy từ repo/mẫu có sẵn được chấm trần 20/40 điểm ở mục Chất lượng kỹ thuật vì phần
-              tự dựng ít hơn. Các mục còn lại giữ nguyên.
-            </Note>
-          )}
+          <Input
+            label="Hạn nộp mong muốn (ngày kể từ khi duyệt)"
+            type="number"
+            min={1}
+            max={15}
+            value={String(requestedDeadlineDays)}
+            onChange={(e) => setRequestedDeadlineDays(Number(e.target.value))}
+            className="sm:max-w-xs"
+          />
+          <Note tone="warning">
+            Sản phẩm phải được <b>tự dựng mới trong kỳ thi</b>. Bài bị phát hiện dùng lại repo hoặc
+            mẫu có sẵn sẽ không qua được Phase 2 — BTC đối chiếu lịch sử commit khi chấm mã nguồn.
+          </Note>
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
               label="Công cụ AI dự định dùng"
@@ -352,6 +343,11 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
             checked={confirmTemplateConsent}
             onChange={setConfirmTemplateConsent}
             label="Đồng ý cho Mắt Bão dùng repo của tôi làm Template Vibe Host (có ghi tên tác giả)."
+          />
+          <Checkbox
+            checked={confirmSelfBuilt}
+            onChange={setConfirmSelfBuilt}
+            label="Cam kết sản phẩm được tự dựng mới trong kỳ thi, không dùng lại repo hay mẫu có sẵn."
           />
         </div>
       </Card>

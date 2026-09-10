@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthCard } from "@/components/dsvh/ui/auth/AuthCard";
+import { LogoWide } from "@/components/brand";
 import { PasswordInput } from "@/components/dsvh/ui/auth/PasswordInput";
 import { Input } from "@/components/dsvh/ui/Input";
 import { Button } from "@/components/dsvh/ui/Button";
@@ -42,6 +43,7 @@ export default function LoginPage() {
 
   return (
     <AuthCard
+      brand={<LogoWide height={34} />}
       title="Đăng nhập"
       subtitle="Vibe Code Challenge · Mắt Bão"
       footer={

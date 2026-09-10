@@ -355,8 +355,8 @@ async function main() {
       features: ["Ghi chú theo khách", "Nhắc lịch follow-up", "Lọc theo trạng thái"],
       databasePlan: "Bảng khách hàng + lịch sử liên hệ, lưu Postgres",
       hasWorkflow: false,
-      deployMethod: "Deploy từ Git-repo / mẫu có sẵn trước đó",
-      isPrebuiltRepo: true,
+      deployMethod: "Tự dựng mới trong kỳ thi",
+      isPrebuiltRepo: false,
       aiTool: "Cursor",
       googleAiPro: false,
       dataUsed: "Dữ liệu khách hàng giả lập",
@@ -386,11 +386,11 @@ async function main() {
       feedbackStatus: "approved",
       kpi3pFlag: true,
       surveySubmittedAt: new Date(Date.now() - 4 * 24 * 3600 * 1000),
-      finalScore: 60,
+      finalScore: 64,
       publishedAt: new Date(Date.now() - 3 * 24 * 3600 * 1000),
     })
     .returning();
-  // Chỉ một giám khảo chấm — trung bình của một phiếu vẫn là chính nó. 20 + 10 + 20 + 10 = 60.
+  // Chỉ một giám khảo chấm — trung bình của một phiếu vẫn là chính nó. 24 + 10 + 20 + 10 = 64.
   await db.insert(ideaScores).values({
     submissionId: sub4.id,
     judgeId: judge.id,
@@ -401,9 +401,8 @@ async function main() {
   await db.insert(productScores).values({
     submissionId: sub4.id,
     judgeId: judge.id,
-    // Deploy từ repo có sẵn -> trần kỹ thuật 20 (dù chấm gốc có thể cao hơn)
     moduleScores: { chatLuongKyThuat: 24, hoanThien: 10 },
-    summary: "Dùng lại repo mẫu, có chỉnh sửa nhưng chưa nhiều.",
+    summary: "Chạy được, phần workflow tự động còn thiếu.",
     source: "judge",
   });
 
@@ -456,7 +455,7 @@ async function main() {
   console.log(`  candidate TS      thisinh.ts@matbao.com / ${DEV_PASSWORD}     (Phase 2, chưa nộp Vibe Host)`);
   console.log(`  candidate MK      thisinh.mk@matbao.com / ${DEV_PASSWORD}     (chờ duyệt CP2)`);
   console.log(`  candidate DE      thisinh.de@matbao.com / ${DEV_PASSWORD}     (đã công bố · 91.5đ, 2 giám khảo)`);
-  console.log(`  candidate SALES   thisinh.sales@matbao.com / ${DEV_PASSWORD}  (đã công bố · 60đ, repo có sẵn)`);
+  console.log(`  candidate SALES   thisinh.sales@matbao.com / ${DEV_PASSWORD}  (đã công bố · 64đ)`);
   console.log(`  candidate HR      thisinh.hr@matbao.com / ${DEV_PASSWORD}     (bị trả về CP2)`);
   process.exit(0);
 }

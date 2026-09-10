@@ -19,7 +19,6 @@ export type PendingTopic = {
   targetUsers: string;
   databasePlan: string;
   features: string[];
-  isPrebuiltRepo: boolean;
   requestedDeadlineDays: number;
   riskSelfAssessment: string | null;
   prdContent: string | null;
@@ -70,7 +69,6 @@ export function TopicRow({ submission, capLeft }: { submission: PendingTopic; ca
         <div className="flex flex-wrap gap-1.5">
           <Badge tone="neutral">Nhánh {submission.branch}</Badge>
           <Badge tone="neutral">{submission.topicGroup}</Badge>
-          {submission.isPrebuiltRepo && <Badge tone="warning">Repo có sẵn — trần 20đ kỹ thuật</Badge>}
         </div>
       </div>
 

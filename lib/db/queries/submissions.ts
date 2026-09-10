@@ -1,4 +1,4 @@
-import { eq, desc, and, gte, lte, isNotNull } from "drizzle-orm";
+import { eq, desc, and, gte, lte, lt, isNotNull } from "drizzle-orm";
 import { db } from "../index";
 import { submissions, users, type NewSubmission } from "../schema";
 
@@ -41,14 +41,14 @@ export async function createSubmission(data: NewSubmission) {
 }
 
 // Tuần dương lịch Thứ 2 → Chủ nhật — giả định nêu trong docs/PLAN.md, cần BTC xác nhận.
-function startOfWeek(date: Date) {
+export function startOfWeek(date: Date) {
   const d = new Date(date);
   const day = (d.getDay() + 6) % 7; // 0 = Thứ 2
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() - day);
   return d;
 }
-function endOfWeek(date: Date) {
+export function endOfWeek(date: Date) {
   const start = startOfWeek(date);
   const end = new Date(start);
   end.setDate(end.getDate() + 7);
@@ -197,6 +197,24 @@ export async function publishSubmission(id: number, finalScore: number) {
 }
 
 /**
+ * Gắn/gỡ cờ "dùng repo có sẵn". Gắn cờ thì hạ luôn `feedbackStatus` về `needs_fix` — bài không thể
+ * đang ở trạng thái "đã duyệt đạt Phase 2" mà lại vi phạm điều kiện để qua Phase 2.
+ */
+export async function setPrebuiltFlag(id: number, prebuilt: boolean, note?: string) {
+  const [row] = await db
+    .update(submissions)
+    .set({
+      isPrebuiltRepo: prebuilt,
+      prebuiltNote: prebuilt ? (note ?? null) : null,
+      ...(prebuilt ? { feedbackStatus: "needs_fix" as const, kpi3pFlag: false } : {}),
+      updatedAt: new Date(),
+    })
+    .where(eq(submissions.id, id))
+    .returning();
+  return row;
+}
+
+/**
  * Mở lại một bài ĐÃ công bố để chấm lại — chỉ dùng khi BTC CHẤP NHẬN phản biện.
  *
  * Thiếu hàm này thì nút "Chấp nhận & chấm lại" là ngõ cụt: phản biện được ghi nhận nhưng điểm cũ
@@ -213,17 +231,41 @@ export async function reopenForRescore(id: number) {
   return row;
 }
 
-export async function listPublishedByBoard(board: "ky_thuat" | "van_phong") {
+/**
+ * Bảng điểm của ĐỢT ĐANG THI CÙNG TUẦN, không phải xếp hạng toàn mùa.
+ *
+ * Thể lệ duyệt cuốn chiếu 30–40 bài/tuần, nên "đối thủ" thật sự của một người là những người được
+ * duyệt đề tài cùng tuần với họ — cùng hạn nộp, cùng khung đăng bài, cùng kỳ đếm tương tác. Xếp
+ * chung cả mùa là so người vừa đăng ký với người đã xong từ tháng trước.
+ *
+ * Trả về CẢ bài chưa công bố (điểm `null`) để thấy đủ mặt đợt, nhưng chỉ bài đã công bố mới có
+ * điểm. Sắp theo điểm giảm dần, bài chưa có điểm xuống cuối.
+ */
+export async function listCohortByBoard(
+  board: "ky_thuat" | "van_phong",
+  weekStart: Date,
+  weekEnd: Date
+) {
   const rows = await db
     .select({
       id: submissions.id,
       productName: submissions.productName,
       finalScore: submissions.finalScore,
+      publishedAt: submissions.publishedAt,
+      userId: submissions.userId,
       userName: users.name,
+      department: users.department,
     })
     .from(submissions)
     .innerJoin(users, eq(submissions.userId, users.id))
-    .where(and(eq(users.board, board), isNotNull(submissions.publishedAt)))
+    .where(
+      and(
+        eq(users.board, board),
+        isNotNull(submissions.approvedAt),
+        gte(submissions.approvedAt, weekStart),
+        lt(submissions.approvedAt, weekEnd)
+      )
+    )
     .orderBy(desc(submissions.finalScore));
   return rows;
 }

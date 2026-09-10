@@ -10,6 +10,8 @@ import { Note } from "@/components/dsvh/ui/data/Note";
 import { NotepadIcon, HourglassIcon } from "@/components/dsvh/icons";
 import { ShareForm } from "./share-form";
 
+export const metadata = { title: "Chia sẻ & lan tỏa" };
+
 export default async function SharePage() {
   const session = await getSession();
   const submission = session ? await getCurrentSubmissionForUser(session.userId) : null;
@@ -59,8 +61,8 @@ export default async function SharePage() {
     >
       <Card>
         <CardHeader
-          title="Link bài đăng trên nhóm cộng đồng"
-          subtitle='Đăng ẩn danh lên nhóm "Vibe Coding chưa?" rồi dán link vào đây'
+          title="Ba bước của vòng lan tỏa"
+          subtitle="Bước nào đang chờ bạn, bước nào đang chờ BTC — nhìn màu và số thứ tự là biết"
         />
         <ShareForm
           submissionId={submission.id}

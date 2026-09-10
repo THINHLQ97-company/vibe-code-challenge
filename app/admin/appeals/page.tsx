@@ -7,6 +7,8 @@ import { Note } from "@/components/dsvh/ui/data/Note";
 import { ScalesIcon, HourglassIcon, CheckCircleIcon } from "@/components/dsvh/icons";
 import { AppealsTable, type AppealRowData } from "./appeals-table";
 
+export const metadata = { title: "Phản biện" };
+
 export default async function AppealsAdminPage() {
   const appeals = await listAppealsWithSubmission();
 

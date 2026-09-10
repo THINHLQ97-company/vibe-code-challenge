@@ -8,6 +8,8 @@ import { Note } from "@/components/dsvh/ui/data/Note";
 import { MegaphoneIcon, HourglassIcon, TrophyIcon, ChartBarIcon } from "@/components/dsvh/icons";
 import { PostsTable, type PostRowData } from "./posts-table";
 
+export const metadata = { title: "Bài đăng & lan tỏa" };
+
 export default async function PostsPage() {
   const all = await listSubmissionsWithUser();
   const relevant = all.filter((s) => !!s.facebookPostUrl);

@@ -23,6 +23,8 @@ const NAV: NavItem[] = [
   { href: "/dashboard/leaderboard", label: "Bảng xếp hạng", icon: <TrophyIcon size={17} /> },
 ];
 
+export const metadata = { title: { default: "Khu thí sinh", template: "%s · Khu thí sinh" } };
+
 const BOARD_LABEL: Record<string, string> = {
   ky_thuat: "Bảng Kỹ thuật",
   van_phong: "Bảng Văn phòng",
@@ -39,6 +41,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       brandTitle="Vibe Code Challenge"
       brandSubtitle="Khu vực thí sinh"
       nav={NAV}
+      avatarUrl={user?.avatarUrl}
+      profileHref="/dashboard/profile"
       userName={user?.name ?? ""}
       userMeta={`${user?.department ?? ""} · ${user?.board ? BOARD_LABEL[user.board] : ""}`}
     >

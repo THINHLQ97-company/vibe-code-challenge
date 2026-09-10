@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { LunorMark } from "@/components/dsvh/icons";
+import { LogoSquare, LogoWideDark } from "@/components/brand";
 import { Avatar } from "@/components/dsvh/ui/data/Avatar";
 import { LogoutButton } from "@/components/logout-button";
 
@@ -26,6 +26,8 @@ export function AppShell({
   nav,
   userName,
   userMeta,
+  avatarUrl,
+  profileHref,
   children,
 }: {
   brandTitle: string;
@@ -33,6 +35,8 @@ export function AppShell({
   nav: NavItem[];
   userName: string;
   userMeta: string;
+  avatarUrl?: string | null;
+  profileHref: string;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -40,12 +44,11 @@ export function AppShell({
   return (
     <div className="flex min-h-screen bg-surface-2">
       <aside className="hidden w-60 shrink-0 flex-col bg-canvas md:flex">
-        <div className="flex items-center gap-2.5 px-4 py-4">
-          <LunorMark size={32} />
-          <div className="min-w-0">
-            <div className="truncate text-body font-semibold text-cream">{brandTitle}</div>
-            <div className="truncate text-meta text-cream/60">{brandSubtitle}</div>
-          </div>
+        {/* Logo NGANG bản tối: đọc được tên cuộc thi ngay trên cột điều hướng, thay vì một khối
+            vuông cụt kèm chữ gõ tay. `brandTitle` giờ chỉ còn dùng cho thanh đầu ở mobile. */}
+        <div className="px-4 py-4">
+          <LogoWideDark height={26} />
+          <div className="mt-1.5 truncate text-meta text-cream/60">{brandSubtitle}</div>
         </div>
 
         <nav className="flex flex-col gap-0.5 px-2 py-2">
@@ -74,15 +77,22 @@ export function AppShell({
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between gap-3 border-b border-stroke bg-surface px-4 py-2.5 md:px-6">
           <div className="flex items-center gap-2 md:hidden">
-            <LunorMark size={26} />
+            <LogoSquare size={26} />
             <span className="text-caption font-semibold text-ink">{brandTitle}</span>
           </div>
           <div className="ml-auto flex items-center gap-2.5">
-            <div className="hidden text-right sm:block">
-              <div className="text-caption font-medium text-ink">{userName}</div>
-              <div className="text-meta text-ink-3">{userMeta}</div>
-            </div>
-            <Avatar name={userName} size="sm" />
+            {/* Avatar + tên là MỘT liên kết tới hồ sơ — chỗ người ta theo bản năng bấm vào để đổi
+                ảnh hay mật khẩu, thay vì phải đi tìm một mục menu riêng. */}
+            <Link
+              href={profileHref}
+              className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 hover:bg-surface-hover"
+            >
+              <div className="hidden text-right sm:block">
+                <div className="text-caption font-medium text-ink">{userName}</div>
+                <div className="text-meta text-ink-3">{userMeta}</div>
+              </div>
+              <Avatar name={userName} src={avatarUrl ?? undefined} size="sm" />
+            </Link>
             <LogoutButton />
           </div>
         </header>

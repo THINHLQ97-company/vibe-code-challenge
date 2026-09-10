@@ -18,6 +18,8 @@ import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
 import { NotepadIcon, HourglassIcon } from "@/components/dsvh/icons";
 import { AppealForm } from "./appeal-form";
 
+export const metadata = { title: "Kết quả" };
+
 export default async function ResultsPage() {
   const session = await getSession();
   const submission = session ? await getCurrentSubmissionForUser(session.userId) : null;
@@ -67,8 +69,7 @@ export default async function ResultsPage() {
     listAppealsForSubmission(submission.id),
   ]);
 
-  const technicalCap = submission.isPrebuiltRepo ? 20 : 40;
-  const technical = Math.min(scores.chatLuongKyThuat.value, technicalCap);
+  const technical = Math.min(scores.chatLuongKyThuat.value, 40);
   const completion = Math.min(scores.hoanThien.value, 15);
   const applicationValue = Math.min(scores.giaTriUngDung.value, 25);
   const engagement = engagementTierToScore(submission.engagementTier);
@@ -95,7 +96,7 @@ export default async function ResultsPage() {
           <span className="text-body text-ink-2">/100</span>
         </div>
         <div className="mt-4 space-y-3">
-          <ScoreLine label="Chất lượng kỹ thuật" value={technical} max={technicalCap} />
+          <ScoreLine label="Chất lượng kỹ thuật" value={technical} max={40} />
           <ScoreLine label="Độ hoàn thiện & nội dung riêng" value={completion} max={15} />
           <ScoreLine label="Giá trị ứng dụng" value={applicationValue} max={25} />
           <ScoreLine label="Lan tỏa cộng đồng" value={engagement} max={20} />
@@ -105,11 +106,7 @@ export default async function ResultsPage() {
             Điểm là trung bình của {judgeCount} giám khảo chấm độc lập.
           </Note>
         )}
-        {submission.isPrebuiltRepo && (
-          <Note tone="warning" className="mt-4">
-            Bài deploy từ repo/mẫu có sẵn nên mục Chất lượng kỹ thuật tính trần 20 điểm.
-          </Note>
-        )}
+
       </Card>
 
       <Card>

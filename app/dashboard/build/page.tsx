@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
+import { getAggregatedScores } from "@/lib/db/queries/scores";
 import { formatDateTimeVN, formatDateVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
@@ -11,6 +12,8 @@ import { Badge } from "@/components/dsvh/ui/Badge";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { NotepadIcon, HourglassIcon, ArrowRightIcon } from "@/components/dsvh/icons";
 import { BuildForm } from "./build-form";
+
+export const metadata = { title: "Nộp bài" };
 
 export default async function BuildPage() {
   const session = await getSession();
@@ -56,6 +59,14 @@ export default async function BuildPage() {
 
   const overdue =
     !!submission.submissionDeadline && submission.submissionDeadline.getTime() < Date.now();
+
+  /**
+   * Khoá sửa link khi BTC ĐÃ chấm Phase 2 — điểm chấm theo sản phẩm tại thời điểm chấm, đổi link
+   * sau đó là điểm không còn khớp thứ được chấm. Ngoại lệ: `needs_fix` thì phải mở, vì chính BTC
+   * yêu cầu sửa và nộp lại.
+   */
+  const scores = await getAggregatedScores(submission.id);
+  const locked = scores.hasProductScore && submission.feedbackStatus !== "needs_fix";
 
   return (
     <PageShell
@@ -103,12 +114,50 @@ export default async function BuildPage() {
           lastCheckedAt={
             submission.githubLastCheckedAt ? formatDateTimeVN(submission.githubLastCheckedAt) : null
           }
+          locked={locked}
         />
+        {locked && (
+          <Note className="mt-3">
+            BTC đã chấm Phase 2 nên link được khoá — điểm chấm theo đúng sản phẩm ở thời điểm chấm.
+            Nếu BTC yêu cầu chỉnh sửa, ô nhập sẽ mở lại để bạn nộp bản mới.
+          </Note>
+        )}
         <Note className="mt-4">
           Repo để <b>private</b> và thêm tài khoản GitHub <code>matbao-vibe-bot</code> làm
           collaborator (quyền Read) — hệ thống dùng tài khoản đó để xác minh, không đọc mã nguồn của
           bạn cho việc gì khác.
         </Note>
+      </Card>
+
+      {/* Phiếu trải nghiệm (CP6) hỏi về trải nghiệm LÀM sản phẩm, nên đặt ngay cạnh bước nộp bài
+          thay vì để thí sinh tự nhớ ra một mục rời trong menu. */}
+      <Card>
+        <CardHeader
+          title="Phiếu trải nghiệm sản phẩm (CP6)"
+          subtitle="Bắt buộc với mọi thí sinh — thiếu phiếu là chưa được công nhận đậu"
+          action={
+            <Link href="/dashboard/survey">
+              <Button
+                variant={submission.surveySubmittedAt ? "ghost" : "solid"}
+                size="sm"
+                rightIcon={<ArrowRightIcon size={15} />}
+              >
+                {submission.surveySubmittedAt ? "Xem lại phiếu" : "Nộp phiếu"}
+              </Button>
+            </Link>
+          }
+        />
+        {submission.surveySubmittedAt ? (
+          <Note>
+            Đã nộp {formatDateVN(submission.surveySubmittedAt)}. Nội dung phiếu được đội sản phẩm
+            dùng để cải thiện Vibe Host.
+          </Note>
+        ) : (
+          <Note tone="warning">
+            Bạn vừa làm xong sản phẩm là lúc nhớ rõ nhất chỗ nào của Vibe Host khó dùng — nộp phiếu
+            ngay bây giờ thay vì để tới cuối.
+          </Note>
+        )}
       </Card>
 
       {submission.feedbackStatus !== "pending" && (

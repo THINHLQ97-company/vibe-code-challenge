@@ -18,6 +18,14 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Bài này đã công bố kết quả" }, { status: 409 });
   }
 
+  // Dùng repo/mẫu có sẵn là vi phạm thể lệ — không công bố, bất kể điểm cao thấp.
+  if (submission.isPrebuiltRepo) {
+    return NextResponse.json(
+      { error: "Bài bị gắn cờ dùng repo/mẫu có sẵn — không đủ điều kiện công bố" },
+      { status: 409 }
+    );
+  }
+
   // Thể lệ: phải đủ CP1–CP6 mới được công nhận đậu — kiểm một lượt, báo hết các mốc còn thiếu
   // thay vì bắt admin bấm lại từng lần để lộ ra từng lỗi.
   const missing = missingCheckpoints(submission);
@@ -37,7 +45,6 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
   const finalScore = computeFinalScore({
     technicalRaw: scores.chatLuongKyThuat.value,
-    isPrebuiltRepo: submission.isPrebuiltRepo,
     completion: scores.hoanThien.value,
     applicationValue: scores.giaTriUngDung.value,
     engagementTier: submission.engagementTier,

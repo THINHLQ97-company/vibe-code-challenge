@@ -1,12 +1,15 @@
 import { getSession } from "@/lib/auth/session";
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { getScoreOverviews } from "@/lib/db/queries/scores";
+import { submissionStage } from "@/lib/stage-status";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { StatCard } from "@/components/dsvh/ui/data/StatCard";
 import { RobotIcon, HourglassIcon, CheckCircleIcon, ScalesIcon } from "@/components/dsvh/icons";
 import { ScoringTable, type ScoringRowData } from "./scoring-table";
+
+export const metadata = { title: "Chấm điểm" };
 
 export default async function ScoringPage() {
   const session = await getSession();
@@ -19,6 +22,7 @@ export default async function ScoringPage() {
 
   const rows: ScoringRowData[] = approved.map((s) => {
     const o = overviews.get(s.id)!;
+    const stage = submissionStage(s);
     return {
       id: s.id,
       productName: s.productName,
@@ -35,14 +39,15 @@ export default async function ScoringPage() {
       productBasis: o.chatLuongKyThuat.basis,
       judgeCount: Math.max(o.giaTriUngDung.judgeCount, o.chatLuongKyThuat.judgeCount),
       iScored: o.myIdea != null || o.myProduct != null,
-      feedbackStatus: s.feedbackStatus,
+      stageLabel: stage.label,
+      stageTone: stage.tone,
     };
   });
 
   const waitingAi = rows.filter((r) => r.ideaValue == null).length;
   const waitingJudge = rows.filter((r) => r.ideaValue != null && r.judgeCount === 0).length;
   const notScoredByMe = rows.filter((r) => !r.iScored).length;
-  const approvedPhase2 = rows.filter((r) => r.feedbackStatus === "approved").length;
+  const approvedPhase2 = approved.filter((s) => s.feedbackStatus === "approved").length;
 
   return (
     <PageShell

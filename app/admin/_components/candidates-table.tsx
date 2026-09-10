@@ -4,16 +4,18 @@ import { useMemo, useState } from "react";
 import { Table } from "@/components/dsvh/ui/Table";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { Input } from "@/components/dsvh/ui/Input";
+import { Avatar } from "@/components/dsvh/ui/data/Avatar";
 import { UsersThreeIcon, MagnifyingGlassIcon } from "@/components/dsvh/icons";
 
 export type CandidateRow = {
   id: number;
   userName: string;
+  avatarUrl: string | null;
   department: string;
   board: string;
   productName: string;
   stageLabel: string;
-  stageTone: "neutral" | "accent" | "success" | "warning" | "danger";
+  stageTone: "neutral" | "success" | "warning" | "danger";
   finalScore: number | null;
   reimburse: boolean;
 };
@@ -56,10 +58,13 @@ export function CandidatesTable({ rows }: { rows: CandidateRow[] }) {
             key: "user",
             header: "Thí sinh",
             render: (r) => (
-              <div>
-                <div className="text-body text-ink">{r.userName}</div>
-                <div className="text-caption text-ink-2">
-                  {r.department} · {r.board}
+              <div className="flex min-w-0 items-center gap-2.5">
+                <Avatar name={r.userName} src={r.avatarUrl ?? undefined} size="sm" />
+                <div className="min-w-0">
+                  <div className="truncate text-body text-ink">{r.userName}</div>
+                  <div className="truncate text-caption text-ink-2">
+                    {r.department} · {r.board}
+                  </div>
                 </div>
               </div>
             ),

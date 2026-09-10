@@ -1,56 +1,83 @@
 "use client";
 
-import { Table } from "@/components/dsvh/ui/Table";
+import { Table, type ColumnDef } from "@/components/dsvh/ui/Table";
 import { Badge } from "@/components/dsvh/ui/Badge";
-import { TrophyIcon } from "@/components/dsvh/icons";
 
 export type LeaderboardRow = {
   id: number;
-  rank: number;
   productName: string;
+  userName: string;
+  department: string;
   finalScore: number | null;
-  userName: string | null;
+  published: boolean;
   isMe: boolean;
 };
 
+/**
+ * Cố ý KHÔNG có cột hạng 1/2/3 và không có huy hiệu quán quân.
+ *
+ * Đây là bảng ĐIỂM của một đợt đang thi, không phải bảng vinh danh: đợt chưa chấm xong nên gắn số
+ * hạng lên là công bố một thứ tự chưa chốt, và người đứng "hạng 1" hôm nay có thể tụt khi những
+ * bài còn lại được chấm. Giải và thứ hạng do BTC chốt cuối tháng, không phải do màn này suy ra.
+ * Ở đây chỉ sắp điểm từ cao xuống thấp.
+ */
 export function LeaderboardTable({ rows }: { rows: LeaderboardRow[] }) {
+  const columns: ColumnDef<LeaderboardRow>[] = [
+    {
+      key: "user",
+      header: "Thí sinh",
+      maxWidth: 260,
+      render: (r) => (
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="min-w-0">
+            <div className="truncate font-medium text-ink">{r.userName}</div>
+            <div className="truncate text-meta text-ink-3">{r.department}</div>
+          </div>
+          {r.isMe && <Badge tone="accent">Bạn</Badge>}
+        </div>
+      ),
+    },
+    {
+      key: "product",
+      header: "Sản phẩm",
+      maxWidth: 340,
+      render: (r) => <span className="block truncate text-ink-2">{r.productName}</span>,
+    },
+    {
+      key: "status",
+      header: "Trạng thái",
+      align: "center",
+      render: (r) =>
+        r.published ? (
+          <Badge tone="success">Đã công bố điểm</Badge>
+        ) : (
+          <Badge tone="warning">Đang thi</Badge>
+        ),
+    },
+    {
+      key: "score",
+      header: "Điểm",
+      align: "right",
+      render: (r) =>
+        r.finalScore != null ? (
+          <span className="font-semibold tabular-nums text-ink">{r.finalScore}</span>
+        ) : (
+          <span className="text-caption text-ink-3">chưa có</span>
+        ),
+    },
+  ];
+
   return (
-    <Table<LeaderboardRow>
+    <Table
       data={rows}
+      columns={columns}
       getRowId={(r) => r.id}
-      rowClassName={(r) => (r.isMe ? "bg-cream-100" : undefined)}
-      emptyText="Chưa có bài nào được công bố"
-      emptySubtext="Khi BTC chốt điểm và bấm công bố, thứ hạng của bảng bạn sẽ hiện ở đây."
-      emptyIcon={<TrophyIcon size={36} />}
-      columns={[
-        {
-          key: "rank",
-          header: "Hạng",
-          width: 72,
-          render: (r) =>
-            r.rank <= 3 ? (
-              <span className="flex items-center gap-1.5 font-semibold text-ink">
-                <TrophyIcon size={15} className={r.rank === 1 ? "text-amber" : "text-ink-3"} />
-                {r.rank}
-              </span>
-            ) : (
-              <span className="tabular-nums text-ink-2">{r.rank}</span>
-            ),
-        },
-        {
-          key: "user",
-          header: "Thí sinh",
-          render: (r) => (r.isMe ? <Badge tone="accent">Bạn</Badge> : <span>{r.userName}</span>),
-        },
-        { key: "product", header: "Sản phẩm", accessorKey: "productName" },
-        {
-          key: "score",
-          header: "Điểm",
-          align: "right",
-          width: 96,
-          render: (r) => <span className="font-semibold tabular-nums text-ink">{r.finalScore}</span>,
-        },
-      ]}
+      variant="zebra"
+      density="comfortable"
+      stickyHeader={false}
+      rowClassName={(r) => (r.isMe ? "bg-orange/5" : undefined)}
+      emptyText="Chưa có ai trong đợt này"
+      emptySubtext="Đề tài được BTC duyệt trong tuần nào thì vào bảng điểm của tuần đó."
     />
   );
 }

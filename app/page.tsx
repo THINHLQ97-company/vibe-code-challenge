@@ -3,8 +3,8 @@ import { Button } from "@/components/dsvh/ui/Button";
 import { Card } from "@/components/dsvh/ui/Card";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { Note } from "@/components/dsvh/ui/data/Note";
+import { LogoWide } from "@/components/brand";
 import {
-  LunorMark,
   ArrowRightIcon,
   CheckCircleIcon,
   TrophyIcon,
@@ -84,8 +84,8 @@ const PITFALLS = [
     body: "Thiếu bài đăng là chưa hoàn thành, kể cả sản phẩm tốt. Bù lại bạn được đăng ẩn danh — không cần dùng nick Facebook chính.",
   },
   {
-    title: "Deploy từ repo có sẵn bị trần 20/40 điểm kỹ thuật",
-    body: "Vẫn được dự thi, nhưng mục Chất lượng kỹ thuật chỉ tính tối đa 50%. Hệ thống đối chiếu lịch sử commit. Ba mục còn lại giữ nguyên.",
+    title: "Phải tự dựng mới — không dùng lại repo có sẵn",
+    body: "Đây là cuộc thi vibe code, giá trị nằm ở việc bạn tự dựng trong kỳ thi. Bài bị phát hiện dùng lại repo hoặc mẫu có sẵn KHÔNG qua được Phase 2 và không được công bố. BTC đối chiếu lịch sử commit khi chấm mã nguồn.",
   },
 ];
 
@@ -94,10 +94,7 @@ export default function LandingPage() {
     <main className="min-h-screen bg-surface-2">
       <header className="border-b border-stroke bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
-          <div className="flex items-center gap-2.5">
-            <LunorMark size={30} />
-            <span className="text-body font-semibold text-ink">Vibe Code Challenge</span>
-          </div>
+          <LogoWide height={30} />
           <Link href="/login">
             <Button variant="solid" size="sm" rightIcon={<ArrowRightIcon size={15} />}>
               Đăng nhập

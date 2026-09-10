@@ -15,6 +15,8 @@ const REG_STATUS: Record<string, { tone: "neutral" | "success" | "warning" | "da
   returned: { tone: "danger", label: "Bị trả về" },
 };
 
+export const metadata = { title: "Đề tài của tôi" };
+
 export default async function RegisterPage() {
   const session = await getSession();
   const submission = session ? await getCurrentSubmissionForUser(session.userId) : null;
@@ -47,34 +49,54 @@ export default async function RegisterPage() {
     >
       <Card>
         <CardHeader title={submission.productName} subtitle={submission.topicGroup} />
-        <dl className="divide-y divide-stroke">
-          <InfoRow label="Nhánh đề tài" value={`Nhánh ${submission.branch}`} />
-          <InfoRow label="Bài toán giải quyết" value={submission.problemDesc} wrap />
-          <InfoRow label="Người dùng sản phẩm" value={submission.targetUsers} wrap />
+        {/* Hai cột, nhãn trên giá trị dưới. Mặc định `row` của InfoRow là `justify-between` —
+            trên thẻ rộng gần hết màn thì nhãn dính mép trái, giá trị dính mép phải, ở giữa là
+            khoảng trống hàng ngàn pixel và mắt phải quét ngang cả màn để ghép một cặp. */}
+        <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+          <InfoRow layout="stack" label="Nhánh đề tài" value={`Nhánh ${submission.branch}`} size="sm" />
+          <InfoRow layout="stack" label="Bài toán giải quyết" value={submission.problemDesc} wrap size="sm" />
+          <InfoRow layout="stack" label="Người dùng sản phẩm" value={submission.targetUsers} wrap size="sm" />
           <InfoRow
+            layout="stack"
             label="Chức năng chính"
-            value={features.length ? features.join(" · ") : "—"}
-            wrap
+            value={
+              features.length ? (
+                <ul className="space-y-0.5">
+                  {(features as string[]).map((f) => (
+                    <li key={f}>· {f}</li>
+                  ))}
+                </ul>
+              ) : (
+                "—"
+              )
+            }
+            size="sm"
           />
-          <InfoRow label="Phương án database" value={submission.databasePlan} wrap />
+          <InfoRow layout="stack" label="Phương án database" value={submission.databasePlan} wrap size="sm" />
           <InfoRow
+            layout="stack"
             label="Workflow tự động"
             value={submission.hasWorkflow ? (submission.workflowDesc ?? "Có") : "Không có"}
             wrap
+            size="sm"
           />
-          <InfoRow label="Cách đưa lên Vibe Host" value={submission.deployMethod} />
-          <InfoRow label="Công cụ AI dự định dùng" value={submission.aiTool ?? "—"} />
+          <InfoRow layout="stack" label="Công cụ AI dự định dùng" value={submission.aiTool ?? "—"} size="sm" />
           <InfoRow
+            layout="stack"
             label="Đăng ký Google AI Pro"
             value={submission.googleAiPro ? "Có — được hoàn phí khi đậu" : "Không"}
+            size="sm"
           />
           <InfoRow
+            layout="stack"
             label="Hạn nộp"
             value={
               submission.submissionDeadline
                 ? formatDateVN(submission.submissionDeadline)
                 : `${submission.requestedDeadlineDays} ngày kể từ khi duyệt`
             }
+            size="sm"
+            numeric
           />
         </dl>
       </Card>
@@ -88,9 +110,10 @@ export default async function RegisterPage() {
       </Card>
 
       {submission.isPrebuiltRepo && (
-        <Alert tone="warning" title="Deploy từ repo có sẵn — thang điểm kỹ thuật riêng">
-          Bài dùng lại repo/mẫu có sẵn được chấm trần 20/40 điểm ở mục Chất lượng kỹ thuật; các mục
-          còn lại giữ nguyên.
+        <Alert tone="error" title="BTC phát hiện bài dùng repo/mẫu có sẵn">
+          {submission.prebuiltNote ?? "BTC chưa ghi rõ căn cứ — liên hệ ban tổ chức."} Theo thể lệ,
+          bài phải được tự dựng mới trong kỳ thi nên bài này chưa qua được Phase 2. Bạn có quyền
+          phản biện kèm bằng chứng (lịch sử commit).
         </Alert>
       )}
     </PageShell>

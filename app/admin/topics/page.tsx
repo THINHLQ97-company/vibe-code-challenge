@@ -9,6 +9,8 @@ import { Badge } from "@/components/dsvh/ui/Badge";
 import { CheckCircleIcon } from "@/components/dsvh/icons";
 import { TopicRow } from "./topic-row";
 
+export const metadata = { title: "Duyệt đề tài" };
+
 export default async function TopicsPage() {
   const [pending, season] = await Promise.all([listPendingApprovals(), getActiveSeason()]);
   const approvedThisWeek = season ? await countApprovedThisWeek(season.id) : 0;
@@ -51,7 +53,6 @@ export default async function TopicsPage() {
                   targetUsers: s.targetUsers,
                   databasePlan: s.databasePlan,
                   features: Array.isArray(s.features) ? (s.features as string[]) : [],
-                  isPrebuiltRepo: s.isPrebuiltRepo,
                   requestedDeadlineDays: s.requestedDeadlineDays,
                   riskSelfAssessment: s.riskSelfAssessment,
                   prdContent: s.prdContent,

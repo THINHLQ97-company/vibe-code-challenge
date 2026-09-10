@@ -7,6 +7,7 @@ import {
   markGithubVerified,
   markGithubVerifyFailed,
 } from "@/lib/db/queries/submissions";
+import { getAggregatedScores } from "@/lib/db/queries/scores";
 import { verifyGithubAccess } from "@/lib/github";
 
 const schema = z.object({
@@ -28,6 +29,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
+  }
+
+  // Đã chấm Phase 2 thì khoá link: điểm chấm theo sản phẩm ở thời điểm chấm, đổi link sau đó là
+  // điểm không còn khớp thứ được chấm. `needs_fix` là ngoại lệ — chính BTC yêu cầu nộp lại.
+  const scored = await getAggregatedScores(submission.id);
+  if (scored.hasProductScore && submission.feedbackStatus !== "needs_fix") {
+    return NextResponse.json(
+      { error: "BTC đã chấm Phase 2 — không đổi link được nữa. Chờ BTC yêu cầu chỉnh sửa nếu cần." },
+      { status: 409 }
+    );
   }
 
   await updatePhase2Info(submission.id, parsed.data);

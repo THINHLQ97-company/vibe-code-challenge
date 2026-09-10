@@ -56,9 +56,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       githubVerified: !!s.githubVerifiedAt,
       hasWorkflow: s.hasWorkflow,
       workflowDesc: s.workflowDesc,
-      isPrebuiltRepo: s.isPrebuiltRepo,
-      // Trần điểm kỹ thuật để bộ chấm không trả về điểm vượt trần rồi bị cắt lặng lẽ.
-      technicalCap: s.isPrebuiltRepo ? 20 : 40,
+      flaggedPrebuiltRepo: s.isPrebuiltRepo,
+      // Thang điểm kỹ thuật cố định 40 — dùng repo có sẵn nay là vi phạm, không phải hạ trần.
+      technicalMax: 40,
     },
   });
 }

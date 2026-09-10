@@ -15,6 +15,7 @@ export function BuildForm({
   githubVerified,
   initialError,
   lastCheckedAt,
+  locked,
 }: {
   submissionId: number;
   initialVibehostUrl: string;
@@ -22,6 +23,8 @@ export function BuildForm({
   githubVerified: boolean;
   initialError: string | null;
   lastCheckedAt: string | null;
+  /** BTC đã chấm Phase 2 và không yêu cầu sửa ⇒ khoá, xem `BuildPage`. */
+  locked: boolean;
 }) {
   const router = useRouter();
   const [vibehostUrl, setVibehostUrl] = useState(initialVibehostUrl);
@@ -68,6 +71,7 @@ export function BuildForm({
         placeholder="https://ten-san-pham.vibehost.vn"
         value={vibehostUrl}
         onChange={(e) => setVibehostUrl(e.target.value)}
+        disabled={locked}
         required
       />
       <Input
@@ -76,6 +80,7 @@ export function BuildForm({
         placeholder="https://github.com/tai-khoan/ten-repo"
         value={githubRepoUrl}
         onChange={(e) => setGithubRepoUrl(e.target.value)}
+        disabled={locked}
         required
       />
 
@@ -84,7 +89,7 @@ export function BuildForm({
           {verified ? "Đã xác minh quyền truy cập repo" : "Chưa xác minh"}
         </Badge>
         {lastCheckedAt && <span className="text-meta text-ink-3">Kiểm tra lần cuối: {lastCheckedAt}</span>}
-        {!verified && githubRepoUrl && (
+        {!locked && !verified && githubRepoUrl && (
           <Button
             type="button"
             variant="ghost"
@@ -104,9 +109,11 @@ export function BuildForm({
         </Alert>
       )}
 
-      <Button type="submit" variant="solid" loading={loading}>
-        Lưu & xác minh
-      </Button>
+      {!locked && (
+        <Button type="submit" variant="solid" loading={loading}>
+          Lưu & xác minh
+        </Button>
+      )}
     </form>
   );
 }

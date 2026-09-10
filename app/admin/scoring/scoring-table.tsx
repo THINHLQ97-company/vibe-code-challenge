@@ -13,7 +13,7 @@ export type ScoringRowData = {
   userName: string;
   department: string;
   currentPhase: number;
-  isPrebuiltRepo: boolean;
+  isPrebuiltRepo: boolean;  // BTC gắn cờ vi phạm
   hasPrd: boolean;
   ideaValue: number | null;
   ideaBasis: "judges" | "external_ai" | "none";
@@ -21,13 +21,8 @@ export type ScoringRowData = {
   productBasis: "judges" | "external_ai" | "none";
   judgeCount: number;
   iScored: boolean;
-  feedbackStatus: string;
-};
-
-const FEEDBACK: Record<string, { label: string; tone: "neutral" | "warning" | "success" }> = {
-  pending: { label: "Chờ chấm", tone: "neutral" },
-  needs_fix: { label: "Cần sửa", tone: "warning" },
-  approved: { label: "Đạt", tone: "success" },
+  stageLabel: string;
+  stageTone: "neutral" | "success" | "warning" | "danger";
 };
 
 /** Ô điểm: số + nguồn điểm, để BTC nhìn phát biết đang là điểm máy hay điểm hội đồng. */
@@ -139,14 +134,10 @@ export function ScoringTable({ rows }: { rows: ScoringRowData[] }) {
         ),
     },
     {
-      key: "feedback",
-      header: "Phase 2",
+      key: "stage",
+      header: "Đang ở đâu",
       align: "center",
-      hideBelow: "lg",
-      render: (r) => {
-        const f = FEEDBACK[r.feedbackStatus] ?? FEEDBACK.pending;
-        return <Badge tone={f.tone}>{f.label}</Badge>;
-      },
+      render: (r) => <Badge tone={r.stageTone}>{r.stageLabel}</Badge>,
     },
     {
       key: "open",

@@ -4,6 +4,7 @@ import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
 import { getAggregatedScores } from "@/lib/db/queries/scores";
 import { candidateScoreView } from "@/lib/score-visibility";
 import { getCheckpoints } from "@/lib/checkpoints";
+import { submissionStage } from "@/lib/stage-status";
 import { formatDateVN, formatDeadlineDistance } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
@@ -28,11 +29,7 @@ const PHASE_STEPS = [
   { label: "Công bố", description: "Kết quả cuối" },
 ];
 
-const REG_STATUS: Record<string, { tone: "neutral" | "success" | "warning" | "danger"; label: string }> = {
-  pending: { tone: "warning", label: "Chờ BTC duyệt" },
-  approved: { tone: "success", label: "Đã duyệt đề tài" },
-  returned: { tone: "danger", label: "Bị trả về" },
-};
+export const metadata = { title: { absolute: "Tổng quan · Khu thí sinh" } };
 
 export default async function DashboardOverviewPage() {
   const session = await getSession();
@@ -71,14 +68,19 @@ export default async function DashboardOverviewPage() {
   const checklist = getCheckpoints(submission);
 
   const nextAction = getNextAction(submission);
-  const status = REG_STATUS[submission.registrationStatus];
+  // Một huy hiệu trạng thái TỔNG, cùng từ vựng với màn BTC — thí sinh và BTC nhìn cùng một chữ.
+  const stage = submissionStage(submission);
 
   return (
     <PageShell
       title={submission.productName}
       subtitle={`Nhánh ${submission.branch} · ${submission.topicGroup}`}
-      action={<Badge tone={status.tone}>{status.label}</Badge>}
+      action={<Badge tone={stage.tone}>{stage.label}</Badge>}
     >
+      <Note tone={stage.state === "blocked" ? "danger" : stage.state === "waiting" ? "warning" : "neutral"}>
+        {stage.detail}
+      </Note>
+
       {submission.registrationStatus === "returned" && (
         <Alert tone="warning" title="Đề tài bị trả về — sửa và nộp lại">
           {submission.registrationNote}{" "}

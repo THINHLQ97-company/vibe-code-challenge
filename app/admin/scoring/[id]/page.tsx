@@ -7,7 +7,6 @@ import { formatDateVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Badge } from "@/components/dsvh/ui/Badge";
-import { Note } from "@/components/dsvh/ui/data/Note";
 import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
 import { PrdPanel } from "@/components/prd-viewer";
 import {
@@ -19,6 +18,12 @@ import {
 } from "@/components/dsvh/icons";
 import { PhaseScoring } from "./phase-scoring";
 import { FeedbackPanel } from "./feedback-panel";
+import { PrebuiltPanel } from "./prebuilt-panel";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const s = await getSubmissionWithUser(Number((await params).id));
+  return { title: s ? `Chấm ${s.productName}` : "Chấm điểm" };
+}
 
 export default async function ScoringDetailPage({
   params,
@@ -37,7 +42,6 @@ export default async function ScoringDetailPage({
     listJudgeScores(id),
   ]);
   const o = overviews.get(id)!;
-  const technicalCap = submission.isPrebuiltRepo ? 20 : 40;
 
   return (
     <PageShell
@@ -132,12 +136,13 @@ export default async function ScoringDetailPage({
           />
         </dl>
 
-        {submission.isPrebuiltRepo && (
-          <Note tone="warning" className="mt-4">
-            Bài deploy từ repo/mẫu có sẵn — điểm Chất lượng kỹ thuật bị tính trần {technicalCap} khi
-            chốt tổng, dù bạn chấm cao hơn.
-          </Note>
-        )}
+        <div className="mt-4 border-t border-stroke pt-4">
+          <PrebuiltPanel
+            submissionId={id}
+            flagged={submission.isPrebuiltRepo}
+            note={submission.prebuiltNote}
+          />
+        </div>
       </Card>
 
       <Card>
@@ -172,7 +177,7 @@ export default async function ScoringDetailPage({
         title="Phase 2 · Điểm sản phẩm"
         subtitle="Máy chấm dựa trên sản phẩm và mã nguồn; bạn xác nhận hoặc điều chỉnh"
         modules={[
-          { key: "chatLuongKyThuat", label: "Chất lượng kỹ thuật", max: technicalCap },
+          { key: "chatLuongKyThuat", label: "Chất lượng kỹ thuật", max: 40 },
           { key: "hoanThien", label: "Độ hoàn thiện", max: 15 },
         ]}
         aggregate={{

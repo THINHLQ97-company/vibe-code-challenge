@@ -9,6 +9,7 @@ import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { InfoTile } from "@/components/dsvh/ui/data/InfoTile";
+import { submissionStage } from "@/lib/stage-status";
 import { CandidatesTable, type CandidateRow } from "./_components/candidates-table";
 import {
   NotepadIcon,
@@ -25,26 +26,7 @@ const BOARD_LABEL: Record<string, string> = {
   van_phong: "Văn phòng",
 };
 
-/** Trạng thái gọn cho một dòng — thứ BTC cần liếc là bài đang kẹt ở đâu. */
-function stageOf(s: {
-  registrationStatus: string;
-  currentPhase: number;
-  githubVerifiedAt: Date | null;
-  securityStatus: string;
-  facebookApprovedAt: Date | null;
-  surveySubmittedAt: Date | null;
-  publishedAt: Date | null;
-}): { label: string; tone: "neutral" | "accent" | "success" | "warning" | "danger" } {
-  if (s.publishedAt) return { label: "Đã công bố", tone: "success" };
-  if (s.registrationStatus === "pending") return { label: "Chờ duyệt đề tài", tone: "warning" };
-  if (s.registrationStatus === "returned") return { label: "Trả về sửa", tone: "danger" };
-  if (!s.githubVerifiedAt) return { label: "Đang làm bài", tone: "neutral" };
-  if (s.securityStatus === "flagged") return { label: "Gắn cờ an toàn", tone: "danger" };
-  if (s.currentPhase < 3) return { label: "Chờ chấm Phase 2", tone: "accent" };
-  if (!s.facebookApprovedAt) return { label: "Chờ duyệt bài đăng", tone: "accent" };
-  if (!s.surveySubmittedAt) return { label: "Thiếu phiếu trải nghiệm", tone: "warning" };
-  return { label: "Chờ công bố", tone: "accent" };
-}
+export const metadata = { title: { absolute: "Tổng quan · Ban tổ chức" } };
 
 export default async function AdminDashboardPage() {
   const [submissions, season] = await Promise.all([listSubmissionsWithUser(), getActiveSeason()]);
@@ -69,10 +51,11 @@ export default async function AdminDashboardPage() {
   // dữ liệu với các ô thống kê phía trên, tách ra thành trang riêng chỉ bắt BTC bấm thêm một lần
   // để xem chi tiết của con số họ vừa đọc.
   const candidateRows: CandidateRow[] = submissions.map((s) => {
-    const stage = stageOf(s);
+    const stage = submissionStage(s);
     return {
       id: s.id,
       userName: s.user.name ?? "",
+      avatarUrl: s.user.avatarUrl,
       department: s.user.department ?? "",
       board: s.user.board ? BOARD_LABEL[s.user.board] : "—",
       productName: s.productName,

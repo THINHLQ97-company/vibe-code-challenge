@@ -21,6 +21,8 @@ const NAV: NavItem[] = [
   { href: "/admin/appeals", label: "Phản biện", icon: <ScalesIcon size={17} /> },
 ];
 
+export const metadata = { title: { default: "Ban tổ chức", template: "%s · Ban tổ chức" } };
+
 const ROLE_LABEL: Record<string, string> = { admin: "Ban tổ chức", judge: "Giám khảo" };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -34,6 +36,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       brandTitle="Vibe Code Challenge"
       brandSubtitle="Ban tổ chức"
       nav={NAV}
+      avatarUrl={user?.avatarUrl}
+      profileHref="/admin/profile"
       userName={user?.name ?? ""}
       userMeta={ROLE_LABEL[user?.role ?? ""] ?? ""}
     >

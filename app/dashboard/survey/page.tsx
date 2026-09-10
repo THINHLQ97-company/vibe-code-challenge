@@ -11,6 +11,8 @@ import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { NotepadIcon } from "@/components/dsvh/icons";
 import { SurveyForm } from "./survey-form";
 
+export const metadata = { title: "Phiếu trải nghiệm" };
+
 export default async function SurveyPage() {
   const session = await getSession();
   const [submission, user] = await Promise.all([

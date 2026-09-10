@@ -20,8 +20,15 @@ const registerSchema = z.object({
   databasePlan: z.string().min(3),
   hasWorkflow: z.boolean().optional().default(false),
   workflowDesc: z.string().optional(),
-  deployMethod: z.string().min(1),
-  isPrebuiltRepo: z.boolean().optional().default(false),
+  // Chỉ còn một cách hợp lệ; `isPrebuiltRepo` KHÔNG nhận từ thí sinh nữa — nay là cờ do BTC gắn
+  // khi phát hiện vi phạm, không phải điều thí sinh tự khai để chịu trừ điểm.
+  // `z.literal` phát mã lỗi `invalid_literal` và bỏ qua `message`, nên câu báo lỗi rơi về tiếng
+  // Anh mặc định của zod. Dùng refine để giữ được câu tiếng Việt.
+  deployMethod: z
+    .string()
+    .refine((v) => v === "Tự dựng mới trong kỳ thi", {
+      message: "Sản phẩm phải được tự dựng mới trong kỳ thi — không nhận repo/mẫu có sẵn",
+    }),
   aiTool: z.string().optional(),
   googleAiPro: z.boolean().optional().default(false),
   dataUsed: z.string().optional(),

@@ -33,15 +33,19 @@ export function engagementTierToScore(tier: number | null): number {
   }
 }
 
+export const TECHNICAL_MAX = 40;
+
+/**
+ * Không còn trần điểm kỹ thuật theo cách deploy: dùng repo có sẵn nay là VI PHẠM (chặn ở Phase 2),
+ * không phải một lựa chọn hợp lệ bị trừ điểm. Mọi bài vào tới đây đều chấm trên thang 40 đầy đủ.
+ */
 export function computeFinalScore(params: {
-  technicalRaw: number; // /40 gốc
-  isPrebuiltRepo: boolean;
+  technicalRaw: number; // /40
   completion: number; // /15
   applicationValue: number; // /25
   engagementTier: number | null;
 }): number {
-  const technicalCap = params.isPrebuiltRepo ? 20 : 40;
-  const technical = Math.min(params.technicalRaw, technicalCap);
+  const technical = Math.min(params.technicalRaw, TECHNICAL_MAX);
   const completion = Math.min(params.completion, 15);
   const applicationValue = Math.min(params.applicationValue, 25);
   const engagement = engagementTierToScore(params.engagementTier);

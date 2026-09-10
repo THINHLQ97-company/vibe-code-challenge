@@ -6,6 +6,8 @@ import { ShieldCheckIcon, ShieldWarningIcon, HourglassIcon } from "@/components/
 import { SecurityTable, type SecurityRowData } from "./security-table";
 import { BanList } from "./ban-list";
 
+export const metadata = { title: "Cổng an toàn" };
+
 export default async function SecurityPage() {
   const all = await listSubmissionsWithUser();
   const relevant = all.filter((s) => s.registrationStatus === "approved" && s.currentPhase >= 2);
