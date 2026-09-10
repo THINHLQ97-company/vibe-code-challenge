@@ -277,7 +277,7 @@ const STEPS = [
         </div>
 
         <DarkNote tone="warning">
-          Hệ thống chỉ nhận PRD ở dạng chữ thuần (.md hoặc .txt), tối thiểu 200 ký tự. Không nhận
+          Hệ thống chỉ nhận PRD ở dạng file .md, tối thiểu 200 ký tự. Không nhận
           .docx hay .pdf, vì hệ chấm điểm phải đọc được nội dung mới chấm tự động được Phase 1.
         </DarkNote>
       </div>
@@ -325,8 +325,7 @@ const STEPS = [
           ratio="1261/859"
         />
         <DarkNote>
-          Đề tài bị trả về sẽ kèm lý do cụ thể; bạn chỉnh sửa rồi nộp lại. Thời gian làm bài chỉ bắt
-          đầu tính từ thời điểm đề tài được duyệt.
+          Bị trả về thì vẫn nộp lại được, nhưng điểm đã chấm được ghi nhận ngay tại thời điểm bạn nộp bài. Ban giám khảo chỉ ra chỗ chưa đạt để bạn sửa và bước vào vòng kế tiếp. Thời gian làm bài chỉ bắt đầu tính từ thời điểm đề tài được duyệt.
         </DarkNote>
       </div>
     ),
@@ -376,14 +375,14 @@ const STEPS = [
     id: "buoc-5-vibe-host",
     icon: <StepDeploy size={22} />,
     title: "Đưa sản phẩm lên Vibe Host",
-    lead: "Sản phẩm phải chạy được trên một đường dẫn công khai thì hội đồng mới chấm được. Bạn được cấp tài khoản Vibe Host miễn phí trong suốt chương trình.",
+    lead: "Sản phẩm phải chạy được trên một đường dẫn công khai thì hội đồng mới chấm được. Bạn tự vào vibehost.matbao.ai đăng ký tài khoản — hệ thống chỉ nhận email công ty @matbao.com.",
     content: (
       <div className="space-y-4">
         <div className="grid gap-3 md:grid-cols-2">
           <GlassCard className="p-4">
             <h3 className="text-body font-semibold text-cream">Trình tự đưa lên</h3>
             <ol className="mt-2.5 space-y-1.5 text-caption text-cream/65">
-              <li>1. Đăng nhập vibehost.matbao.ai bằng tài khoản được cấp</li>
+              <li>1. Vào vibehost.matbao.ai, đăng ký bằng email @matbao.com</li>
               <li>2. Tạo dự án mới và kết nối kho mã nguồn của bạn</li>
               <li>3. Khai báo cơ sở dữ liệu — gói cơ bản có sẵn một suất</li>
               <li>4. Triển khai, chờ trạng thái báo thành công</li>
@@ -449,8 +448,9 @@ const STEPS = [
           ratio="1274/941"
         />
         <DarkNote>
-          Duyệt đạt Phase 2 là mốc sản phẩm của bạn được ghi nhận vào {KPI_CATEGORY}. Hệ thống nhân
-          sự đọc dữ liệu trực tiếp từ nền tảng này.
+          Duyệt đạt Phase 2 là mốc sản phẩm của bạn được ghi nhận vào {KPI_CATEGORY}. Điểm cuối
+          cùng được gửi về Trưởng bộ phận của bạn để ra quyết định; hệ thống nhân sự đọc dữ liệu
+          trực tiếp từ nền tảng này.
         </DarkNote>
       </div>
     ),

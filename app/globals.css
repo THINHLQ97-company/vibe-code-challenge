@@ -137,3 +137,21 @@ summary::-webkit-details-marker {
   --text-kpi: 35px;
   --text-hero: 44px;
 }
+
+/**
+ * Hiệu ứng hiện vào cho khối chi tiết từng bước ở đoàn tàu hành trình.
+ *
+ * Khai ở đây chứ không trong `tailwind.config.ts`: đây là keyframes dùng đúng MỘT chỗ, nhét vào
+ * config khiến mọi trang phải tải thêm định nghĩa mà không ai dùng. Component gọi qua
+ * `motion-safe:animate-[fadeUp_.35s_ease-out]`, nên ai bật "giảm chuyển động" sẽ không thấy gì cả.
+ */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

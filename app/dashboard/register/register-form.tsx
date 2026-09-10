@@ -49,8 +49,8 @@ type Initial = {
   prdFileName: string | null;
 };
 
-/** Chỉ nhận định dạng chữ thuần — hệ chấm ngoài phải đọc được nội dung mới chấm được Phase 1. */
-const PRD_ACCEPT = ".md,.markdown,.txt,text/markdown,text/plain";
+/** Chỉ nhận .md — hệ chấm ngoài phải đọc được nội dung mới chấm tự động được Phase 1. */
+const PRD_ACCEPT = ".md,.markdown,text/markdown";
 const PRD_MAX_BYTES = 200_000;
 
 export function RegisterForm({ initial }: { initial?: Initial }) {
@@ -216,7 +216,7 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
           />
           {prdError && <Alert tone="error">{prdError}</Alert>}
           <Note>
-            Hệ chấm điểm đọc thẳng nội dung này nên chỉ nhận chữ (.md / .txt), không nhận .docx hay
+            Hệ chấm điểm đọc thẳng nội dung này nên chỉ nhận file .md, không nhận .docx hay
             .pdf. Đừng dán dữ liệu khách thật hay thông tin nội bộ vào đây.
           </Note>
         </div>

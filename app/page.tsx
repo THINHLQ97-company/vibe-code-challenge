@@ -25,11 +25,6 @@ import {
   TopicLegal,
   TopicEdu,
   TopicLife,
-  StepRegister,
-  StepApproved,
-  StepDeploy,
-  StepSecurity,
-  StepSurvey,
   BoardTech,
   BoardOffice,
   DeptSupport,
@@ -42,6 +37,7 @@ import {
   PrizeGlow,
 } from "@/components/landing-art";
 import { HeroBackdrop } from "@/components/hero-backdrop";
+import { JourneyTrain } from "@/components/journey-train";
 import { GlassCard, Pill, DarkNote, Band, BackToTop } from "@/components/landing-ui";
 
 /**
@@ -122,19 +118,6 @@ const TOPICS = [
   { icon: <TopicLife size={20} />, label: "Cá nhân / đời sống" },
 ];
 
-/**
- * Nhãn "CP1…CP6" là ký hiệu nội bộ của BTC — người chưa dự thi đọc không ra nghĩa. Trang giới
- * thiệu chỉ đánh số bước 1–6; ký hiệu CP vẫn giữ nguyên trong khu thí sinh, nơi nó khớp với thể lệ.
- */
-const CHECKPOINTS = [
-  { icon: <StepRegister size={20} />, label: "Đăng ký dự thi", desc: "Dự kick-off (hoặc xem lại bản ghi) và đăng ký trong tuần." },
-  { icon: <StepApproved size={20} />, label: "Đề tài được duyệt", desc: "Nộp form đề tài kèm tài liệu PRD, chọn hạn nộp ≤15 ngày." },
-  { icon: <StepDeploy size={20} />, label: "Nộp Vibe Host + mã nguồn", desc: "Sản phẩm chạy thật, có database, đạt đủ 6 tiêu chí ngưỡng sàn." },
-  { icon: <StepSecurity size={20} />, label: "Qua cổng an toàn", desc: "Không vướng 7 điều cấm — máy quét trước, người duyệt bài bị gắn cờ." },
-  { icon: <MarkBroadcast size={20} />, label: "Đăng bài & BGK duyệt", desc: 'Đăng lên nhóm "Vibe Coding chưa?" theo lịch được cấp. Được đăng ẩn danh.' },
-  { icon: <StepSurvey size={20} />, label: "Phiếu trải nghiệm", desc: "Nộp phiếu trải nghiệm sản phẩm — bắt buộc với mọi thí sinh." },
-];
-
 const FLOOR = [
   "Link mở được và hiện ra nội dung — trang trắng không tính.",
   "Có ít nhất 3 chức năng chạy đúng như mô tả trong tài liệu PRD.",
@@ -189,15 +172,15 @@ const FAQ = [
   },
   {
     q: "Chi phí hạ tầng và công cụ AI do ai chi trả?",
-    a: "Thí sinh được cấp tài khoản Vibe Host miễn phí trong suốt chương trình, với gói cơ bản gồm hai suất chạy nền — đủ cho một website và một cơ sở dữ liệu theo đúng yêu cầu bắt buộc. Về công cụ AI, bạn tự do lựa chọn; riêng khoản đăng ký Google AI Pro sẽ được hoàn lại qua kỳ lương kế tiếp nếu bạn đậu.",
+    a: "Bạn tự vào vibehost.matbao.ai đăng ký tài khoản — hệ thống chỉ nhận email công ty @matbao.com. Gói cơ bản gồm hai suất chạy nền, đủ cho một website và một cơ sở dữ liệu theo đúng yêu cầu bắt buộc. Về công cụ AI, bạn tự do lựa chọn; riêng khoản đăng ký Google AI Pro sẽ được hoàn lại qua kỳ lương kế tiếp nếu bạn đậu.",
   },
   {
     q: "Tôi ngại công khai danh tính khi đăng bài chia sẻ.",
-    a: "Đăng bài lên nhóm cộng đồng là nghĩa vụ bắt buộc, nhưng danh tính thì không. Bạn có thể sử dụng chế độ ẩn danh của nhóm, một tài khoản phụ, hoặc gửi nội dung để ban tổ chức đăng hộ. Điểm lan tỏa được chấm trên chính bài đăng đó, không phụ thuộc việc ai đứng tên.",
+    a: "Đăng bài lên nhóm cộng đồng là nghĩa vụ bắt buộc, nhưng danh tính thì không. Bạn có thể sử dụng chế độ ẩn danh của nhóm hoặc một tài khoản phụ. Điểm lan tỏa được chấm trên chính bài đăng đó, không phụ thuộc việc ai đứng tên.",
   },
   {
     q: "Bài bị trả về ở vòng kiểm tra thì có bị loại không?",
-    a: "Không. Cả hai cổng kiểm tra — ngưỡng sàn kỹ thuật và rà soát an toàn — đều cho phép chỉnh sửa và nộp lại trong thời hạn của bạn. Ban tổ chức có trách nhiệm nêu rõ sản phẩm chưa đạt ở điểm nào; nhận xét chung chung không được xem là hợp lệ. Cơ chế này nhằm biến một lần chưa đạt thành một lần học được điều gì đó.",
+    a: "Không bị loại. Cả hai cổng kiểm tra — ngưỡng sàn kỹ thuật và rà soát an toàn — đều cho phép chỉnh sửa và nộp lại trong thời hạn của bạn. Lưu ý: điểm đã chấm được ghi nhận ngay tại thời điểm bạn nộp bài; ban giám khảo chỉ ra chỗ chưa đạt để bạn sửa và bước vào vòng kế tiếp. Nhận xét kiểu chung chung không được xem là hợp lệ.",
   },
   {
     q: "Nếu tôi không đồng tình với kết quả chấm?",
@@ -205,7 +188,7 @@ const FAQ = [
   },
   {
     q: "Điểm số được tính vào KPI như thế nào?",
-    a: `Sản phẩm được hội đồng duyệt đạt sẽ được ghi nhận vào ${KPI_CATEGORY} trong hệ thống KPI của bạn. Hệ thống nhân sự đọc trực tiếp dữ liệu từ nền tảng này, bạn không cần khai báo lại.`,
+    a: `Sản phẩm được hội đồng duyệt đạt sẽ được ghi nhận vào ${KPI_CATEGORY} trong hệ thống KPI của bạn. Điểm cuối cùng được gửi về Trưởng bộ phận của bạn để ra quyết định. Hệ thống nhân sự đọc trực tiếp dữ liệu từ nền tảng này, bạn không cần khai báo lại.`,
   },
   {
     q: "Tôi cần chuẩn bị gì trước khi đăng ký?",
@@ -226,7 +209,7 @@ export default function LandingPage() {
         <header className="sticky top-0 z-30 border-b border-cream/10 bg-canvas/80 backdrop-blur-md">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5 sm:px-6">
             <Link href="/" aria-label="Vibe Code Challenge — về đầu trang">
-              <LogoWideDark height={30} />
+              <LogoWideDark height={40} />
             </Link>
 
             <nav aria-label="Mục lục trang" className="hidden items-center gap-1 lg:flex">
@@ -256,10 +239,10 @@ export default function LandingPage() {
         </header>
 
         {/* ── HERO ───────────────────────────────────────────────────────────────────────── */}
-        <section className="mx-auto max-w-6xl px-5 pb-12 pt-8 text-center sm:px-6 sm:pt-14">
+        <section className="mx-auto max-w-6xl px-5 pb-7 pt-8 text-center sm:px-6 sm:pt-14">
           <Pill tone="accent">
             <MarkSpark size={14} />
-            Mắt Bão · Toàn công ty · Thi cá nhân
+            Cuộc thi Vibe Code nội bộ Mắt Bão
           </Pill>
           <h1 className="mx-auto mt-5 max-w-3xl text-hero font-bold leading-tight tracking-tight text-cream">
             Tự tay làm ra một sản phẩm.
@@ -301,19 +284,23 @@ export default function LandingPage() {
         {/* Dải giải thưởng có quầng sáng RIÊNG, đậm hơn phần còn lại — đây là điểm nhấn của trang. */}
         <section id="giai-thuong" className="relative isolate scroll-mt-20 overflow-hidden">
           <PrizeGlow />
-          <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-6">
+          <div className="relative mx-auto max-w-6xl px-5 pb-14 pt-7 sm:px-6">
           <div className="text-center">
             {/* Cúp đặt TRƯỚC nhãn và con số: mắt đi từ hình xuống chữ, và bản thân ảnh đã có quầng
                 sáng riêng nên nó gánh luôn vai trò điểm nhấn — quầng CSS phía sau chỉ còn phụ hoạ.
-                Ảnh có kênh alpha (48,5% trong suốt) nên hoà thẳng vào nền, không cần khung. */}
+
+                Ảnh gốc có 304px (27% chiều cao) TRONG SUỐT HOÀN TOÀN ở mép trên — nó tự đẩy cúp
+                xuống và tạo một khoảng trống lớn không ai giải thích được. Đã cắt theo vùng THẤY
+                ĐƯỢC (alpha ≥ 8) chứ không phải alpha > 0: viền alpha 1–7 mắt không nhìn ra nhưng
+                vẫn chiếm chỗ. Tỉ lệ sau khi cắt là 760/412. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/trophy-glow.webp"
               alt=""
               aria-hidden
-              width={360}
-              height={293}
-              className="mx-auto mb-1 w-[220px] max-w-full sm:w-[300px] lg:w-[360px]"
+              width={380}
+              height={206}
+              className="mx-auto -mb-1 w-[240px] max-w-full sm:w-[320px] lg:w-[380px]"
             />
             <p className="flex items-center justify-center gap-2 text-caption font-semibold uppercase tracking-wide text-cream/50">
               <MarkTrophy size={16} className="text-orange-bright" />
@@ -394,33 +381,9 @@ export default function LandingPage() {
           id="hanh-trinh"
           eyebrow="Sáu mốc bắt buộc"
           title="Hành trình của bạn"
-          subtitle="Sáu mốc dưới đây là bắt buộc với mọi thí sinh. Sau khi đăng nhập, khu vực thí sinh hiển thị đúng sáu mốc này kèm trạng thái hiện tại của bạn, để bạn luôn biết mình đang ở đâu và việc kế tiếp là gì."
+          subtitle="Sáu mốc dưới đây là bắt buộc với mọi thí sinh. Bấm vào từng toa hoặc dùng mũi tên để xem chi tiết mốc đó: bạn phải làm gì, ban tổ chức làm gì, và điều gì quyết định bạn được đi tiếp."
         >
-          {/* Lưới 3 cột thay cho danh sách dọc: sáu mốc xếp dọc kéo trang dài thêm gần 500px mà
-              không nói thêm điều gì. */}
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {CHECKPOINTS.map((c, i) => (
-              <GlassCard key={c.label} className="relative overflow-hidden p-5">
-                {/* Số bước đặt to, mờ, ở góc — đọc được thứ tự từ xa mà không tranh chỗ với tiêu đề. */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -right-1 -top-2 text-[64px] font-bold leading-none text-cream/[0.07]"
-                >
-                  {i + 1}
-                </span>
-                <span className="relative grid size-11 place-items-center rounded-xl bg-orange/12 text-orange-bright">
-                  {c.icon}
-                </span>
-                <div className="relative mt-3.5 flex items-center gap-2">
-                  <span className="text-meta font-bold uppercase tracking-wider text-orange-bright">
-                    Bước {i + 1}
-                  </span>
-                </div>
-                <h3 className="relative mt-1 text-title font-semibold text-cream">{c.label}</h3>
-                <p className="relative mt-1.5 text-caption text-cream/60">{c.desc}</p>
-              </GlassCard>
-            ))}
-          </div>
+          <JourneyTrain />
         </Band>
 
         {/* ── CHẤM ĐIỂM ──────────────────────────────────────────────────────────────────── */}

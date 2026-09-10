@@ -68,7 +68,10 @@ export function FeedbackPanel({
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <div className="flex flex-wrap gap-2">
+      {/* Đã duyệt đạt thì nút duyệt TẮT — bấm lại chỉ ghi đè cùng một trạng thái, không thay đổi
+          gì mà lại làm người dùng tưởng có việc để làm. Bấm "Yêu cầu sửa" là trạng thái quay về
+          `needs_fix`, nút duyệt sáng lại vì lúc đó nó thật sự có việc. */}
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           variant="ghost"
           size="sm"
@@ -82,11 +85,16 @@ export function FeedbackPanel({
           variant="solid"
           size="sm"
           loading={loading}
-          disabled={text.trim().length < 3}
+          disabled={text.trim().length < 3 || status === "approved"}
           onClick={() => void send("approved")}
         >
           Duyệt đạt · mở Phase 3
         </Button>
+        {status === "approved" && (
+          <span className="text-caption text-ink-3">
+            Đã duyệt đạt — bấm &quot;Yêu cầu sửa&quot; nếu cần mở lại.
+          </span>
+        )}
       </div>
       {error && <Alert tone="error">{error}</Alert>}
     </div>

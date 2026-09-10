@@ -103,7 +103,7 @@ export const submissions = pgTable("submissions", {
    * Lưu NỘI DUNG markdown chứ không lưu file nhị phân: hệ chấm điểm ngoài phải ĐỌC ĐƯỢC tài liệu
    * mới chấm được ý tưởng. Một file .docx trong ổ đĩa hay một link Google Docs private thì nó
    * không mở ra được, và Phase 1 sẽ không bao giờ chấm tự động được như thể lệ mô tả.
-   * Thí sinh kéo thả file .md/.txt (đọc ngay ở trình duyệt) hoặc dán thẳng nội dung.
+   * Thí sinh chọn file .md (đọc ngay ở trình duyệt) hoặc dán thẳng nội dung.
    */
   prdContent: text("prd_content"),
   prdFileName: text("prd_file_name"),

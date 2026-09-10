@@ -103,7 +103,7 @@ export default async function BuildPage() {
       <Card>
         <CardHeader
           title="Link sản phẩm và mã nguồn"
-          subtitle="Bạn tự đăng ký tài khoản Vibe Host và deploy ở đó; hệ thống này chỉ lưu link để chấm"
+          subtitle="Bạn tự đăng ký Vibe Host bằng email @matbao.com và deploy ở đó; hệ thống này chỉ lưu link để chấm"
         />
         <BuildForm
           submissionId={submission.id}

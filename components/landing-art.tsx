@@ -497,7 +497,7 @@ export function PrizeGlow() {
         <ellipse cx="50%" cy="26%" rx="62%" ry="52%" fill="url(#pz-core)" />
       </svg>
       {/* Hai vạch mảnh phân tách dải, nhạt hơn trước để không thành khung viền. */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange/28 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange/30 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cream/12 to-transparent" />
     </div>
   );
