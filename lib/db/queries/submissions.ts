@@ -196,6 +196,23 @@ export async function publishSubmission(id: number, finalScore: number) {
   return row;
 }
 
+/**
+ * Mở lại một bài ĐÃ công bố để chấm lại — chỉ dùng khi BTC CHẤP NHẬN phản biện.
+ *
+ * Thiếu hàm này thì nút "Chấp nhận & chấm lại" là ngõ cụt: phản biện được ghi nhận nhưng điểm cũ
+ * vẫn nguyên, và cổng chặn công bố lại ("Bài này đã công bố kết quả") khoá luôn đường sửa. Xoá
+ * `publishedAt`/`finalScore` để hội đồng chấm lại rồi công bố lại — thí sinh thấy bảng điểm quay
+ * về trạng thái đang đối chiếu, đúng với việc điểm cũ đã bị bác.
+ */
+export async function reopenForRescore(id: number) {
+  const [row] = await db
+    .update(submissions)
+    .set({ finalScore: null, publishedAt: null, updatedAt: new Date() })
+    .where(eq(submissions.id, id))
+    .returning();
+  return row;
+}
+
 export async function listPublishedByBoard(board: "ky_thuat" | "van_phong") {
   const rows = await db
     .select({

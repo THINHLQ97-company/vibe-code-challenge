@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
-import { formatDateTimeVN } from "@/lib/datetime";
+import { formatDateTimeVN, formatDateVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { Note } from "@/components/dsvh/ui/data/Note";
+import { Badge } from "@/components/dsvh/ui/Badge";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { NotepadIcon, HourglassIcon, ArrowRightIcon } from "@/components/dsvh/icons";
 import { BuildForm } from "./build-form";
@@ -53,11 +54,41 @@ export default async function BuildPage() {
     );
   }
 
+  const overdue =
+    !!submission.submissionDeadline && submission.submissionDeadline.getTime() < Date.now();
+
   return (
     <PageShell
       title="Nộp bài — sản phẩm & mã nguồn"
       subtitle="Phase 2: chấm chất lượng kỹ thuật và độ hoàn thiện"
+      action={
+        submission.submissionDeadline ? (
+          <Badge tone={overdue ? "danger" : "neutral"}>
+            Hạn nộp {formatDateVN(submission.submissionDeadline)}
+          </Badge>
+        ) : undefined
+      }
     >
+      {/* BTC gắn cờ ở cổng an toàn thì thí sinh PHẢI thấy lý do. Trước đây màn này im lặng: bài
+          bị chặn công bố mà người làm không biết mình sai điều cấm nào để mà sửa. */}
+      {submission.securityStatus === "flagged" && (
+        <Alert tone="error" title="Bài bị gắn cờ ở cổng rà soát an toàn (CP4)">
+          {submission.securityNote ?? "BTC chưa ghi rõ lý do — liên hệ ban tổ chức."} Sửa xong thì
+          nộp lại link bên dưới để BTC rà lại.
+        </Alert>
+      )}
+
+      {submission.securityStatus === "clean" && (
+        <Note>Bài đã qua cổng rà soát an toàn (CP4) — không vướng điều cấm nào.</Note>
+      )}
+
+      {overdue && !submission.githubVerifiedAt && (
+        <Alert tone="warning" title="Đã quá hạn nộp">
+          Hạn nộp của bạn là {formatDateVN(submission.submissionDeadline!)}. Vẫn nộp được, nhưng
+          BTC có quyền không nhận bài trễ — liên hệ ban tổ chức nếu có lý do chính đáng.
+        </Alert>
+      )}
+
       <Card>
         <CardHeader
           title="Link sản phẩm và mã nguồn"

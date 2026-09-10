@@ -47,11 +47,11 @@ export default async function ResultsPage() {
         <Card>
           <Empty
             icon={<HourglassIcon size={40} />}
-            title="Chưa công bố điểm"
-            description="Hội đồng đang đối chiếu điểm máy chấm với phần chấm tay. Điểm chỉ hiển thị sau khi BTC bấm công bố — trước đó không ai thấy điểm của bạn."
+            title="Chưa công bố kết quả"
+            description="Tổng điểm và thứ hạng chỉ hiện sau khi BTC bấm công bố. Điểm từng phần đã được hội đồng chốt thì xem ở trang Tổng quan."
             action={
               <Link href="/dashboard">
-                <Button variant="ghost">Về tổng quan</Button>
+                <Button variant="ghost">Xem điểm từng phần</Button>
               </Link>
             }
           />

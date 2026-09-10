@@ -60,6 +60,8 @@ export function ShareForm({
 
   return (
     <div className="space-y-4">
+      {/* BGK duyệt xong là chốt link — API chặn đổi (`phase3` trả 409). Khoá luôn ô nhập ở đây
+          thay vì để thí sinh gõ lại rồi mới ăn lỗi: giao diện phải nói cùng một luật với API. */}
       <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <Input
           className="flex-1"
@@ -68,11 +70,15 @@ export function ShareForm({
           placeholder="https://facebook.com/groups/.../posts/..."
           value={url}
           onChange={(e) => setUrl(e.target.value)}
+          disabled={approved}
+          hint={approved ? "BGK đã duyệt bài này — không đổi link được nữa." : undefined}
           required
         />
-        <Button type="submit" variant="solid" loading={loading}>
-          {initialUrl ? "Cập nhật link" : "Gửi link bài"}
-        </Button>
+        {!approved && (
+          <Button type="submit" variant="solid" loading={loading}>
+            {initialUrl ? "Cập nhật link" : "Gửi link bài"}
+          </Button>
+        )}
       </form>
 
       {error && <Alert tone="error">{error}</Alert>}

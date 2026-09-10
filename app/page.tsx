@@ -22,7 +22,7 @@ const STEPS = [
   {
     icon: <RocketIcon size={20} />,
     title: "Đăng ký đề tài",
-    desc: "Mô tả bài toán, chức năng và phương án database. BTC duyệt cuốn chiếu theo tuần.",
+    desc: "Mô tả bài toán, chức năng, phương án database và đính tài liệu PRD. BTC duyệt cuốn chiếu theo tuần.",
   },
   {
     icon: <DatabaseIcon size={20} />,
