@@ -486,23 +486,19 @@ export function PrizeGlow() {
       <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
         <defs>
           <radialGradient id="pz-core" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="var(--color-orange-bright)" stopOpacity="0.42" />
-            <stop offset="55%" stopColor="var(--color-orange)" stopOpacity="0.14" />
+            <stop offset="0%" stopColor="var(--color-orange)" stopOpacity="0.16" />
+            <stop offset="60%" stopColor="var(--color-orange)" stopOpacity="0.05" />
             <stop offset="100%" stopColor="var(--color-orange)" stopOpacity="0" />
           </radialGradient>
-          <radialGradient id="pz-warm" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="var(--color-amber)" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="var(--color-amber)" stopOpacity="0" />
-          </radialGradient>
         </defs>
-        {/* Quầng chính ngay sau con số tổng giá trị. */}
-        <ellipse cx="50%" cy="20%" rx="46%" ry="30%" fill="url(#pz-core)" />
-        <ellipse cx="22%" cy="72%" rx="34%" ry="34%" fill="url(#pz-warm)" />
-        <ellipse cx="80%" cy="76%" rx="30%" ry="30%" fill="url(#pz-warm)" />
+        {/* MỘT quầng rất rộng và rất nhạt, tâm đặt sau con số tổng. Bản trước dùng ba quầng ở
+            42%/20% cùng lúc: ba vệt màu chồng nhau đọc ra như lỗi hiển thị chứ không như ánh
+            sáng. Ánh sáng thật thì rộng, mờ, và chỉ có một nguồn. */}
+        <ellipse cx="50%" cy="26%" rx="62%" ry="52%" fill="url(#pz-core)" />
       </svg>
-      {/* Hai vạch sáng mảnh ôm lấy dải, cùng vai trò với đường viền nhưng mềm hơn. */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange/50 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-orange/35 to-transparent" />
+      {/* Hai vạch mảnh phân tách dải, nhạt hơn trước để không thành khung viền. */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange/28 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cream/12 to-transparent" />
     </div>
   );
 }

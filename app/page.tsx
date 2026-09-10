@@ -307,18 +307,11 @@ export default function LandingPage() {
               <MarkTrophy size={16} className="text-orange-bright" />
               Tổng giá trị đến tay người dự thi
             </p>
-            <p className="relative mt-2 inline-block">
-              {/* Bản mờ đặt phía sau tạo hào quang quanh chữ — `blur` trên chính chữ đó, không
-                  phải một hình nền riêng, nên hào quang luôn ôm đúng nét chữ ở mọi cỡ màn hình. */}
-              <span
-                aria-hidden
-                className="absolute inset-0 select-none text-hero font-bold tracking-tight text-orange-bright opacity-60 blur-[18px]"
-              >
-                Hơn 45 triệu đồng
-              </span>
-              <span className="relative bg-gradient-to-r from-orange-bright via-orange to-orange-bright bg-clip-text text-hero font-bold tracking-tight text-transparent">
-                Hơn 45 triệu đồng
-              </span>
+            {/* Chữ để NÉT, không bọc hào quang. Bản trước đặt một bản chữ mờ 18px phía sau: ở cỡ
+                44px nó thành vệt cam loang quanh từng chữ, đọc như chữ bị nhoè chứ không như ánh
+                sáng. Phần toả sáng để cho lớp nền lo, chữ chỉ giữ dải màu. */}
+            <p className="mt-2 bg-gradient-to-r from-orange-bright via-orange to-orange-bright bg-clip-text text-hero font-bold tracking-tight text-transparent">
+              Hơn 45 triệu đồng
             </p>
             <p className="mx-auto mt-2.5 max-w-2xl text-body text-cream/65">
               Bao gồm giải thưởng tiền mặt theo tháng và giải chung cuối chương trình, khoản hoàn
@@ -689,7 +682,7 @@ function PrizeCard({
             key={p.rank}
             className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${
               i === 0
-              ? "border border-orange/50 bg-orange/[0.16] shadow-[0_0_24px_-6px_var(--color-orange)]"
+              ? "border border-orange/45 bg-orange/[0.14]"
               : "border border-transparent bg-cream/[0.06]"
             }`}
           >
