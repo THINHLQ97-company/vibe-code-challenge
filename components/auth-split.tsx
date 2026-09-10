@@ -47,10 +47,10 @@ export function AuthSplit({
       <aside className="relative hidden w-1/2 shrink-0 overflow-hidden bg-canvas lg:block">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url(/auth-bg.jpg)" }}
+          style={{ backgroundImage: "url(/auth-bg.webp)" }}
         />
         {/* Lớp phủ chỉ ĐỦ để chữ đáy đọc được: đậm ở dưới, nhạt dần lên trên để phần tranh ở giữa
-            không bị dìm. Ảnh BTC cấp vốn đã tối sẵn nên phủ đều tay là mất luôn hình. */}
+            không bị dìm. Ảnh hiện tại là JPEG/WebP ĐẶC nên vẫn cần lớp này; ảnh bản alpha thì bỏ. */}
         <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/35 to-canvas/25" />
 
         <div className="relative flex h-full flex-col justify-between p-8 xl:p-10">

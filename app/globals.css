@@ -114,3 +114,26 @@ html[data-theme="dark"] {
 summary::-webkit-details-marker {
   display: none;
 }
+
+/**
+ * THANG CHỮ RIÊNG CHO TRANG GIỚI THIỆU — đúng 1,25× thang DSVH.
+ *
+ * Thang 8 bậc của DSVH (body 14px, page 24, hero 34) vẽ cho MÀN LÀM VIỆC dày đặc dữ liệu. Trên
+ * một trang tiếp thị chiếm trọn màn hình, cỡ đó nhỏ: người dùng phải phóng trình duyệt lên 125%
+ * mới thấy vừa mắt — tức là chữ đang thiếu đúng một phần tư.
+ *
+ * Cách làm: GHI ĐÈ chính các biến thang chữ trong phạm vi trang này, không thêm token mới. Nhờ vậy
+ * mọi class `text-body`/`text-page`/`text-hero` sẵn có vẫn chạy nguyên, không phải sửa một chỗ nào
+ * trong JSX, và cũng không phải khai thêm bậc cho tailwind-merge (luật #21). Ra khỏi trang này thì
+ * thang chữ tự trở lại đúng DSVH.
+ */
+.landing-scale {
+  --text-micro: 13px;
+  --text-meta: 14px;
+  --text-caption: 15px;
+  --text-body: 18px;
+  --text-title: 20px;
+  --text-page: 30px;
+  --text-kpi: 35px;
+  --text-hero: 44px;
+}

@@ -1,8 +1,5 @@
 import Link from "next/link";
 import { Button } from "@/components/dsvh/ui/Button";
-import { Card } from "@/components/dsvh/ui/Card";
-import { Badge } from "@/components/dsvh/ui/Badge";
-import { Note } from "@/components/dsvh/ui/data/Note";
 import { LogoWideDark } from "@/components/brand";
 import { KPI_CATEGORY } from "@/lib/kpi";
 import {
@@ -18,12 +15,34 @@ import {
   MarkCheck,
   MarkArrowRight,
   MarkChevronDown,
-  DarkBandArt,
   HairlineDivider,
+  TopicFinance,
+  TopicSales,
+  TopicMarketing,
+  TopicWeb,
+  TopicOps,
+  TopicPeople,
+  TopicLegal,
+  TopicEdu,
+  TopicLife,
+  StepRegister,
+  StepApproved,
+  StepDeploy,
+  StepSecurity,
+  StepSurvey,
+  BoardTech,
+  BoardOffice,
 } from "@/components/landing-art";
+import { HeroBackdrop } from "@/components/hero-backdrop";
+import { GlassCard, Pill, DarkNote, Band } from "@/components/landing-ui";
 
 /**
  * Trang giới thiệu cuộc thi. Nguồn nội dung: `docs/reference/the-le-v3.html`.
+ *
+ * TOÀN TRANG NỀN TỐI (`canvas`), không còn dải sáng nào. Ảnh nền là WebP có kênh alpha mờ dần về
+ * trong suốt ở đáy (85,5% pixel đặc · 3,5% trong suốt hoàn toàn) nên tự hoà vào nền, không cần lớp
+ * phủ gradient — đó là cách trang tham chiếu làm và nó cho người vẽ kiểm soát chỗ đậm chỗ nhạt
+ * thay vì phó mặc một gradient chung.
  *
  * Bố cục tham chiếu vietnamaichallenge.com (hero ảnh nền → giải thưởng → chủ đề → hành trình →
  * FAQ → CTA), nhưng THU VỀ quy mô nội bộ: bỏ hẳn phần cố vấn, nhà tài trợ, địa điểm thi đấu và
@@ -74,24 +93,28 @@ const BENEFITS = [
 ];
 
 const TOPICS = [
-  "Tài chính cá nhân & doanh nghiệp",
-  "Kinh doanh / bán hàng",
-  "Marketing / Sales / CSKH",
-  "Website / Kỹ thuật",
-  "Quản lý / Vận hành",
-  "Văn phòng / Nhân sự",
-  "Pháp lý",
-  "Giáo dục / học tập",
-  "Cá nhân / đời sống",
+  { icon: <TopicFinance size={20} />, label: "Tài chính cá nhân & doanh nghiệp" },
+  { icon: <TopicSales size={20} />, label: "Kinh doanh / bán hàng" },
+  { icon: <TopicMarketing size={20} />, label: "Marketing / Sales / CSKH" },
+  { icon: <TopicWeb size={20} />, label: "Website / Kỹ thuật" },
+  { icon: <TopicOps size={20} />, label: "Quản lý / Vận hành" },
+  { icon: <TopicPeople size={20} />, label: "Văn phòng / Nhân sự" },
+  { icon: <TopicLegal size={20} />, label: "Pháp lý" },
+  { icon: <TopicEdu size={20} />, label: "Giáo dục / học tập" },
+  { icon: <TopicLife size={20} />, label: "Cá nhân / đời sống" },
 ];
 
+/**
+ * Nhãn "CP1…CP6" là ký hiệu nội bộ của BTC — người chưa dự thi đọc không ra nghĩa. Trang giới
+ * thiệu chỉ đánh số bước 1–6; ký hiệu CP vẫn giữ nguyên trong khu thí sinh, nơi nó khớp với thể lệ.
+ */
 const CHECKPOINTS = [
-  { code: "CP1", label: "Đăng ký dự thi", desc: "Dự kick-off (hoặc xem lại bản ghi) và đăng ký trong tuần." },
-  { code: "CP2", label: "Đề tài được duyệt", desc: "Nộp form đề tài kèm tài liệu PRD, chọn hạn nộp ≤15 ngày." },
-  { code: "CP3", label: "Nộp Vibe Host + mã nguồn", desc: "Sản phẩm chạy thật, có database, đạt đủ 6 tiêu chí ngưỡng sàn." },
-  { code: "CP4", label: "Qua cổng an toàn", desc: "Không vướng 7 điều cấm — máy quét trước, người duyệt bài bị gắn cờ." },
-  { code: "CP5", label: "Đăng bài & BGK duyệt", desc: 'Đăng lên nhóm "Vibe Coding chưa?" theo lịch được cấp. Được đăng ẩn danh.' },
-  { code: "CP6", label: "Phiếu trải nghiệm", desc: "Nộp phiếu trải nghiệm sản phẩm — bắt buộc với mọi thí sinh." },
+  { icon: <StepRegister size={20} />, label: "Đăng ký dự thi", desc: "Dự kick-off (hoặc xem lại bản ghi) và đăng ký trong tuần." },
+  { icon: <StepApproved size={20} />, label: "Đề tài được duyệt", desc: "Nộp form đề tài kèm tài liệu PRD, chọn hạn nộp ≤15 ngày." },
+  { icon: <StepDeploy size={20} />, label: "Nộp Vibe Host + mã nguồn", desc: "Sản phẩm chạy thật, có database, đạt đủ 6 tiêu chí ngưỡng sàn." },
+  { icon: <StepSecurity size={20} />, label: "Qua cổng an toàn", desc: "Không vướng 7 điều cấm — máy quét trước, người duyệt bài bị gắn cờ." },
+  { icon: <MarkBroadcast size={20} />, label: "Đăng bài & BGK duyệt", desc: 'Đăng lên nhóm "Vibe Coding chưa?" theo lịch được cấp. Được đăng ẩn danh.' },
+  { icon: <StepSurvey size={20} />, label: "Phiếu trải nghiệm", desc: "Nộp phiếu trải nghiệm sản phẩm — bắt buộc với mọi thí sinh." },
 ];
 
 const FLOOR = [
@@ -162,92 +185,79 @@ const FAQ = [
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-surface-2">
-      {/* ── HERO ─────────────────────────────────────────────────────────────────────────── */}
-      <section className="relative isolate overflow-hidden bg-canvas">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url(/auth-bg.jpg)" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-canvas/75 via-canvas/65 to-canvas" />
-        <DarkBandArt />
+    <main className="landing-scale relative isolate min-h-screen overflow-hidden bg-canvas">
+      {/* MỘT ảnh nền cho cả trang, neo đỉnh và mờ dần xuống — thay vì mỗi dải một lớp nền. */}
+      <HeroBackdrop image="/home-bg.webp" position="top" scrim />
 
-        <div className="relative mx-auto max-w-5xl px-5">
-          <header className="flex items-center justify-between py-5">
-            <LogoWideDark height={34} />
+      <div className="relative">
+        <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-6">
+          <LogoWideDark height={34} />
+          <Link href="/login">
+            <Button variant="solid" size="sm" rightIcon={<MarkArrowRight size={15} />}>
+              Đăng nhập
+            </Button>
+          </Link>
+        </header>
+
+        {/* ── HERO ───────────────────────────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-5 pb-12 pt-8 text-center sm:px-6 sm:pt-14">
+          <Pill tone="accent">
+            <MarkSpark size={14} />
+            Mắt Bão · Toàn công ty · Thi cá nhân
+          </Pill>
+          <h1 className="mx-auto mt-5 max-w-3xl text-hero font-bold leading-tight tracking-tight text-cream">
+            Tự tay làm ra một sản phẩm.
+            <br />
+            Đưa lên <span className="text-orange-bright">Vibe Host</span>.
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-body text-cream/70">
+            Chỉ khi tự làm mới đủ hiểu để tư vấn, bán và hỗ trợ khách. Mỗi người một sản phẩm có
+            database chạy thật — đề tài mở, không cần biết code trước.
+          </p>
+
+          <div className="mt-7 flex flex-col items-center gap-3">
             <Link href="/login">
-              <Button variant="solid" size="sm" rightIcon={<MarkArrowRight size={15} />}>
-                Đăng nhập
+              <Button variant="solid" size="lg" rightIcon={<MarkArrowRight size={17} />}>
+                Đăng nhập để dự thi
               </Button>
             </Link>
-          </header>
-
-          <div className="py-14 text-center sm:py-20">
-            <span className="inline-flex items-center gap-2 rounded-full border border-orange/40 bg-orange/12 px-3.5 py-1.5 text-caption font-semibold text-orange-bright">
-              <MarkSpark size={15} />
-              Mắt Bão · Toàn công ty · Thi cá nhân
-            </span>
-            <h1 className="mx-auto mt-5 max-w-3xl text-hero font-bold leading-tight tracking-tight text-cream">
-              Tự tay làm ra một sản phẩm.
-              <br />
-              Đưa lên <span className="text-orange-bright">Vibe Host</span>.
-            </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-body text-cream/75">
-              Chỉ khi tự làm mới đủ hiểu để tư vấn, bán và hỗ trợ khách. Mỗi người một sản phẩm có
-              database chạy thật — đề tài mở, không cần biết code trước.
-            </p>
-
-            <div className="mt-8 flex flex-col items-center gap-3">
-              <Link href="/login">
-                <Button variant="solid" size="lg" rightIcon={<MarkArrowRight size={17} />}>
-                  Đăng nhập để dự thi
-                </Button>
+            <p className="text-caption text-cream/55">
+              Chưa có tài khoản?{" "}
+              <Link href="/signup" className="font-medium text-cream hover:underline">
+                Đăng ký bằng email @matbao.com
               </Link>
-              <p className="text-caption text-cream/60">
-                Chưa có tài khoản?{" "}
-                <Link href="/signup" className="font-medium text-cream hover:underline">
-                  Đăng ký bằng email @matbao.com
-                </Link>
-              </p>
-            </div>
-
-            <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {FACTS.map((f) => (
-                <div
-                  key={f.label}
-                  className="rounded-card border border-cream/15 bg-canvas/50 px-4 py-3 backdrop-blur-sm"
-                >
-                  <div className="text-title font-bold text-cream">{f.value}</div>
-                  <div className="mt-0.5 text-caption text-cream/60">{f.label}</div>
-                </div>
-              ))}
-            </div>
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* ── GIẢI THƯỞNG ──────────────────────────────────────────────────────────────────── */}
-      {/* Giải thưởng nối liền hero thành MỘT dải tối: đây là điểm nhấn của trang, cắt nó ra nền
-          sáng là con số to nằm chơ vơ. Sau dải này mới chuyển hẳn sang nền sáng để đọc nội dung. */}
-      <section className="relative isolate overflow-hidden bg-canvas">
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {FACTS.map((f) => (
+              <GlassCard key={f.label} className="px-4 py-3">
+                <div className="text-title font-bold text-cream">{f.value}</div>
+                <div className="mt-0.5 text-caption text-cream/55">{f.label}</div>
+              </GlassCard>
+            ))}
+          </div>
+        </section>
+
         <HairlineDivider />
-        <DarkBandArt />
-        <div className="relative mx-auto max-w-5xl px-5 py-16">
+
+        {/* ── GIẢI THƯỞNG ────────────────────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-5 py-12 sm:px-6">
           <div className="text-center">
             <p className="flex items-center justify-center gap-2 text-caption font-semibold uppercase tracking-wide text-cream/50">
               <MarkTrophy size={16} className="text-orange-bright" />
               Tổng giá trị đến tay người dự thi
             </p>
-            <p className="mt-2.5 bg-gradient-to-r from-orange-bright via-orange to-orange-bright bg-clip-text text-hero font-bold tracking-tight text-transparent">
+            <p className="mt-2 bg-gradient-to-r from-orange-bright via-orange to-orange-bright bg-clip-text text-hero font-bold tracking-tight text-transparent">
               Hơn 50 triệu đồng
             </p>
-            <p className="mx-auto mt-3 max-w-2xl text-body text-cream/70">
+            <p className="mx-auto mt-2.5 max-w-2xl text-body text-cream/65">
               Gồm 22,8 triệu tiền giải, 26–33 triệu hoàn phí công cụ AI qua lương, và khoảng 6 triệu
               quà mốc cho người đạt ngưỡng sàn.
             </p>
           </div>
 
-          <div className="mt-10 grid gap-4 lg:grid-cols-2">
+          <div className="mt-8 grid gap-4 lg:grid-cols-2">
             <PrizeCard
               title="Giải tháng"
               meta="Trao riêng từng bảng · 4 đợt"
@@ -262,236 +272,311 @@ export default function LandingPage() {
               footer="Cơ cấu và mức giải theo thể lệ đã công bố, có thể điều chỉnh khi chốt chính thức."
             />
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── QUYỀN LỢI ────────────────────────────────────────────────────────────────────── */}
-      <Section
-        eyebrow="Quyền lợi"
-        title="Đậu thì được gì"
-        subtitle='"Đậu" = hoàn thành đủ 6 mốc bắt buộc, qua cổng an toàn và được BGK duyệt đạt.'
-      >
-        <div className="grid gap-3 md:grid-cols-3">
-          {BENEFITS.map((b) => (
-            <Card key={b.title} className="p-4">
-              <span className="grid size-10 place-items-center rounded-lg bg-orange/10 text-orange">
-                {b.icon}
-              </span>
-              <h3 className="mt-3 text-body font-semibold text-ink">{b.title}</h3>
-              <p className="mt-1 text-caption text-ink-2">{b.body}</p>
-            </Card>
-          ))}
-        </div>
-      </Section>
-
-      {/* ── NHÓM CHỦ ĐỀ ──────────────────────────────────────────────────────────────────── */}
-      <Section
-        eyebrow="Đề tài"
-        title="Chín nhóm chủ đề"
-        subtitle="Chọn một nhóm khi đăng ký. Đề tài trùng nhau vẫn được duyệt — thể lệ không cấm."
-      >
-        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          {TOPICS.map((t, i) => (
-            <Card key={t} className="flex items-center gap-3 p-3.5">
-              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-stroke-soft text-meta font-semibold tabular-nums text-ink-2">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="text-body text-ink">{t}</span>
-            </Card>
-          ))}
-        </div>
-        <Note className="mt-3">Không nhận chủ đề Game.</Note>
-      </Section>
-
-      {/* ── HÀNH TRÌNH ───────────────────────────────────────────────────────────────────── */}
-      <Section
-        eyebrow="Sáu mốc bắt buộc"
-        title="Hành trình của bạn"
-        subtitle="Đủ CP1–CP6 mới được công nhận đậu. Sau khi đăng nhập, khu thí sinh theo dõi đúng sáu mốc này."
-      >
-        <ol className="relative space-y-3 border-l-2 border-stroke pl-8">
-          {CHECKPOINTS.map((c) => (
-            <li key={c.code} className="relative">
-              <span className="absolute -left-[38px] top-3.5 grid size-[18px] place-items-center rounded-full border-2 border-orange bg-surface text-micro font-bold text-orange">
-                {c.code.slice(2)}
-              </span>
-              <Card className="p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone="neutral">{c.code}</Badge>
-                  <span className="text-body font-semibold text-ink">{c.label}</span>
-                </div>
-                <p className="mt-1.5 text-caption text-ink-2">{c.desc}</p>
-              </Card>
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      {/* ── CHẤM ĐIỂM ────────────────────────────────────────────────────────────────────── */}
-      <Section
-        eyebrow="Cách chấm"
-        title="Đậu được chấm thế nào"
-        subtitle="Trước hết phải qua ngưỡng sàn (đạt / không đạt), qua rồi mới vào thang điểm 100."
-      >
-        <div className="grid gap-3 lg:grid-cols-2">
-          <Card className="p-4">
-            <h3 className="text-body font-semibold text-ink">Ngưỡng sàn — 6 tiêu chí</h3>
-            <p className="mt-0.5 text-caption text-ink-3">
-              Nhị phân: đạt hoặc không. Chưa đạt thì được sửa và nộp lại, không loại ai.
-            </p>
-            <ul className="mt-3 space-y-2">
-              {FLOOR.map((f) => (
-                <li key={f} className="flex gap-2 text-caption text-ink-2">
-                  <MarkCheck size={16} className="mt-0.5 shrink-0 text-teal" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </Card>
-
-          <Card className="p-4">
-            <h3 className="text-body font-semibold text-ink">Thang điểm 100</h3>
-            <p className="mt-0.5 text-caption text-ink-3">
-              Máy chấm là chính; hội đồng xác nhận trước khi công bố.
-            </p>
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full text-caption">
-                <thead>
-                  <tr className="border-b border-stroke text-left text-ink-3">
-                    <th className="pb-2 font-medium">Module</th>
-                    <th className="pb-2 text-right font-medium">Điểm</th>
-                    <th className="pb-2 pl-3 font-medium">Chấm bằng</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {RUBRIC.map((r) => (
-                    <tr key={r.module} className="border-b border-stroke last:border-0">
-                      <td className="py-2 pr-3 text-ink">{r.module}</td>
-                      <td className="py-2 text-right font-semibold tabular-nums text-ink">
-                        {r.point}
-                      </td>
-                      <td className="py-2 pl-3 text-ink-2">{r.by}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <Note className="mt-3">
-              Có điểm rồi bạn được phản biện một vòng duy nhất, trong 48h, bắt buộc kèm bằng chứng
-              kiểm chứng được.
-            </Note>
-          </Card>
-        </div>
-      </Section>
-
-      {/* ── DỄ TRƯỢT ─────────────────────────────────────────────────────────────────────── */}
-      <Section
-        eyebrow="Đọc kỹ"
-        title="Bốn chỗ dễ trượt nhất"
-        subtitle="Đọc kỹ bốn mục này trước khi bắt tay làm — đây là nguyên nhân trượt phổ biến, không phải chuyện kỹ thuật khó."
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          {PITFALLS.map((p) => (
-            <Card key={p.title} className="p-4">
-              <div className="flex gap-2.5">
-                <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-amber/15 text-amber-strong">
-                  {p.icon}
+        {/* ── QUYỀN LỢI ──────────────────────────────────────────────────────────────────── */}
+        <Band
+          eyebrow="Quyền lợi"
+          title="Đậu thì được gì"
+          subtitle={'"Đậu" = hoàn thành đủ 6 mốc bắt buộc, qua cổng an toàn và được BGK duyệt đạt.'}
+        >
+          <div className="grid gap-3 md:grid-cols-3">
+            {BENEFITS.map((b) => (
+              <GlassCard key={b.title} className="p-4">
+                <span className="grid size-10 place-items-center rounded-lg bg-orange/12 text-orange-bright">
+                  {b.icon}
                 </span>
-                <div className="min-w-0">
-                  <h3 className="text-body font-semibold text-ink">{p.title}</h3>
-                  <p className="mt-1 text-caption text-ink-2">{p.body}</p>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </Section>
-
-      {/* ── BẢNG THI ─────────────────────────────────────────────────────────────────────── */}
-      <Section
-        eyebrow="Hai bảng thi"
-        title="Bạn thi ở bảng nào"
-        subtitle="Hệ thống tự xếp bảng theo phòng ban bạn khai lúc đăng ký. Cùng barem, cùng ngưỡng sàn — tách bảng để so tài với người cùng xuất phát điểm."
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          <Card className="p-4">
-            <Badge tone="neutral">Bảng Kỹ thuật</Badge>
-            <p className="mt-2 text-body font-semibold text-ink">TS · DE</p>
-            <p className="mt-1 text-caption text-ink-2">
-              Hỗ trợ Kỹ thuật và Lập trình. Kỳ vọng khai thác sâu database và workflow tự động của
-              Vibe Host.
-            </p>
-          </Card>
-          <Card className="p-4">
-            <Badge tone="neutral">Bảng Văn phòng</Badge>
-            <p className="mt-2 text-body font-semibold text-ink">OP · MK · FI · HR · Kinh doanh</p>
-            <p className="mt-1 text-caption text-ink-2">
-              Không cần biết code trước. Vibe coding cùng AI đủ để dựng một sản phẩm giải đúng việc
-              bạn hay làm.
-            </p>
-          </Card>
-        </div>
-      </Section>
-
-      {/* ── FAQ ──────────────────────────────────────────────────────────────────────────── */}
-      <Section
-        eyebrow="Giải đáp"
-        title="Câu hỏi thường gặp" subtitle="Sáu câu được hỏi nhiều nhất khi mở đăng ký.">
-        <div className="space-y-2">
-          {FAQ.map((f) => (
-            /* `<details>` chứ không dựng accordion bằng JS: đóng mở là hành vi sẵn có của trình
-               duyệt, chạy cả khi JS chưa tải và trình đọc màn hình hiểu đúng ngay. */
-            <details
-              key={f.q}
-              className="group rounded-card border border-stroke bg-surface px-4 py-3"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-body font-medium text-ink">
-                {f.q}
-                <MarkChevronDown
-                  size={16}
-                  className="shrink-0 text-ink-3 transition-transform group-open:rotate-180"
-                />
-              </summary>
-              <p className="mt-2 text-caption text-ink-2">{f.a}</p>
-            </details>
-          ))}
-        </div>
-      </Section>
-
-      {/* ── CTA CUỐI ─────────────────────────────────────────────────────────────────────── */}
-      <section className="relative isolate mt-4 overflow-hidden bg-canvas">
-        <DarkBandArt />
-        <div className="relative mx-auto max-w-5xl px-5 py-16 text-center">
-          <LogoWideDark height={34} className="mx-auto" />
-          <h2 className="mx-auto mt-6 max-w-xl text-page font-bold tracking-tight text-cream">
-            Sẵn sàng đăng ký đề tài?
-          </h2>
-          <p className="mx-auto mt-2.5 max-w-xl text-body text-cream/70">
-            Đăng nhập bằng email công ty để nộp đề tài kèm tài liệu PRD. BTC duyệt cuốn chiếu theo
-            tuần — duyệt xong mới bắt đầu tính hạn nộp của bạn, nên đăng ký sớm là có nhiều thời
-            gian hơn.
-          </p>
-          <div className="mt-7 flex flex-wrap justify-center gap-2.5">
-            <Link href="/login">
-              <Button variant="solid" size="lg" rightIcon={<MarkArrowRight size={16} />}>
-                Đăng nhập
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button variant="ghost" size="lg" className="border border-cream/25 text-cream hover:bg-cream/10">
-                Tạo tài khoản
-              </Button>
-            </Link>
+                <h3 className="mt-3 text-body font-semibold text-cream">{b.title}</h3>
+                <p className="mt-1 text-caption text-cream/60">{b.body}</p>
+              </GlassCard>
+            ))}
           </div>
-        </div>
-      </section>
+        </Band>
+
+        {/* ── CHỦ ĐỀ ─────────────────────────────────────────────────────────────────────── */}
+        <Band
+          eyebrow="Đề tài"
+          title="Chín nhóm chủ đề"
+          subtitle="Chọn một nhóm khi đăng ký. Đề tài trùng nhau vẫn được duyệt — thể lệ không cấm. Không nhận chủ đề Game."
+        >
+          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+            {TOPICS.map((t) => (
+              <GlassCard key={t.label} className="flex items-center gap-3 p-3.5">
+                <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-orange/12 text-orange-bright">
+                  {t.icon}
+                </span>
+                <span className="text-body text-cream/85">{t.label}</span>
+              </GlassCard>
+            ))}
+          </div>
+        </Band>
+
+        {/* ── HÀNH TRÌNH ─────────────────────────────────────────────────────────────────── */}
+        <Band
+          eyebrow="Sáu mốc bắt buộc"
+          title="Hành trình của bạn"
+          subtitle="Đủ CP1–CP6 mới được công nhận đậu. Sau khi đăng nhập, khu thí sinh theo dõi đúng sáu mốc này."
+        >
+          {/* Lưới 3 cột thay cho danh sách dọc: sáu mốc xếp dọc kéo trang dài thêm gần 500px mà
+              không nói thêm điều gì. */}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {CHECKPOINTS.map((c, i) => (
+              <GlassCard key={c.label} className="relative overflow-hidden p-5">
+                {/* Số bước đặt to, mờ, ở góc — đọc được thứ tự từ xa mà không tranh chỗ với tiêu đề. */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -right-1 -top-2 text-[64px] font-bold leading-none text-cream/[0.07]"
+                >
+                  {i + 1}
+                </span>
+                <span className="relative grid size-11 place-items-center rounded-xl bg-orange/12 text-orange-bright">
+                  {c.icon}
+                </span>
+                <div className="relative mt-3.5 flex items-center gap-2">
+                  <span className="text-meta font-bold uppercase tracking-wider text-orange-bright">
+                    Bước {i + 1}
+                  </span>
+                </div>
+                <h3 className="relative mt-1 text-title font-semibold text-cream">{c.label}</h3>
+                <p className="relative mt-1.5 text-caption text-cream/60">{c.desc}</p>
+              </GlassCard>
+            ))}
+          </div>
+        </Band>
+
+        {/* ── CHẤM ĐIỂM ──────────────────────────────────────────────────────────────────── */}
+        <Band
+          eyebrow="Cách chấm"
+          title="Đậu được chấm thế nào"
+          subtitle="Trước hết phải qua ngưỡng sàn (đạt / không đạt), qua rồi mới vào thang điểm 100."
+        >
+          <div className="grid gap-3 lg:grid-cols-2">
+            <GlassCard className="p-4">
+              <h3 className="text-body font-semibold text-cream">Ngưỡng sàn — 6 tiêu chí</h3>
+              <p className="mt-0.5 text-caption text-cream/50">
+                Nhị phân: đạt hoặc không. Chưa đạt thì được sửa và nộp lại, không loại ai.
+              </p>
+              <ul className="mt-3 space-y-2">
+                {FLOOR.map((f) => (
+                  <li key={f} className="flex gap-2 text-caption text-cream/70">
+                    <MarkCheck size={16} className="mt-0.5 shrink-0 text-teal" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </GlassCard>
+
+            <GlassCard className="p-4">
+              <h3 className="text-body font-semibold text-cream">Thang điểm 100</h3>
+              <p className="mt-0.5 text-caption text-cream/50">
+                Máy chấm là chính; hội đồng xác nhận trước khi công bố.
+              </p>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full text-caption">
+                  <thead>
+                    <tr className="border-b border-cream/12 text-left text-cream/50">
+                      <th className="pb-2 font-medium">Module</th>
+                      <th className="pb-2 text-right font-medium">Điểm</th>
+                      <th className="pb-2 pl-3 font-medium">Chấm bằng</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {RUBRIC.map((r) => (
+                      <tr key={r.module} className="border-b border-cream/8 last:border-0">
+                        <td className="py-2 pr-3 text-cream/85">{r.module}</td>
+                        <td className="py-2 text-right font-semibold tabular-nums text-orange-bright">
+                          {r.point}
+                        </td>
+                        <td className="py-2 pl-3 text-cream/55">{r.by}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-3">
+                <DarkNote>
+                  Có điểm rồi bạn được phản biện một vòng duy nhất, trong 48h, bắt buộc kèm bằng
+                  chứng kiểm chứng được.
+                </DarkNote>
+              </div>
+            </GlassCard>
+          </div>
+        </Band>
+
+        {/* ── DỄ TRƯỢT ───────────────────────────────────────────────────────────────────── */}
+        <Band
+          eyebrow="Đọc kỹ"
+          title="Bốn chỗ dễ trượt nhất"
+          subtitle="Đây là nguyên nhân trượt phổ biến, không phải chuyện kỹ thuật khó."
+        >
+          <div className="grid gap-3 md:grid-cols-2">
+            {PITFALLS.map((p) => (
+              <GlassCard key={p.title} className="p-4">
+                <div className="flex gap-2.5">
+                  <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-amber/12 text-amber">
+                    {p.icon}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-body font-semibold text-cream">{p.title}</h3>
+                    <p className="mt-1 text-caption text-cream/60">{p.body}</p>
+                  </div>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        </Band>
+
+        {/* ── BẢNG THI ───────────────────────────────────────────────────────────────────── */}
+        <Band
+          eyebrow="Hai bảng thi"
+          title="Bạn thi ở bảng nào"
+          subtitle="Hệ thống tự xếp bảng theo phòng ban bạn khai lúc đăng ký — không phải chọn. Cùng barem, cùng ngưỡng sàn, cùng cổng an toàn; tách bảng chỉ để so tài với người cùng xuất phát điểm."
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <BoardCard
+              icon={<BoardTech size={22} />}
+              name="Bảng Kỹ thuật"
+              tagline="Khối làm kỹ thuật"
+              departments={["TS — Hỗ trợ Kỹ thuật", "DE — Lập trình / Dev"]}
+              expectation="Nền tảng tốt nên kỳ vọng khai thác sâu database và workflow tự động của Vibe Host."
+            />
+            <BoardCard
+              icon={<BoardOffice size={22} />}
+              name="Bảng Văn phòng"
+              tagline="Khối văn phòng & kinh doanh"
+              departments={[
+                "OP — Vận hành",
+                "MK — Marketing",
+                "FI — Tài chính / Kế toán",
+                "HR — Nhân sự",
+                "Kinh doanh — Sales",
+              ]}
+              expectation="Không cần biết code trước. Vibe coding cùng AI đủ để dựng sản phẩm giải đúng việc bạn hay làm."
+            />
+          </div>
+          <div className="mt-3">
+            <DarkNote>
+              Giải tháng và giải Yêu thích trao riêng cho từng bảng. Cuối 4 tháng mới chọn thêm
+              Quán quân chung giữa hai bảng.
+            </DarkNote>
+          </div>
+        </Band>
+
+        {/* ── FAQ ────────────────────────────────────────────────────────────────────────── */}
+        <Band
+          eyebrow="Giải đáp"
+          title="Câu hỏi thường gặp"
+          subtitle="Sáu câu được hỏi nhiều nhất khi mở đăng ký."
+        >
+          <div className="grid gap-2 lg:grid-cols-2">
+            {FAQ.map((f) => (
+              /* `<details>` chứ không dựng accordion bằng JS: đóng mở là hành vi sẵn có của trình
+                 duyệt, chạy cả khi JS chưa tải và trình đọc màn hình hiểu đúng ngay. */
+              <details
+                key={f.q}
+                className="group rounded-card border border-cream/12 bg-cream/[0.045] px-4 py-3 backdrop-blur-sm"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-body font-medium text-cream">
+                  {f.q}
+                  <MarkChevronDown
+                    size={16}
+                    className="shrink-0 text-cream/50 transition-transform group-open:rotate-180"
+                  />
+                </summary>
+                <p className="mt-2 text-caption text-cream/65">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </Band>
+
+        {/* ── CTA CUỐI ───────────────────────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-5 pb-16 pt-6 sm:px-6">
+          <GlassCard className="p-8 text-center">
+            <LogoWideDark height={34} className="mx-auto" />
+            <h2 className="mx-auto mt-5 max-w-xl text-page font-bold tracking-tight text-cream">
+              Sẵn sàng đăng ký đề tài?
+            </h2>
+            <p className="mx-auto mt-2.5 max-w-xl text-body text-cream/65">
+              Đăng nhập bằng email công ty để nộp đề tài kèm tài liệu PRD. BTC duyệt cuốn chiếu theo
+              tuần — duyệt xong mới bắt đầu tính hạn nộp của bạn, nên đăng ký sớm là có nhiều thời
+              gian hơn.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-2.5">
+              <Link href="/login">
+                <Button variant="solid" size="lg" rightIcon={<MarkArrowRight size={16} />}>
+                  Đăng nhập
+                </Button>
+              </Link>
+              <Link href="/signup">
+                {/* `ghost` của DSVH mang sẵn `bg-surface` (TRẮNG) vì nó dựng cho nền sáng — đặt
+                    nguyên lên đây là nút trắng trên nền tối. Phải đè cả nền, viền lẫn chữ, không
+                    chỉ thêm viền. */}
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="border-cream/25 bg-transparent text-cream hover:border-cream/45 hover:bg-cream/10 hover:text-cream"
+                >
+                  Tạo tài khoản
+                </Button>
+              </Link>
+            </div>
+          </GlassCard>
+        </section>
+      </div>
     </main>
   );
 }
 
+/** Thẻ một bảng thi — tách rõ tên bảng, các phòng thuộc bảng, và kỳ vọng của bảng đó. */
+function BoardCard({
+  icon,
+  name,
+  tagline,
+  departments,
+  expectation,
+}: {
+  icon: React.ReactNode;
+  name: string;
+  tagline: string;
+  departments: string[];
+  expectation: string;
+}) {
+  return (
+    <GlassCard className="p-5">
+      <div className="flex items-start gap-3.5">
+        <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-orange/12 text-orange-bright">
+          {icon}
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-title font-semibold text-cream">{name}</h3>
+          <p className="mt-0.5 text-caption text-cream/50">{tagline}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 border-t border-cream/10 pt-4">
+        <p className="text-meta font-semibold uppercase tracking-wide text-cream/45">
+          Phòng ban thuộc bảng
+        </p>
+        <ul className="mt-2.5 flex flex-wrap gap-2">
+          {departments.map((d) => (
+            <li
+              key={d}
+              className="rounded-lg border border-cream/12 bg-cream/[0.06] px-2.5 py-1.5 text-caption text-cream/80"
+            >
+              {d}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <p className="mt-4 text-caption text-cream/60">{expectation}</p>
+    </GlassCard>
+  );
+}
+
 /**
- * Thẻ giải thưởng trên nền tối. Giải cao nhất được tô đậm hơn (viền và nền cam nhạt) — nhìn phát
- * biết đâu là đỉnh, thay vì bốn dòng đều nhau bắt người đọc tự so số.
+ * Thẻ giải thưởng. Giải cao nhất tô đậm hơn (viền và nền cam) — nhìn phát biết đâu là đỉnh, thay
+ * vì bốn dòng đều nhau bắt người đọc tự so số.
  */
 function PrizeCard({
   title,
@@ -507,12 +592,10 @@ function PrizeCard({
   footer?: string;
 }) {
   return (
-    <div className="rounded-card border border-cream/15 bg-canvas/60 p-5 backdrop-blur-sm">
+    <GlassCard className="p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-title font-semibold text-cream">{title}</h3>
-        <span className="rounded-full border border-cream/15 px-2.5 py-1 text-meta text-cream/60">
-          {meta}
-        </span>
+        <Pill>{meta}</Pill>
       </div>
       <p className="mt-1.5 text-caption text-cream/60">{desc}</p>
       <ul className="mt-4 space-y-1.5">
@@ -520,9 +603,7 @@ function PrizeCard({
           <li
             key={p.rank}
             className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${
-              i === 0
-                ? "border border-orange/40 bg-orange/12"
-                : "border border-transparent bg-cream/[0.06]"
+              i === 0 ? "border border-orange/40 bg-orange/12" : "border border-transparent bg-cream/[0.06]"
             }`}
           >
             <span className={i === 0 ? "text-body font-medium text-cream" : "text-body text-cream/80"}>
@@ -538,29 +619,7 @@ function PrizeCard({
           </li>
         ))}
       </ul>
-      {footer && <p className="mt-4 text-meta text-cream/50">{footer}</p>}
-    </div>
-  );
-}
-
-function Section({
-  eyebrow,
-  title,
-  subtitle,
-  children,
-}: {
-  eyebrow: string;
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="mx-auto max-w-5xl px-5 pb-12 pt-14">
-      {/* Nhãn mở đầu cam: cho mắt một mốc neo khi cuộn qua nhiều dải nội dung cùng tông sáng. */}
-      <p className="text-caption font-semibold uppercase tracking-wide text-orange">{eyebrow}</p>
-      <h2 className="mt-2 text-page font-bold tracking-tight text-ink">{title}</h2>
-      <p className="mb-6 mt-1.5 max-w-3xl text-body text-ink-2">{subtitle}</p>
-      {children}
-    </section>
+      {footer && <p className="mt-4 text-meta text-cream/45">{footer}</p>}
+    </GlassCard>
   );
 }
