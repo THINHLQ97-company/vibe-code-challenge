@@ -10,6 +10,8 @@ import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
 import { PrdPanel } from "@/components/prd-viewer";
+import { CheckpointTrail } from "@/components/checkpoint-trail";
+import { getCheckpoints } from "@/lib/checkpoints";
 import {
   ArrowRightIcon,
   GlobeIcon,
@@ -144,6 +146,14 @@ export default async function ScoringDetailPage({
             note={submission.prebuiltNote}
           />
         </div>
+      </Card>
+
+      <Card>
+        <CardHeader
+          title="Sáu mốc bắt buộc của thí sinh"
+          subtitle="Ô đỏ là mốc đang chặn thí sinh — xử trước; ô cam là việc kế tiếp của họ"
+        />
+        <CheckpointTrail checkpoints={getCheckpoints(submission)} compact />
       </Card>
 
       <Card>

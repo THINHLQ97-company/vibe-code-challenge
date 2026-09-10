@@ -8,6 +8,7 @@ import { Button } from "@/components/dsvh/ui/Button";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { submissionStage } from "@/lib/stage-status";
+import { getCheckpoints } from "@/lib/checkpoints";
 import {
   TopicDonut,
   StageDonut,
@@ -75,6 +76,8 @@ export default async function AdminDashboardPage() {
   // để xem chi tiết của con số họ vừa đọc.
   const candidateRows: CandidateRow[] = submissions.map((s) => {
     const stage = submissionStage(s);
+    const cps = getCheckpoints(s);
+    const blocked = cps.find((c) => c.state === "rejected");
     return {
       id: s.id,
       userName: s.user.name ?? "",
@@ -84,6 +87,9 @@ export default async function AdminDashboardPage() {
       productName: s.productName,
       stageLabel: stage.label,
       stageTone: stage.tone,
+      cpDone: cps.filter((c) => c.state === "done").length,
+      cpTotal: cps.length,
+      cpBlocked: blocked ? blocked.label : null,
       finalScore: s.finalScore,
       // Đậu = công bố điểm + đã đăng ký Google AI Pro (điều kiện hoàn phí theo thể lệ mục C).
       reimburse: !!s.publishedAt && s.googleAiPro,

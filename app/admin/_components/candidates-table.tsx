@@ -16,6 +16,10 @@ export type CandidateRow = {
   productName: string;
   stageLabel: string;
   stageTone: "neutral" | "success" | "warning" | "danger";
+  /** Số mốc đã qua và mốc đang bị chặn (nếu có) — để BTC quét cả danh sách bằng mắt. */
+  cpDone: number;
+  cpTotal: number;
+  cpBlocked: string | null;
   finalScore: number | null;
   reimburse: boolean;
 };
@@ -74,6 +78,29 @@ export function CandidatesTable({ rows }: { rows: CandidateRow[] }) {
             key: "stage",
             header: "Trạng thái",
             render: (r) => <Badge tone={r.stageTone}>{r.stageLabel}</Badge>,
+          },
+          {
+            key: "moc",
+            header: "Mốc",
+            align: "center",
+            hideBelow: "md",
+            render: (r) => (
+              <div className="flex flex-col items-center gap-1">
+                <span className="flex gap-0.5" aria-hidden>
+                  {Array.from({ length: r.cpTotal }, (_, i) => (
+                    <span
+                      key={i}
+                      className={`h-1.5 w-3 rounded-full ${
+                        i < r.cpDone ? "bg-teal" : r.cpBlocked && i === r.cpDone ? "bg-red" : "bg-stroke"
+                      }`}
+                    />
+                  ))}
+                </span>
+                <span className="text-meta tabular-nums text-ink-3">
+                  {r.cpDone}/{r.cpTotal}
+                </span>
+              </div>
+            ),
           },
           {
             key: "score",

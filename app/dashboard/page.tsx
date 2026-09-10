@@ -5,6 +5,7 @@ import { getAggregatedScores } from "@/lib/db/queries/scores";
 import { candidateScoreView } from "@/lib/score-visibility";
 import { getCheckpoints } from "@/lib/checkpoints";
 import { submissionStage } from "@/lib/stage-status";
+import { CheckpointTrail } from "@/components/checkpoint-trail";
 import { formatDateVN, formatDeadlineDistance } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
@@ -15,12 +16,7 @@ import { Note } from "@/components/dsvh/ui/data/Note";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Stepper } from "@/components/dsvh/ui/Stepper";
 import { InfoTile } from "@/components/dsvh/ui/data/InfoTile";
-import {
-  NotepadIcon,
-  CheckCircleIcon,
-  CircleIcon,
-  ArrowRightIcon,
-} from "@/components/dsvh/icons";
+import { NotepadIcon, ArrowRightIcon } from "@/components/dsvh/icons";
 
 const PHASE_STEPS = [
   { label: "Ý tưởng", description: "Đăng ký & chấm điểm đề tài" },
@@ -177,25 +173,14 @@ export default async function DashboardOverviewPage() {
       </Card>
 
       <Card>
-        <CardHeader title="Mốc bắt buộc" subtitle="CP1–CP6 phải xong đủ mới được công nhận đậu" />
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {checklist.map((c) => (
-            <div
-              key={c.label}
-              className="flex items-center gap-2 rounded-lg border border-stroke bg-surface-2 px-3 py-2 text-caption"
-            >
-              {c.done ? (
-                <CheckCircleIcon size={16} className="shrink-0 text-teal" />
-              ) : (
-                <CircleIcon size={16} className="shrink-0 text-ink-3" />
-              )}
-              <span className={c.done ? "text-ink" : "text-ink-2"}>{c.label}</span>
-            </div>
-          ))}
-        </div>
-        <Note className="mt-3">
-          Điểm từng phần hiện ngay khi hội đồng chốt; tổng điểm và thứ hạng chỉ hiện sau khi BTC
-          bấm công bố.
+        <CardHeader
+          title="Mốc bắt buộc"
+          subtitle="Sáu mốc phải xong đủ mới được công nhận đậu. Ô đỏ là việc đang chờ bạn xử lý, ô cam là việc kế tiếp."
+        />
+        <CheckpointTrail checkpoints={checklist} />
+        <Note className="mt-4">
+          Điểm từng phần hiện ngay khi hội đồng chốt; tổng điểm và thứ hạng chỉ hiện sau khi ban tổ
+          chức bấm công bố.
         </Note>
       </Card>
     </PageShell>
