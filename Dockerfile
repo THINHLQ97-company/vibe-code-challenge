@@ -25,6 +25,10 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Bản standalone chỉ gói mã JS được truy vết, KHÔNG gói file .sql. Mà `instrumentation.ts` chạy
+# migration lúc khởi động lại đọc thẳng thư mục này — thiếu nó thì container lên xanh nhưng
+# database rỗng không bảng.
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
 USER nextjs
 EXPOSE 3000
 # `127.0.0.1` chứ KHÔNG `localhost`: trong container, `localhost` phân giải ra `::1` (IPv6) TRƯỚC

@@ -45,15 +45,19 @@ không có khoá API hay chuỗi kết nối nằm trong mã nguồn.
 `;
 }
 
-const DEV_PASSWORD = "Test@1234";
+/**
+ * Mật khẩu tài khoản demo. Mặc định là chuỗi dễ nhớ cho máy dev; ở môi trường có người ngoài
+ * đội truy cập được thì BẮT BUỘC đặt `SEED_PASSWORD` thành chuỗi mạnh — trong đó có cả
+ * `admin@matbao.com` với toàn quyền, để mặc định là mời người lạ vào làm BTC.
+ */
+export const DEV_PASSWORD = process.env.SEED_PASSWORD ?? "Test@1234";
 
-async function main() {
-  // Seed phải chạy lại được nhiều lần (mỗi lần sửa luồng là phải dựng lại dữ liệu demo).
-  // Chặn ở production vì lệnh này XOÁ SẠCH dữ liệu — đặt SEED_FORCE=1 nếu thật sự muốn.
-  if (process.env.NODE_ENV === "production" && process.env.SEED_FORCE !== "1") {
-    console.error("Từ chối seed trên production (lệnh này xoá sạch dữ liệu). Đặt SEED_FORCE=1 nếu chắc chắn.");
-    process.exit(1);
-  }
+/**
+ * Dựng lại TOÀN BỘ dữ liệu demo — XOÁ SẠCH bảng trước khi ghi. Người gọi tự chịu trách nhiệm
+ * kiểm tra được phép xoá hay chưa: CLI hỏi qua `SEED_FORCE`, còn bootstrap lúc khởi động chỉ
+ * gọi khi bảng users rỗng nên không bao giờ xoá mất dữ liệu thật.
+ */
+export async function seedDemoData() {
   await db.execute(
     sql`TRUNCATE TABLE appeals, experience_surveys, idea_scores, product_scores, submissions, seasons, users RESTART IDENTITY CASCADE`
   );
@@ -479,10 +483,4 @@ async function main() {
   console.log(`  candidate SALES   thisinh.sales@matbao.com / ${DEV_PASSWORD}  (đã công bố · 64đ)`);
   console.log(`  candidate HR      thisinh.hr@matbao.com / ${DEV_PASSWORD}     (bị trả về CP2)`);
   console.log(`  candidate OP      thisinh.op@matbao.com / ${DEV_PASSWORD}     (CHƯA đăng ký — demo luồng đăng ký)`);
-  process.exit(0);
 }
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
