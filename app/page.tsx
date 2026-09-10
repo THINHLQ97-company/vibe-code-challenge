@@ -303,6 +303,18 @@ export default function LandingPage() {
           <PrizeGlow />
           <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-6">
           <div className="text-center">
+            {/* Cúp đặt TRƯỚC nhãn và con số: mắt đi từ hình xuống chữ, và bản thân ảnh đã có quầng
+                sáng riêng nên nó gánh luôn vai trò điểm nhấn — quầng CSS phía sau chỉ còn phụ hoạ.
+                Ảnh có kênh alpha (48,5% trong suốt) nên hoà thẳng vào nền, không cần khung. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/trophy-glow.webp"
+              alt=""
+              aria-hidden
+              width={360}
+              height={293}
+              className="mx-auto mb-1 w-[220px] max-w-full sm:w-[300px] lg:w-[360px]"
+            />
             <p className="flex items-center justify-center gap-2 text-caption font-semibold uppercase tracking-wide text-cream/50">
               <MarkTrophy size={16} className="text-orange-bright" />
               Tổng giá trị đến tay người dự thi

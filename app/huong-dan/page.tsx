@@ -3,7 +3,7 @@ import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark } from "@/components/brand";
 import { HeroBackdrop } from "@/components/hero-backdrop";
 import { GlassCard, Pill, DarkNote, ImageSlot, BackToTop } from "@/components/landing-ui";
-import { VscodeMockup } from "@/components/vscode-mockup";
+import { PrdMockup } from "@/components/prd-mockup";
 import { KPI_CATEGORY } from "@/lib/kpi";
 import {
   MarkArrowRight,
@@ -98,7 +98,7 @@ export default function HuongDanPage() {
             Dành cho thí sinh
           </Pill>
           <h1 className="mt-4 max-w-3xl text-hero font-bold leading-tight tracking-tight text-cream">
-            Hướng dẫn dự thi từ đầu đến cuối
+            Hướng dẫn dự thi Vibe Code Challenge
           </h1>
           <p className="mt-4 max-w-3xl text-body text-cream/70">
             Bảy bước dưới đây đi theo đúng trình tự bạn sẽ trải qua, từ lúc chuẩn bị tài liệu đến
@@ -209,18 +209,16 @@ const STEPS = [
           Chỉ khoản đăng ký Google One AI Pro nằm trong diện hoàn phí khi bạn đậu. Các công cụ khác
           vẫn được dùng tự do nhưng do bạn tự chi trả.
         </DarkNote>
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,0.86fr)_1fr] lg:items-start">
-          <ImageSlot
-            src="/huong-dan/buoc1-google-ai-pro.webp"
-            alt="Ưu đãi Google AI Pro dành cho thí sinh"
-            ratio="803/932"
-          />
-          <DarkNote tone="warning">
-            Ưu đãi chỉ áp dụng cho tài khoản Google <b>chưa từng đăng ký Google One</b>. Nếu bạn mở
-            trang đăng ký mà không thấy mức giá khuyến mãi, hãy tạo một tài khoản Google mới rồi
-            đăng ký lại từ tài khoản đó.
-          </DarkNote>
-        </div>
+        <ImageSlot
+          src="/huong-dan/buoc1-google-ai-pro.webp"
+          alt="Ưu đãi Google AI Pro dành cho thí sinh"
+          ratio="803/932"
+        />
+        <DarkNote tone="warning">
+          Ưu đãi chỉ áp dụng cho tài khoản Google <b>chưa từng đăng ký Google One</b>. Nếu bạn mở
+          trang đăng ký mà không thấy mức giá khuyến mãi, hãy tạo một tài khoản Google mới rồi đăng
+          ký lại từ tài khoản đó.
+        </DarkNote>
       </div>
     ),
   },
@@ -272,10 +270,10 @@ const STEPS = [
 
         <div>
           <p className="mb-2.5 text-caption text-cream/55">
-            Màn hình khi bạn vibe code trông như thế này: bên trái là mã nguồn AI dựng ra, bên phải
-            là chỗ bạn nói chuyện với nó bằng tiếng Việt thường ngày.
+            Quá trình viết PRD trông như thế này: bên trái bạn kể bài toán bằng tiếng Việt thường
+            ngày, bên phải là tài liệu có cấu trúc do AI dựng ra để bạn đọc lại và sửa.
           </p>
-          <VscodeMockup />
+          <PrdMockup />
         </div>
 
         <DarkNote tone="warning">
@@ -322,9 +320,9 @@ const STEPS = [
           </GlassCard>
         </div>
         <ImageSlot
-          alt="Form đăng ký đề tài trong khu vực thí sinh"
-          ratio="16/10"
-          note="Ảnh chụp form đăng ký đề tài sau khi rút gọn — thấy rõ ô tải tài liệu PRD và khối cam kết bắt buộc."
+          src="/huong-dan/buoc3-dang-ky.webp"
+          alt="Form đăng ký dự thi"
+          ratio="1261/859"
         />
         <DarkNote>
           Đề tài bị trả về sẽ kèm lý do cụ thể; bạn chỉnh sửa rồi nộp lại. Thời gian làm bài chỉ bắt
@@ -406,9 +404,9 @@ const STEPS = [
           </GlassCard>
         </div>
         <ImageSlot
-          src="/huong-dan/buoc5-quan-ly-bai-thi.webp"
-          alt="Giao diện quản lý bài thi trên Vibe Host"
-          ratio="1274/941"
+          src="/huong-dan/buoc5-upload-vibe-host.webp"
+          alt="Đưa dự án lên Vibe Host"
+          ratio="1912/952"
         />
       </div>
     ),
@@ -445,6 +443,11 @@ const STEPS = [
             </GlassCard>
           ))}
         </div>
+        <ImageSlot
+          src="/huong-dan/buoc5-quan-ly-bai-thi.webp"
+          alt="Giao diện quản lý bài thi"
+          ratio="1274/941"
+        />
         <DarkNote>
           Duyệt đạt Phase 2 là mốc sản phẩm của bạn được ghi nhận vào {KPI_CATEGORY}. Hệ thống nhân
           sự đọc dữ liệu trực tiếp từ nền tảng này.

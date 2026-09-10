@@ -110,14 +110,17 @@ export function ImageSlot({
       <img
         src={src}
         alt={alt}
-        className="w-full rounded-card border border-cream/12"
-        style={{ aspectRatio: ratio, objectFit: "cover" }}
+        // Trần 800px và căn giữa cho MỌI ảnh minh hoạ: ảnh gốc mỗi cái một cỡ (từ 800 tới 1912px
+        // bề ngang), thả tự do thì cái nhỏ bị kéo giãn vỡ nét còn cái to chiếm trọn khung.
+        // `object-contain` để không cắt mất mép ảnh chụp giao diện.
+        className="mx-auto block w-full max-w-[800px] rounded-card border border-cream/12 bg-canvas/40"
+        style={{ aspectRatio: ratio, objectFit: "contain" }}
       />
     );
   }
   return (
     <div
-      className="flex flex-col items-center justify-center gap-1.5 rounded-card border border-dashed border-cream/25 bg-cream/[0.03] p-6 text-center"
+      className="mx-auto flex w-full max-w-[800px] flex-col items-center justify-center gap-1.5 rounded-card border border-dashed border-cream/25 bg-cream/[0.03] p-6 text-center"
       style={{ aspectRatio: ratio }}
     >
       <span className="text-caption font-semibold text-cream/60">Chỗ đặt ảnh minh hoạ</span>
