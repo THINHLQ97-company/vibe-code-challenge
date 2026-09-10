@@ -60,18 +60,21 @@ export function DarkNote({ children, tone = "neutral" }: { children: ReactNode; 
  * rộng, làm khoảng cách dọc trông thừa thãi theo. Đệm dọc cũng hạ từ ~104px xuống 72px.
  */
 export function Band({
+  id,
   eyebrow,
   title,
   subtitle,
   children,
 }: {
+  /** Neo cho menu trang chủ. `scroll-mt` chừa chỗ cho thanh đầu dính. */
+  id?: string;
   eyebrow: string;
   title: string;
   subtitle: string;
   children: ReactNode;
 }) {
   return (
-    <section className="mx-auto max-w-6xl px-5 py-9 sm:px-6">
+    <section id={id} className="mx-auto max-w-6xl scroll-mt-20 px-5 py-9 sm:px-6">
       <p className="text-caption font-semibold uppercase tracking-wide text-orange-bright">
         {eyebrow}
       </p>
@@ -79,5 +82,48 @@ export function Band({
       <p className="mb-5 mt-1.5 max-w-3xl text-body text-cream/65">{subtitle}</p>
       {children}
     </section>
+  );
+}
+
+/**
+ * Ô CHỜ ẢNH MINH HOẠ.
+ *
+ * Hiện khung gạch đứt kèm ĐÚNG kích thước cần và mô tả ảnh phải chụp gì. Khi ảnh về, thả file vào
+ * `public/huong-dan/` rồi truyền `src` — không phải sửa bố cục. Cố ý KHÔNG dùng ảnh mẫu tạm: một
+ * tấm ảnh giả trông như đã xong sẽ lặng lẽ đi thẳng lên bản chạy thật.
+ */
+export function ImageSlot({
+  src,
+  alt,
+  ratio = "16/9",
+  note,
+}: {
+  src?: string;
+  alt: string;
+  ratio?: string;
+  note: string;
+}) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt}
+        className="w-full rounded-card border border-cream/12"
+        style={{ aspectRatio: ratio, objectFit: "cover" }}
+      />
+    );
+  }
+  return (
+    <div
+      className="flex flex-col items-center justify-center gap-1.5 rounded-card border border-dashed border-cream/25 bg-cream/[0.03] p-6 text-center"
+      style={{ aspectRatio: ratio }}
+    >
+      <span className="text-caption font-semibold text-cream/60">Chỗ đặt ảnh minh hoạ</span>
+      <span className="max-w-md text-meta text-cream/45">{note}</span>
+      <span className="mt-1 rounded-full border border-cream/15 px-2 py-0.5 text-micro text-cream/40">
+        tỉ lệ {ratio}
+      </span>
+    </div>
   );
 }

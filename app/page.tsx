@@ -53,11 +53,21 @@ import { GlassCard, Pill, DarkNote, Band } from "@/components/landing-ui";
  * sinh sau khi đăng nhập nói cùng một thứ.
  */
 
+/** Menu trang chủ = điểm neo tới từng mục bên dưới. Đổi `id` ở đây phải đổi cả `id` của `Band`. */
+const NAV_ANCHORS = [
+  { href: "#giai-thuong", label: "Giải thưởng" },
+  { href: "#quyen-loi", label: "Quyền lợi" },
+  { href: "#hanh-trinh", label: "Hành trình" },
+  { href: "#cham-diem", label: "Cách chấm" },
+  { href: "#bang-thi", label: "Bảng thi" },
+  { href: "#faq", label: "Hỏi đáp" },
+];
+
 const FACTS = [
+  { value: "2,5 tháng", label: "toàn bộ chương trình" },
   { value: "2 bảng", label: "Kỹ thuật · Văn phòng" },
-  { value: "4 tháng", label: "nhận 30–40 bài/tuần" },
-  { value: "≤15 ngày", label: "hạn nộp bạn tự chọn" },
-  { value: "1 sản phẩm", label: "mỗi người, có database thật" },
+  { value: "≤15 ngày", label: "thời gian làm bài bạn tự chọn" },
+  { value: "30–40", label: "đề tài được duyệt mỗi tuần" },
 ];
 
 /** Số liệu lấy nguyên từ mục M của thể lệ. */
@@ -78,17 +88,17 @@ const BENEFITS = [
   {
     icon: <MarkWallet size={22} />,
     title: "Hoàn phí công cụ AI",
-    body: "Đậu là được hoàn 130.000đ tiền đăng ký Google AI Pro qua kỳ lương tháng kế tiếp. Công cụ khác không nằm trong diện hoàn.",
+    body: "Thí sinh đậu được hoàn 130.000đ chi phí đăng ký Google AI Pro, chi trả qua kỳ lương tháng kế tiếp. Khoản hoàn phí áp dụng riêng cho công cụ này.",
   },
   {
     icon: <MarkKpi size={22} />,
     title: `Tính vào ${KPI_CATEGORY}`,
-    body: "Bài thi đạt được ghi nhận vào KPI của bạn ở mục đề xuất cải tiến / sáng kiến — làm thật, tính thật.",
+    body: "Sản phẩm được duyệt đạt sẽ ghi nhận vào KPI của bạn ở hạng mục đề xuất cải tiến và sáng kiến. Hệ thống nhân sự đọc dữ liệu trực tiếp, bạn không phải khai báo lại.",
   },
   {
     icon: <MarkSeal size={22} />,
     title: "Chứng nhận & kho Template",
-    body: "Chứng nhận tham gia và quà mốc cho người đạt ngưỡng sàn; repo tốt được đưa vào kho Template Vibe Host, có ghi tên tác giả.",
+    body: "Chứng nhận tham gia và quà mốc dành cho mọi thí sinh vượt ngưỡng sàn. Những sản phẩm chất lượng được tuyển vào kho Template Vibe Host phục vụ người dùng thật, có ghi tên tác giả.",
   },
 ];
 
@@ -137,49 +147,57 @@ const PITFALLS = [
   {
     icon: <MarkShieldAlert size={20} />,
     title: "Dữ liệu phải là dữ liệu giả — tuyệt đối",
-    body: "Vibe Host v2 tự gọi AI sửa mã khi deploy lỗi, và mã nguồn được gửi ra nhà cung cấp AI nước ngoài. Dữ liệu khách thật hay tài liệu nội bộ nằm trong mã là đi ra ngoài mà bạn không bấm nút nào.",
+    body: "Vibe Host phiên bản 2 tự động gọi AI sửa mã mỗi khi triển khai thất bại, và mã nguồn khi đó được gửi tới nhà cung cấp AI nước ngoài. Bất kỳ dữ liệu khách hàng thật hay tài liệu nội bộ nào nằm trong mã đều có thể ra khỏi công ty mà bạn không hề bấm nút nào. Đây là lý do quy định dùng dữ liệu giả là tuyệt đối, không có ngoại lệ.",
   },
   {
     icon: <MarkDatabase size={20} />,
     title: "Sản phẩm bắt buộc có database",
-    body: "Không có database chạy thật thì chưa đạt ngưỡng sàn, dù giao diện đẹp tới đâu. Đây là tiêu chí nhị phân, không có điểm một nửa.",
+    body: "Sản phẩm phải đọc và ghi dữ liệu thật, không phải dữ liệu gắn cứng trong mã. Đây là tiêu chí đạt hoặc không đạt: thiếu cơ sở dữ liệu là chưa vượt ngưỡng sàn, bất kể giao diện hoàn chỉnh đến đâu.",
   },
   {
     icon: <MarkBroadcast size={20} />,
     title: "Đăng bài là nghĩa vụ, không phải tuỳ chọn",
-    body: "Thiếu bài đăng là chưa hoàn thành, kể cả sản phẩm tốt. Bù lại bạn được đăng ẩn danh — không cần dùng nick Facebook chính.",
+    body: "Bài chia sẻ trên nhóm cộng đồng là một trong sáu mốc bắt buộc. Sản phẩm tốt đến đâu mà thiếu bước này vẫn chưa hoàn thành nghĩa vụ. Đổi lại, bạn được quyền đăng ẩn danh nên không phải cân nhắc chuyện lộ danh tính.",
   },
   {
     icon: <MarkBranch size={20} />,
     title: "Phải tự dựng mới — không dùng lại repo có sẵn",
-    body: "Đây là cuộc thi vibe code, giá trị nằm ở việc bạn tự dựng trong kỳ thi. Bài bị phát hiện dùng lại repo hoặc mẫu có sẵn KHÔNG qua được Phase 2 và không được công bố. BTC đối chiếu lịch sử commit khi chấm mã nguồn.",
+    body: "Giá trị của chương trình nằm ở quá trình bạn tự dựng sản phẩm trong thời gian dự thi. Ban tổ chức đối chiếu lịch sử commit khi chấm mã nguồn; bài bị phát hiện sử dụng lại kho mã hoặc mẫu có sẵn sẽ không vượt qua Phase 2 và không được công bố kết quả.",
   },
 ];
 
 const FAQ = [
   {
-    q: "Không biết code thì có thi được không?",
-    a: "Được. Bảng Văn phòng (OP, MK, FI, HR, Kinh doanh) không yêu cầu biết code trước — vibe coding cùng AI đủ để dựng một sản phẩm giải đúng việc bạn hay làm. Hai bảng chấm cùng barem nhưng xếp hạng riêng.",
+    q: "Tôi không có nền tảng lập trình, có thể tham gia không?",
+    a: "Hoàn toàn có thể, và đó chính là lý do chương trình chia hai bảng thi. Bảng Văn phòng dành cho các khối Vận hành, Marketing, Tài chính, Nhân sự và Kinh doanh, không đòi hỏi kinh nghiệm viết mã. Vibe coding cùng công cụ AI cho phép bạn mô tả bài toán bằng ngôn ngữ thường ngày và nhận về một sản phẩm chạy được. Hai bảng áp dụng cùng barem và cùng ngưỡng sàn, chỉ xếp hạng riêng để bạn so tài với những người cùng xuất phát điểm.",
   },
   {
-    q: "Làm đề tài cá nhân có được không?",
-    a: "Được. Đề tài mở: việc công ty, việc cá nhân (ví dụ sổ thu chi) hay giải pháp cho SME đều nhận. Chỉ không nhận chủ đề Game.",
+    q: "Đề tài có bắt buộc phải phục vụ công việc tại công ty không?",
+    a: "Không. Ban tổ chức mở rộng phạm vi đề tài: một quy trình nội bộ bạn muốn rút gọn, một việc cá nhân bạn lặp lại hằng tuần, hay một giải pháp cho doanh nghiệp nhỏ bên ngoài đều được chấp nhận. Điều kiện duy nhất là bài toán phải có thật và sản phẩm phải giải được nó. Chương trình không nhận đề tài thuộc nhóm trò chơi.",
   },
   {
-    q: "Tôi phải tự trả tiền Vibe Host à?",
-    a: "Không. Người tham gia được cấp tài khoản Vibe Host miễn phí trong suốt cuộc thi. Gói cơ bản có 2 suất chạy nền = 1 website + 1 database, vừa đủ yêu cầu bắt buộc.",
+    q: "Chi phí hạ tầng và công cụ AI do ai chi trả?",
+    a: "Thí sinh được cấp tài khoản Vibe Host miễn phí trong suốt chương trình, với gói cơ bản gồm hai suất chạy nền — đủ cho một website và một cơ sở dữ liệu theo đúng yêu cầu bắt buộc. Về công cụ AI, bạn tự do lựa chọn; riêng khoản đăng ký Google AI Pro sẽ được hoàn lại qua kỳ lương kế tiếp nếu bạn đậu.",
   },
   {
-    q: "Ngại lộ danh tính khi đăng bài thì sao?",
-    a: "Bài đăng lên nhóm được đăng ẩn danh — dùng chế độ ẩn danh của nhóm, tài khoản phụ, hoặc nhờ BTC đăng hộ. Đăng bài là bắt buộc, nhưng lộ mặt thì không.",
+    q: "Tôi ngại công khai danh tính khi đăng bài chia sẻ.",
+    a: "Đăng bài lên nhóm cộng đồng là nghĩa vụ bắt buộc, nhưng danh tính thì không. Bạn có thể sử dụng chế độ ẩn danh của nhóm, một tài khoản phụ, hoặc gửi nội dung để ban tổ chức đăng hộ. Điểm lan tỏa được chấm trên chính bài đăng đó, không phụ thuộc việc ai đứng tên.",
   },
   {
-    q: "Nộp bài bị trả về là trượt luôn?",
-    a: "Không. Cả hai cổng (ngưỡng sàn kỹ thuật và rà soát an toàn) đều cho sửa và nộp lại trong hạn của bạn. BTC phải ghi rõ sai ở đâu — nhận xét chung chung không hợp lệ.",
+    q: "Bài bị trả về ở vòng kiểm tra thì có bị loại không?",
+    a: "Không. Cả hai cổng kiểm tra — ngưỡng sàn kỹ thuật và rà soát an toàn — đều cho phép chỉnh sửa và nộp lại trong thời hạn của bạn. Ban tổ chức có trách nhiệm nêu rõ sản phẩm chưa đạt ở điểm nào; nhận xét chung chung không được xem là hợp lệ. Cơ chế này nhằm biến một lần chưa đạt thành một lần học được điều gì đó.",
   },
   {
-    q: "Không đồng ý với điểm thì làm gì?",
-    a: "Gửi phản biện một vòng duy nhất, trong 48h kể từ khi công bố điểm, bắt buộc kèm bằng chứng kiểm chứng được (link chức năng, commit, video, ảnh màn hình). Kết quả sau phản biện là chung cuộc.",
+    q: "Nếu tôi không đồng tình với kết quả chấm?",
+    a: "Bạn có quyền gửi phản biện một lần duy nhất, trong vòng 48 giờ kể từ thời điểm công bố điểm, kèm bằng chứng có thể kiểm chứng như đường dẫn tới chức năng đang chạy, lịch sử commit, video hoặc ảnh màn hình. Hội đồng đối chiếu bằng chứng với sản phẩm và phản hồi trong 48 giờ. Kết quả sau phản biện là chung cuộc.",
+  },
+  {
+    q: "Điểm số được tính vào KPI như thế nào?",
+    a: `Sản phẩm được hội đồng duyệt đạt sẽ được ghi nhận vào ${KPI_CATEGORY} trong hệ thống KPI của bạn. Hệ thống nhân sự đọc trực tiếp dữ liệu từ nền tảng này, bạn không cần khai báo lại.`,
+  },
+  {
+    q: "Tôi cần chuẩn bị gì trước khi đăng ký?",
+    a: "Một bài toán cụ thể bạn muốn giải, hình dung về ba đến năm chức năng chính của sản phẩm, phương án dữ liệu sẽ lưu, và một tài liệu PRD mô tả các nội dung đó. Trang Hướng dẫn trình bày chi tiết từng bước, kèm gợi ý cách viết PRD và danh sách công cụ AI phù hợp.",
   },
 ];
 
@@ -190,13 +208,39 @@ export default function LandingPage() {
       <HeroBackdrop image="/home-bg.webp" position="top" scrim />
 
       <div className="relative">
-        <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-6">
-          <LogoWideDark height={34} />
-          <Link href="/login">
-            <Button variant="solid" size="sm" rightIcon={<MarkArrowRight size={15} />}>
-              Đăng nhập
-            </Button>
-          </Link>
+        {/* Thanh đầu DÍNH: menu là các điểm neo tới từng mục trên chính trang này, cộng một lối
+            sang trang Hướng dẫn. `backdrop-blur` + nền canvas mờ để chữ vẫn đọc được khi cuộn qua
+            vùng sáng của ảnh nền. */}
+        <header className="sticky top-0 z-30 border-b border-cream/10 bg-canvas/80 backdrop-blur-md">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5 sm:px-6">
+            <Link href="/" aria-label="Vibe Code Challenge — về đầu trang">
+              <LogoWideDark height={30} />
+            </Link>
+
+            <nav aria-label="Mục lục trang" className="hidden items-center gap-1 lg:flex">
+              {NAV_ANCHORS.map((a) => (
+                <Link
+                  key={a.href}
+                  href={a.href}
+                  className="rounded-lg px-2.5 py-1.5 text-caption font-medium text-cream/70 transition-colors hover:bg-cream/10 hover:text-cream"
+                >
+                  {a.label}
+                </Link>
+              ))}
+              <Link
+                href="/huong-dan"
+                className="ml-1 rounded-lg border border-cream/20 px-2.5 py-1.5 text-caption font-medium text-cream transition-colors hover:bg-cream/10"
+              >
+                Hướng dẫn
+              </Link>
+            </nav>
+
+            <Link href="/login">
+              <Button variant="solid" size="sm" rightIcon={<MarkArrowRight size={15} />}>
+                Đăng nhập
+              </Button>
+            </Link>
+          </div>
         </header>
 
         {/* ── HERO ───────────────────────────────────────────────────────────────────────── */}
@@ -206,13 +250,14 @@ export default function LandingPage() {
             Mắt Bão · Toàn công ty · Thi cá nhân
           </Pill>
           <h1 className="mx-auto mt-5 max-w-3xl text-hero font-bold leading-tight tracking-tight text-cream">
-            Tự tay làm ra một sản phẩm.
+            Mỗi người một sản phẩm,
             <br />
-            Đưa lên <span className="text-orange-bright">Vibe Host</span>.
+            vận hành thật trên <span className="text-orange-bright">Vibe Host</span>.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-body text-cream/70">
-            Chỉ khi tự làm mới đủ hiểu để tư vấn, bán và hỗ trợ khách. Mỗi người một sản phẩm có
-            database chạy thật — đề tài mở, không cần biết code trước.
+            Cuộc thi vibe coding nội bộ dành cho toàn thể nhân sự Mắt Bão. Bạn tự chọn một bài
+            toán có thật, dựng thành sản phẩm chạy được với cơ sở dữ liệu thật, rồi đưa lên Vibe
+            Host. Đề tài mở cho mọi phòng ban — không yêu cầu kinh nghiệm lập trình.
           </p>
 
           <div className="mt-7 flex flex-col items-center gap-3">
@@ -242,43 +287,45 @@ export default function LandingPage() {
         <HairlineDivider />
 
         {/* ── GIẢI THƯỞNG ────────────────────────────────────────────────────────────────── */}
-        <section className="mx-auto max-w-6xl px-5 py-12 sm:px-6">
+        <section id="giai-thuong" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-12 sm:px-6">
           <div className="text-center">
             <p className="flex items-center justify-center gap-2 text-caption font-semibold uppercase tracking-wide text-cream/50">
               <MarkTrophy size={16} className="text-orange-bright" />
               Tổng giá trị đến tay người dự thi
             </p>
             <p className="mt-2 bg-gradient-to-r from-orange-bright via-orange to-orange-bright bg-clip-text text-hero font-bold tracking-tight text-transparent">
-              Hơn 50 triệu đồng
+              Hơn 45 triệu đồng
             </p>
             <p className="mx-auto mt-2.5 max-w-2xl text-body text-cream/65">
-              Gồm 22,8 triệu tiền giải, 26–33 triệu hoàn phí công cụ AI qua lương, và khoảng 6 triệu
-              quà mốc cho người đạt ngưỡng sàn.
+              Bao gồm giải thưởng tiền mặt theo tháng và giải chung cuối chương trình, khoản hoàn
+              phí công cụ AI chi trả qua lương cho toàn bộ thí sinh đậu, cùng quà mốc dành cho
+              người vượt ngưỡng sàn kỹ thuật.
             </p>
           </div>
 
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
             <PrizeCard
               title="Giải tháng"
-              meta="Trao riêng từng bảng · 4 đợt"
-              desc="Cuối mỗi tháng chốt bảng xếp hạng của bảng Kỹ thuật và bảng Văn phòng, mỗi bảng trao đủ bộ giải dưới đây."
+              meta="Trao riêng từng bảng"
+              desc="Kết thúc mỗi tháng, ban tổ chức chốt bảng xếp hạng của từng bảng thi và trao đủ bộ giải dưới đây cho mỗi bảng."
               prizes={MONTHLY_PRIZES}
             />
             <PrizeCard
               title="Giải chung cuối kỳ"
-              meta="Giữa hai bảng · sau 4 tháng"
-              desc="Kết thúc chương trình, hội đồng chọn quán quân chung giữa hai bảng thi."
+              meta="Giữa hai bảng thi"
+              desc="Khép lại 2,5 tháng tranh tài, hội đồng chọn ra những sản phẩm xuất sắc nhất trong toàn chương trình, không phân biệt bảng thi."
               prizes={FINAL_PRIZES}
-              footer="Cơ cấu và mức giải theo thể lệ đã công bố, có thể điều chỉnh khi chốt chính thức."
+              footer="Cơ cấu và mức giải căn cứ thể lệ đã công bố; số đợt giải tháng phụ thuộc lịch chương trình và sẽ được ban tổ chức chốt chính thức."
             />
           </div>
         </section>
 
         {/* ── QUYỀN LỢI ──────────────────────────────────────────────────────────────────── */}
         <Band
+          id="quyen-loi"
           eyebrow="Quyền lợi"
           title="Đậu thì được gì"
-          subtitle={'"Đậu" = hoàn thành đủ 6 mốc bắt buộc, qua cổng an toàn và được BGK duyệt đạt.'}
+          subtitle="Một thí sinh được công nhận đậu khi hoàn thành đủ sáu mốc bắt buộc, vượt qua cổng rà soát an toàn và được hội đồng giám khảo duyệt đạt."
         >
           <div className="grid gap-3 md:grid-cols-3">
             {BENEFITS.map((b) => (
@@ -295,9 +342,10 @@ export default function LandingPage() {
 
         {/* ── CHỦ ĐỀ ─────────────────────────────────────────────────────────────────────── */}
         <Band
+          id="de-tai"
           eyebrow="Đề tài"
           title="Chín nhóm chủ đề"
-          subtitle="Chọn một nhóm khi đăng ký. Đề tài trùng nhau vẫn được duyệt — thể lệ không cấm. Không nhận chủ đề Game."
+          subtitle="Bạn chọn một nhóm khi nộp đăng ký. Đề tài trùng nhau giữa các thí sinh vẫn được duyệt bình thường; ban tổ chức chỉ theo dõi phân bổ để cân bằng ngân hàng đề tài. Chương trình không nhận đề tài thuộc nhóm trò chơi."
         >
           <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {TOPICS.map((t) => (
@@ -313,9 +361,10 @@ export default function LandingPage() {
 
         {/* ── HÀNH TRÌNH ─────────────────────────────────────────────────────────────────── */}
         <Band
+          id="hanh-trinh"
           eyebrow="Sáu mốc bắt buộc"
           title="Hành trình của bạn"
-          subtitle="Đủ CP1–CP6 mới được công nhận đậu. Sau khi đăng nhập, khu thí sinh theo dõi đúng sáu mốc này."
+          subtitle="Sáu mốc dưới đây là bắt buộc với mọi thí sinh. Sau khi đăng nhập, khu vực thí sinh hiển thị đúng sáu mốc này kèm trạng thái hiện tại của bạn, để bạn luôn biết mình đang ở đâu và việc kế tiếp là gì."
         >
           {/* Lưới 3 cột thay cho danh sách dọc: sáu mốc xếp dọc kéo trang dài thêm gần 500px mà
               không nói thêm điều gì. */}
@@ -346,9 +395,10 @@ export default function LandingPage() {
 
         {/* ── CHẤM ĐIỂM ──────────────────────────────────────────────────────────────────── */}
         <Band
+          id="cham-diem"
           eyebrow="Cách chấm"
           title="Đậu được chấm thế nào"
-          subtitle="Trước hết phải qua ngưỡng sàn (đạt / không đạt), qua rồi mới vào thang điểm 100."
+          subtitle="Sản phẩm phải vượt ngưỡng sàn kỹ thuật trước — đây là bộ tiêu chí đạt hoặc không đạt, không có điểm trung gian. Vượt qua rồi mới được đưa vào thang điểm 100 để xếp hạng."
         >
           <div className="grid gap-3 lg:grid-cols-2">
             <GlassCard className="p-4">
@@ -405,9 +455,10 @@ export default function LandingPage() {
 
         {/* ── DỄ TRƯỢT ───────────────────────────────────────────────────────────────────── */}
         <Band
+          id="doc-ky"
           eyebrow="Đọc kỹ"
           title="Bốn chỗ dễ trượt nhất"
-          subtitle="Đây là nguyên nhân trượt phổ biến, không phải chuyện kỹ thuật khó."
+          subtitle="Qua các kỳ tổ chức, phần lớn trường hợp chưa đạt không đến từ khó khăn kỹ thuật mà từ bốn điều dưới đây. Đọc kỹ trước khi bắt tay vào làm sẽ tiết kiệm cho bạn một vòng chỉnh sửa."
         >
           <div className="grid gap-3 md:grid-cols-2">
             {PITFALLS.map((p) => (
@@ -428,9 +479,10 @@ export default function LandingPage() {
 
         {/* ── BẢNG THI ───────────────────────────────────────────────────────────────────── */}
         <Band
+          id="bang-thi"
           eyebrow="Hai bảng thi"
           title="Bạn thi ở bảng nào"
-          subtitle="Hệ thống tự xếp bảng theo phòng ban bạn khai lúc đăng ký — không phải chọn. Cùng barem, cùng ngưỡng sàn, cùng cổng an toàn; tách bảng chỉ để so tài với người cùng xuất phát điểm."
+          subtitle="Hệ thống tự động xếp bảng dựa trên phòng ban bạn khai khi đăng ký, bạn không cần chọn. Hai bảng áp dụng chung barem, chung ngưỡng sàn và chung cổng rà soát an toàn; việc tách bảng chỉ nhằm bảo đảm bạn so tài với những người có cùng xuất phát điểm."
         >
           <div className="grid gap-4 lg:grid-cols-2">
             <BoardCard
@@ -456,17 +508,18 @@ export default function LandingPage() {
           </div>
           <div className="mt-3">
             <DarkNote>
-              Giải tháng và giải Yêu thích trao riêng cho từng bảng. Cuối 4 tháng mới chọn thêm
-              Quán quân chung giữa hai bảng.
+              Giải tháng và giải Yêu thích được trao riêng cho từng bảng thi. Giải chung cuộc chỉ
+              xét một lần vào cuối chương trình, giữa những sản phẩm xuất sắc nhất của cả hai bảng.
             </DarkNote>
           </div>
         </Band>
 
         {/* ── FAQ ────────────────────────────────────────────────────────────────────────── */}
         <Band
+          id="faq"
           eyebrow="Giải đáp"
           title="Câu hỏi thường gặp"
-          subtitle="Sáu câu được hỏi nhiều nhất khi mở đăng ký."
+          subtitle="Những thắc mắc ban tổ chức nhận được nhiều nhất trong đợt mở đăng ký."
         >
           <div className="grid gap-2 lg:grid-cols-2">
             {FAQ.map((f) => (
@@ -497,9 +550,9 @@ export default function LandingPage() {
               Sẵn sàng đăng ký đề tài?
             </h2>
             <p className="mx-auto mt-2.5 max-w-xl text-body text-cream/65">
-              Đăng nhập bằng email công ty để nộp đề tài kèm tài liệu PRD. BTC duyệt cuốn chiếu theo
-              tuần — duyệt xong mới bắt đầu tính hạn nộp của bạn, nên đăng ký sớm là có nhiều thời
-              gian hơn.
+              Đăng nhập bằng email công ty để nộp đề tài kèm tài liệu PRD. Ban tổ chức duyệt cuốn
+              chiếu theo tuần, và thời gian làm bài chỉ bắt đầu tính từ lúc đề tài của bạn được
+              duyệt — đăng ký sớm đồng nghĩa với việc bạn có nhiều thời gian chuẩn bị hơn.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-2.5">
               <Link href="/login">
