@@ -53,6 +53,33 @@ Không port nhóm `ui/deploy/**`, `LogViewer`, `MetricGauge`, `ResourceMeter`, `
 - Mọi trang bọc `PageShell` (đệm ngoài + nhịp dọc + `PageHeader`).
 - Nền `canvas` (tối ở CẢ hai theme) đi với chữ `cream`, không ghim `text-white`.
 
+## Sự cố đã sửa: token khai bằng chuỗi `var()` làm Tailwind bỏ hẳn class opacity
+
+`tailwind.config.ts` từng khai màu bằng chuỗi `"var(--color-x)"` thuần. Tailwind không
+tách được kênh màu từ một chuỗi `var()` để chèn alpha, nên nó **BỎ HẲN mọi class có hậu
+tố opacity** — không cảnh báo, không lỗi build, chỉ đơn giản là không sinh ra một dòng
+CSS nào. Đo trên bản build cũ: 89 class kiểu `bg-ink/30`, `ring-orange/30`, `bg-teal/12`,
+`text-cream/70` đều không tồn tại trong CSS output. Hậu quả thấy trên UI: cột điều hướng
+mất màu chữ (thừa hưởng `ink` tối trên nền `canvas` tối, gần như vô hình), modal/drawer
+mất nền mờ, toàn bộ `focus-visible:ring` biến mất, nền huy hiệu trạng thái mất khiến
+`Badge` chỉ còn chữ trần.
+
+Sửa: khai token bằng **hàm** trả `color-mix(in srgb, var(--color-x) calc(<alpha> * 100%),
+transparent)` thay vì chuỗi `var()` thuần (xem `tailwind.config.ts`, hàm `token()`). Giữ
+nguyên biến hex trong `app/globals.css` nên component DSVH dùng thẳng `var(--color-*)`
+trong style nội tuyến vẫn chạy y cũ.
+
+Hai lỗi cùng họ tìm ra khi rà tiếp, cũng khai tay trong `tailwind.config.ts`:
+- **Thang opacity thiếu bậc**: mặc định Tailwind nhảy `…10,20,25,30…`, không có 12/15/85
+  mà DSVH dùng (`bg-teal/12` cho nền badge, viền ô nhập lỗi, lớp phủ) — khai thêm ba bậc
+  này trong `theme.extend.opacity`.
+- **`shadow-xs` và `scrollbar-thin` không sinh CSS**: `shadow-xs` là bậc của Tailwind v4
+  (repo chạy v3) — khai lại giá trị trong `theme.extend.boxShadow`. `scrollbar-thin` là
+  class của plugin `tailwind-scrollbar` mà repo không cài — khai bằng plugin Tailwind nội bộ
+  (`plugins: [plugin(...)]` trong `tailwind.config.ts`) thay vì thêm package: một phụ thuộc mới
+  chỉ để lấy đúng một class là không đáng, chưa kể pnpm ở workspace này chặn gói mới phát hành
+  dưới 24h nên mỗi lần thêm là một lần phải xử lý.
+
 ## Chưa làm
 
 - Chưa có cổng tự động (`ds:check`, `ds:probe`…) như repo gốc — luật hiện dựa vào review, không có

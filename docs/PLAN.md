@@ -59,10 +59,20 @@
   (duyệt cuốn chiếu, trả về kèm lý do)
 
 ### Step 5: Phase 1 — điểm ý tưởng + API tích hợp ngoài (Day 4–5) — ✅ DONE
-- [x] `POST /api/integrations/scores` nhận điểm từ hệ ngoài (phase=1|2, auth `X-API-Key`)
+- [x] `POST /api/integrations/scores` nhận điểm từ hệ ngoài (phase=1|2, auth `X-API-Key`
+  so khớp `timingSafeEqual`)
+- [x] Form đăng ký nhận **PRD** (`prdContent` 200–200 000 ký tự + `prdFileName`) — đọc
+  file `.md`/`.txt` ngay ở trình duyệt, không dựng ổ lưu trữ file nhị phân. Đây là đầu
+  vào BẮT BUỘC của Phase 1 ("chấm điểm PRD và document" theo thể lệ) — thiếu field này
+  thì hệ chấm ngoài không có gì để đọc.
+- [x] `GET /api/integrations/submissions/:id` cho hệ chấm ngoài ĐỌC bài + PRD trước khi
+  chấm (không trả danh tính thí sinh) — trước đây chỉ có chiều đẩy điểm vào.
+- [x] `components/prd-viewer.tsx` cho BTC đọc PRD — cố ý KHÔNG render markdown thành
+  HTML (nội dung do thí sinh nộp, render mở đường XSS).
 - [x] Fallback `POST /api/admin/submissions/:id/manual-score` cho BTC tự nhập khi chưa có
-  hệ ngoài kết nối (đánh dấu `source="judge"` để phân biệt)
-- [x] Hiển thị điểm ý tưởng ở `/dashboard` sau khi có
+  hệ ngoài kết nối (đánh dấu `source="judge"` + `judgeId`, mỗi giám khảo một phiếu)
+- [x] Hiển thị điểm ý tưởng ở `/dashboard` sau khi hội đồng xác nhận
+  (`lib/score-visibility.ts`) — không hiện điểm máy thô chưa ai chốt
 
 ### Step 6: Phase 2 — sản phẩm, mã nguồn, GitHub verify (Day 5–6) — ✅ DONE
 - [x] Form nộp link Vibe Host + link Git private (`/dashboard/build`)

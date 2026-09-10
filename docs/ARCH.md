@@ -21,7 +21,8 @@
 graph LR
   Candidate[Thí sinh] --> W[Next.js web :3000]
   Admin[BTC/BGK] --> W
-  External[Hệ chấm điểm AI ngoài] -->|POST /api/integrations/scores| W
+  External[Hệ chấm điểm AI ngoài] -->|GET /api/integrations/submissions/:id| W
+  External -->|POST /api/integrations/scores| W
   W --> MW[middleware.ts — JWT verify, role gate]
   MW --> API[App Router API routes]
   API --> Q[lib/db/queries/*]
@@ -43,8 +44,12 @@ graph LR
 ## Data Flow — luồng chính (3-phase chấm điểm)
 1. Thí sinh đăng ký đề tài (`POST /api/submissions`) → BTC duyệt cuốn chiếu, có trần
    `capPerWeek`/tuần (`lib/db/queries/submissions.ts#countApprovedThisWeek`).
-2. **Phase 1**: hệ chấm điểm AI ngoài đẩy điểm ý tưởng qua `POST /api/integrations/scores`
-   (auth bằng `X-API-Key` = `SCORING_API_KEY`). App CHỈ lưu, không tự chấm.
+2. **Phase 1**: thí sinh nộp kèm PRD (`prdContent`/`prdFileName`, nội dung markdown/text —
+   đầu vào bắt buộc để chấm "PRD và document" theo thể lệ). Hệ chấm điểm AI ngoài ĐỌC bài +
+   PRD qua `GET /api/integrations/submissions/:id`, rồi đẩy điểm ý tưởng về qua
+   `POST /api/integrations/scores` (cả hai auth bằng header `X-API-Key` = `SCORING_API_KEY`,
+   so khớp `timingSafeEqual`). App CHỈ lưu, không tự chấm. Thí sinh chỉ thấy điểm sau khi có
+   phiếu giám khảo xác nhận (`lib/score-visibility.ts`), không thấy điểm máy thô.
 3. **Phase 2**: thí sinh nộp link Vibe Host + Git repo private
    (`POST /api/submissions/:id/phase2`) → app tự verify GitHub collaborator qua
    `lib/github.ts` (machine-user `matbao-vibe-bot` + `GITHUB_BOT_PAT`) → hệ chấm ngoài
@@ -54,12 +59,33 @@ graph LR
 5. **Phase 3**: thí sinh đăng bài Facebook ẩn danh → BGK tick duyệt → admin nhập tay số
    tương tác sau 7 ngày → `lib/scoring.ts#engagementTierFromCount` tự tính bậc 1-4 theo
    trung vị cùng tuần (`getEngagementCohort`).
-6. **Công bố**: `POST /api/admin/submissions/:id/publish` tính `finalScore` bằng
+6. **Công bố**: `POST /api/admin/submissions/:id/publish` kiểm đủ **CP1–CP6** một lượt
+   (`lib/checkpoints.ts#missingCheckpoints`, một nguồn sự thật dùng chung với dashboard thí
+   sinh và `/admin/posts`), chặn công bố lại bài đã công bố, lấy điểm module từ
+   `getAggregatedScores()` (`lib/db/queries/scores.ts` — **trung bình các phiếu giám khảo**,
+   rơi về điểm hệ chấm ngoài khi chưa ai chấm tay) rồi tính `finalScore` bằng
    `lib/scoring.ts#computeFinalScore` (40 kỹ thuật + 15 hoàn thiện + 25 ý tưởng + 20 lan
    tỏa, trần kỹ thuật 20 nếu `isPrebuiltRepo`) → set `publishedAt` → hiện trên BXH
    (`listPublishedByBoard`).
-7. **CP7 (tuỳ chọn)**: thí sinh gửi phản biện kèm bằng chứng, admin xử thủ công (chưa có
-   AI sàng lọc tự động — Phase 2 roadmap).
+7. **CP7 (tuỳ chọn)**: thí sinh gửi phản biện trong 48h kể từ công bố, một lần duy nhất
+   (`lib/appeal-policy.ts`, dùng chung cho `/dashboard/results` và API). Admin xử thủ công
+   (chưa có AI sàng lọc tự động — Phase 2 roadmap); chấp nhận thì `reopenForRescore()` xoá
+   `publishedAt`/`finalScore` để hội đồng chấm lại rồi công bố lại — không chỉ ghi kết luận
+   suông.
+
+## Modules dùng chung (một nguồn sự thật)
+
+Trước bản sửa gần nhất, mỗi màn tự liệt kê lại luật riêng (dashboard đòi 6 mốc, API
+`publish` chỉ kiểm 2 mốc; trang kết quả biết luật phản biện 48h nhưng API `appeals` thì
+không) — sửa một chỗ, quên chỗ khác. Nay gom vào các module thuần hàm dưới `lib/`:
+
+| Module | Dùng ở đâu | Việc |
+|---|---|---|
+| `lib/checkpoints.ts` | `/dashboard`, `/dashboard/build`, `/admin/posts`, `POST .../publish` | `getCheckpoints`/`missingCheckpoints` — mốc CP1–CP6 bắt buộc để công bố |
+| `lib/appeal-policy.ts` | `/dashboard/results`, `POST /api/submissions/:id/appeals` | `checkAppealGate` — cửa sổ 48h kể từ `publishedAt` + đúng một lần |
+| `lib/score-visibility.ts` | `/dashboard`, `/dashboard/results` | `candidateScoreView` — chỉ hiện điểm khi có phiếu giám khảo (`judges`), điểm máy (`external_ai`) hiện "Đang đối chiếu" |
+| `lib/db/queries/scores.ts#getAggregatedScores` | API `publish`, dashboard thí sinh | Điểm CHỐT một bài = trung bình các phiếu giám khảo, rơi về điểm hệ ngoài khi chưa ai chấm tay |
+| `lib/db/queries/scores.ts#getScoreOverviews` | `/admin/scoring` | Tổng hợp điểm cho NHIỀU bài trong 2 truy vấn (trước đây N bài × 2 truy vấn/bài) |
 
 ## Folder Structure
 
@@ -75,11 +101,13 @@ app/
     results/                    # Kết quả + phản biện (CP7)
     leaderboard/                # Bảng xếp hạng theo bảng
   admin/                        # Khu vực BTC/BGK (bảo vệ bởi middleware)
+    page.tsx                    # Dashboard tổng: StatTile + bảng thí sinh (gộp menu cũ)
     topics/                     # Duyệt đề tài cuốn chiếu
-    scoring/                    # Xem/nhập điểm Phase 1-2 + feedback
-    security/                   # Cổng CP4
-    posts/                      # Duyệt bài Facebook + engagement + công bố
-    appeals/                    # Xử lý phản biện
+    scoring/                    # Bảng tổng quan điểm Phase 1-2 (scoring-table.tsx)
+      [id]/                     # Chi tiết 1 bài: xác nhận/điều chỉnh điểm máy, feedback
+    security/                   # Cổng CP4 — bảng + modal rà soát (security-table.tsx)
+    posts/                      # Duyệt bài, nhập engagement, công bố — modal 3 bước (posts-table.tsx)
+    appeals/                    # Xử lý phản biện (appeals-table.tsx)
   api/
     auth/{signup,login,logout,me}/route.ts
     submissions/route.ts                          # candidate: tạo/xem đề tài
@@ -89,9 +117,16 @@ app/
                              approve-post,engagement,publish,manual-score}/route.ts
     admin/appeals/{route.ts,[id]/route.ts}
     integrations/scores/route.ts                   # hệ chấm điểm ngoài đẩy điểm vào
+    integrations/submissions/[id]/route.ts         # hệ chấm điểm ngoài ĐỌC bài + PRD (không lộ danh tính)
 lib/
   db/
-    schema.ts                  # Drizzle schema (7 bảng, xem docs/PRD.md mục 6)
+    schema.ts                  # Drizzle schema (7 bảng, xem docs/PRD.md mục 6).
+                                # submissions: + prd_content/prd_file_name (đầu vào Phase 1),
+                                # + btc_feedback/feedback_status/kpi3p_flag (chuyển từ product_scores —
+                                # quyết định CHUNG của BTC, không phải cờ riêng của một phiếu chấm),
+                                # final_score: integer -> real (trung bình nhiều giám khảo ra .5).
+                                # idea_scores/product_scores: + judge_id (null = hệ chấm ngoài) với
+                                # unique(submission_id, judge_id) — mỗi giám khảo đúng một phiếu.
     queries/                   # DB query layer tập trung theo domain
       submissions.ts, scores.ts, appeals.ts, surveys.ts, seasons.ts
     seed.ts                    # Seed dev (pnpm db:seed)
@@ -101,6 +136,9 @@ lib/
   api-auth.ts                  # requireSession() helper cho route handlers
   github.ts                    # verify GitHub collaborator (Phase 2)
   scoring.ts                   # tính bậc lan tỏa + final score (pure functions)
+  checkpoints.ts              # CP1-CP6 — một nguồn sự thật cho gate công bố
+  appeal-policy.ts            # cửa sổ phản biện 48h + một lần duy nhất
+  score-visibility.ts         # luật hiện điểm cho thí sinh (judges/external_ai/none)
 middleware.ts                  # bảo vệ /dashboard/* + /admin/*, role gate
 components/
   ui/                          # Component nền tảng port từ dsvh (xem docs/design.md)

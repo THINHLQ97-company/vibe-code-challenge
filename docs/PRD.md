@@ -18,7 +18,11 @@ Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, 4 thán
 ## 3. User Journeys (theo mốc CP1–CP7 + 3 phase chấm điểm)
 1. **CP1** — Thí sinh xem landing công khai (giới thiệu + thể lệ) → Đăng nhập → đăng ký trong tuần.
 2. **CP2** — Nộp form đăng ký đề tài (đủ 3 phần theo thể lệ mục Q) → BTC duyệt cuốn chiếu (trần 30–40/tuần) → chọn hạn nộp ≤15 ngày.
-3. **Phase 1 · Điểm ý tưởng** — Ngay sau duyệt, hệ thống gửi nội dung form đăng ký cho hệ chấm điểm ngoài qua API → nhận điểm ý tưởng, hiển thị cho thí sinh. Không gate — ai cũng tiến tiếp.
+3. **Phase 1 · Điểm ý tưởng** — Ngay sau duyệt, thí sinh đã nộp kèm **PRD** (nội dung
+   markdown/text, đầu vào chấm Phase 1 theo thể lệ "chấm điểm PRD và document"). Hệ chấm
+   điểm ngoài ĐỌC bài + PRD qua `GET /api/integrations/submissions/:id` (API key), rồi đẩy
+   điểm ý tưởng về qua `POST /api/integrations/scores` → hiển thị cho thí sinh sau khi hội
+   đồng xác nhận (`lib/score-visibility.ts`). Không gate — ai cũng tiến tiếp.
 4. **CP3** — Thí sinh tự đăng ký Vibe Host ở vibehost.matbao.ai (ngoài hệ thống), làm sản phẩm đạt đủ 6 tiêu chí ngưỡng sàn.
 5. **Phase 2 · Điểm sản phẩm & mã nguồn** — Nộp link Vibe Host + link Git private, thêm machine-user GitHub (`matbao-vibe-bot`) làm collaborator → hệ thống tự verify qua GitHub API → hệ chấm ngoài chấm Chất lượng kỹ thuật + Hoàn thiện → BTC xem, ghi feedback cụ thể → thí sinh sửa & nộp lại → BTC xác nhận đạt → app đánh dấu trạng thái "đạt 90% Ứng dụng AI KPI 3P" (không đẩy đi đâu, hệ HRM tự đọc).
 6. **CP4** — Qua cổng rà soát an toàn (7 điều cấm) — tự động là chính, người chỉ xử case bị gắn cờ.
@@ -30,9 +34,13 @@ Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, 4 thán
 ## 4. Functional Requirements
 - **Auth**: email/password nội bộ (JWT tự viết trong Next.js API/route handlers), seed user test; schema có sẵn `oauth_provider`/`oauth_subject` để sau swap MS365 OAuth (không dùng NextAuth để dễ kiểm soát swap).
 - **Landing công khai**: giới thiệu + thể lệ đầy đủ + nút "Đăng nhập" — không form đăng ký công khai.
-- **User portal**: đăng ký đề tài (đủ field Phần 1–3 theo thể lệ) · theo dõi CP1–CP7 · xem điểm ý tưởng (Phase 1) · nộp Phase 2 (link Vibe Host + link Git + xác nhận add collaborator, app tự verify) · xem & phản hồi feedback BTC · nộp Phase 3 (link bài Facebook) · nộp phiếu trải nghiệm (form) · gửi phản biện (CP7) · xem kết quả (ẩn tới khi công bố) · bảng xếp hạng theo bảng.
+- **User portal**: đăng ký đề tài (đủ field Phần 1–3 theo thể lệ, kèm **nộp PRD** — nội dung markdown/text 200–200 000 ký tự, căn cứ chấm Phase 1) · theo dõi CP1–CP7 · xem điểm ý tưởng (Phase 1, chỉ sau khi hội đồng xác nhận) · nộp Phase 2 (link Vibe Host + link Git + xác nhận add collaborator, app tự verify) · xem & phản hồi feedback BTC · nộp Phase 3 (link bài Facebook) · nộp phiếu trải nghiệm (form) · gửi phản biện (CP7) · xem kết quả (ẩn tới khi công bố) · bảng xếp hạng theo bảng.
 - **Admin/BGK portal**: duyệt đề tài cuốn chiếu (kèm điểm ý tưởng Phase 1) · xem điểm Phase 2 từ hệ ngoài + ghi feedback + xác nhận đạt (set flag KPI 3P) · duyệt case gắn cờ · duyệt bài Facebook (tick) + nhập tay engagement count → hệ tự tính bậc điểm lan tỏa · xử phản biện thủ công · xác nhận & công bố kết quả · dashboard thống kê · quản lý thí sinh.
-- **API nhận điểm từ hệ chấm ngoài**: 1 endpoint, phân biệt `phase` (1/2) trong payload, kèm `submission_id` + điểm từng module + tóm tắt + timestamp, auth bằng API key. (Payload/API key chi tiết — cần chốt cùng đội build bộ chấm điểm, đánh dấu integration point.)
+- **API cho hệ chấm ngoài**: hai chiều — `GET /api/integrations/submissions/:id` để hệ
+  ngoài ĐỌC bài + PRD (không trả danh tính thí sinh), và `POST /api/integrations/scores`
+  để đẩy điểm vào, phân biệt `phase` (1/2), kèm `submission_id` + điểm từng module + tóm
+  tắt + timestamp. Cả hai auth bằng `X-API-Key` (so khớp `timingSafeEqual`). (Payload chi
+  tiết — cần chốt cùng đội build bộ chấm điểm, đánh dấu integration point.)
 - **GitHub verify (Phase 2)**: machine-user GitHub account (`matbao-vibe-bot`, do BTC/IT tạo & quản lý) + Personal Access Token lưu server-side secret. Thí sinh add account này làm collaborator (Read) vào repo private. Backend dùng PAT gọi GitHub API kiểm tra bot account truy cập được repo chưa (200 vs 404) → set `github_verified_at`. Action item trước launch: tạo tài khoản `matbao-vibe-bot` + sinh PAT.
 - **UI**: copy trực tiếp component + token CSS từ `dsvh` (cùng stack Next.js+Tailwind+shadcn/ui) vào project — Button, Card, Table, Stepper, StatTile, Badge, Progress, FileUpload...; giữ `docs/design.md` ghi chú các component đã dùng & mapping với các trang trong app.
 
@@ -46,15 +54,15 @@ Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, 4 thán
 ## 6. Data Model (high-level, Drizzle ORM + Postgres)
 - **users**: id, name, email, password_hash, employee_code, department, board, role, oauth_provider, oauth_subject.
 - **seasons**: id, name, start_date, end_date, cap_per_week.
-- **submissions**: id, user_id, season_id, product_name, branch(A/B), topic_group, problem_desc, target_users, features(jsonb), database_plan, has_workflow, deploy_method, ai_tool, google_ai_pro(bool), risk_self_assessment, status, current_phase, submission_deadline, vibehost_url, github_repo_url, github_verified_at, facebook_post_url, facebook_approved_at, engagement_count, engagement_tier, published_at.
-- **idea_scores** (Phase 1): submission_id, module_scores(jsonb), source, created_at.
-- **product_scores** (Phase 2): submission_id, module_scores(jsonb), btc_feedback, feedback_status, source, created_at.
+- **submissions**: id, user_id, season_id, product_name, branch(A/B), topic_group, problem_desc, target_users, features(jsonb), **prd_content, prd_file_name** (PRD — đầu vào chấm Phase 1), database_plan, has_workflow, deploy_method, ai_tool, google_ai_pro(bool), risk_self_assessment, status, current_phase, submission_deadline, vibehost_url, github_repo_url, github_verified_at, **btc_feedback, feedback_status, kpi3p_flag** (quyết định CHUNG của BTC về cả bài — không nằm trên phiếu chấm), facebook_post_url, facebook_approved_at, engagement_count, engagement_tier, final_score(real), published_at.
+- **idea_scores** (Phase 1): submission_id, **judge_id** (null = hệ chấm ngoài, unique theo submission+judge), module_scores(jsonb), source, created_at.
+- **product_scores** (Phase 2): submission_id, **judge_id** (idem), module_scores(jsonb), source, created_at. `btc_feedback`/`feedback_status` đã chuyển lên `submissions` (mỗi phiếu giám khảo không còn mang cờ KPI riêng).
 - **appeals**: submission_id, criteria, evidence_url, status, resolved_by, resolved_at.
 - **experience_surveys**: submission_id, answers(jsonb theo board).
 
 ## 7. Integrations
 - **Vibe Host**: tự đăng ký ngoài (vibehost.matbao.ai), không tích hợp API.
-- **Hệ chấm điểm AI ngoài**: một chiều, đẩy điểm Phase 1 + Phase 2 qua API — cần chốt hợp đồng.
+- **Hệ chấm điểm AI ngoài**: hai chiều — đọc bài + PRD qua `GET /api/integrations/submissions/:id`, đẩy điểm Phase 1 + Phase 2 qua `POST /api/integrations/scores` — cần chốt hợp đồng payload chính thức.
 - **GitHub API**: verify collaborator Phase 2 qua machine-user + PAT — cần tạo account trước launch.
 - **Facebook**: thủ công hoàn toàn — không Graph API trong MVP.
 - **HRM/KPI 3P**: không tích hợp — hệ ngoài tự đọc từ DB/báo cáo của app này.

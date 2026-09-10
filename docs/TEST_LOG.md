@@ -1,7 +1,11 @@
 # Test Log — matbao-vibe-challenge (iMVP)
 
 Test thủ công qua curl + kiểm tra render HTML thật (không phải chỉ gọi API), chạy trên
-`docker compose` local với Postgres thật. Ngày: 2026-09-09.
+`docker compose` local với Postgres thật. Ngày: 2026-09-09 → 2026-09-10.
+
+**Repo CHƯA có test tự động** (không Vitest/Playwright chạy thật dù `CLAUDE.md` đặt mục
+tiêu coverage >70%) — mọi mục dưới đây là kiểm THỦ CÔNG qua curl/render HTML, lặp lại thủ
+công mỗi lần sửa luồng. Ghi lại đây để lần sau còn biết kịch bản nào đã chạy qua.
 
 ## Auth
 - [x] Signup email `@matbao.com` hợp lệ → tạo user, set cookie.
@@ -38,6 +42,66 @@ Test thủ công qua curl + kiểm tra render HTML thật (không phải chỉ g
 14. [x] Candidate gửi phản biện kèm bằng chứng.
 15. [x] Admin resolve phản biện (`accepted`/`rejected` + ghi chú).
 
+## Chấm nhiều giám khảo — trung bình (2026-09-09)
+- [x] 2 giám khảo cùng chấm 1 bài (idea + product), mỗi người 1 phiếu (`judgeId` từ
+  session). Verify E2E: `(36+33)/2` giá trị ứng dụng + `(14+13)/2` hoàn thiện +
+  `(22+24)/2` kỹ thuật + 20 lan tỏa → `finalScore = 91`, khớp response API publish.
+- [x] Giám khảo gọi lại `manual-score` cho cùng bài/phase → SỬA phiếu cũ của chính họ
+  (không đẻ thêm phiếu) — verify bảng `idea_scores`/`product_scores` không phát sinh
+  dòng mới, chỉ `updatedAt`/nội dung đổi.
+- [x] `getAggregatedScores`: có phiếu giám khảo thì lấy trung bình; chưa ai chấm tay thì
+  rơi về điểm hệ chấm ngoài (`source="judge"` vs `"external_ai"`).
+
+## Các cổng chặn CP bị hở trước đây, nay đã siết (2026-09-09 → 2026-09-10)
+- [x] `publish` chặn khi thiếu bất kỳ mốc nào trong CP1–CP6 (trước chỉ kiểm CP4+CP5) —
+  test case thiếu CP6 (chưa nộp phiếu trải nghiệm) → 409 kèm danh sách `missing`.
+- [x] `publish` chặn công bố lại bài đã có `publishedAt` → 409 "Bài này đã công bố kết quả".
+- [x] `engagement` chặn nhập số tương tác khi `facebookApprovedAt` chưa set (CP5) → 409.
+- [x] `phase3` chặn nộp link lan tỏa khi chưa có `vibehostUrl` (Phase 2) → 409; chặn đổi
+  link sau khi BGK đã duyệt bài (`facebookApprovedAt` đã set) → 409.
+- [x] `appeals` chặn: chưa công bố → 409; quá 48h kể từ `publishedAt` → 409; gửi lần hai
+  cho cùng bài → 409 "Mỗi bài chỉ được phản biện một lần".
+
+## Xác thực PRD (2026-09-09)
+- [x] `POST /api/submissions` thiếu `prdContent` → 400 yêu cầu đính PRD.
+- [x] `prdContent` dưới 200 ký tự → 400 "Tài liệu PRD quá ngắn".
+- [x] `prdContent` vượt 200 000 ký tự → 400 "Tài liệu quá dài".
+- [x] `GET /api/integrations/submissions/:id` (X-API-Key hợp lệ) trả đúng `prd`/`prdFileName`,
+  KHÔNG có tên/email thí sinh trong response.
+- [x] `GET /api/integrations/submissions/:id` với API key sai → 401 (so khớp bằng
+  `timingSafeEqual`, không phải `!==`).
+
+## Vòng phản biện: chấp nhận → mở lại → chấm lại → công bố lại (2026-09-10)
+- [x] Chạy trọn vòng trên 1 bài: công bố lần 1 (`finalScore=84`) → thí sinh gửi phản biện
+  → BTC `accepted` → `reopenForRescore()` xoá `publishedAt`/`finalScore` → hội đồng chấm
+  lại → công bố lần 2 (`finalScore=91`) → thí sinh đọc được kết luận phản biện lần 1 →
+  gửi phản biện lần hai cho cùng bài → bị chặn (409, đúng luật "một lần duy nhất").
+
+## Đồng bộ hai chiều BTC ↔ thí sinh (2026-09-10)
+- [x] BTC gắn cờ CP4 (`securityStatus=flagged` + `securityNote`) → thí sinh thấy lý do ở
+  cả `/dashboard` lẫn `/dashboard/build` (trước đây thí sinh không thấy gì).
+- [x] Dashboard thí sinh chuyển sang `getAggregatedScores` (cùng nguồn dữ liệu với
+  `/admin/scoring`) — chỉ hiện điểm khi có phiếu giám khảo, hiện "Đang đối chiếu" khi chỉ
+  có điểm máy — khớp `lib/score-visibility.ts`.
+- [x] Form dán link bài đăng (`/dashboard/share`) khoá ô nhập kèm lý do sau khi BGK đã
+  duyệt bài — khớp 409 phía API `phase3`.
+- [x] `getNextAction` (việc-tiếp-theo của thí sinh) phản ánh đúng: bài bị gắn cờ an toàn,
+  BTC yêu cầu sửa (`needs_fix`), và thứ tự "chờ BGK duyệt bài" đặt TRƯỚC phiếu trải
+  nghiệm (trước đây bị đảo ngược).
+
+## Phân quyền (2026-09-10)
+- [x] Thí sinh (`role=candidate`) vào bất kỳ route `/admin/*` → redirect 307 về `/dashboard`.
+- [x] Thí sinh gọi thẳng API chỉ dành cho BTC/BGK (vd `manual-score`, `publish`) → 403.
+- [x] Thí sinh sửa/xem bài dự thi của người khác (`phase2`, `phase3`, `appeals`) → 404
+  (không lộ cả sự tồn tại của bài).
+
+## Đăng ký tài khoản — validate (2026-09-10)
+- [x] Email ngoài domain `@matbao.com` → 400.
+- [x] Mật khẩu dưới 8 ký tự → 400.
+- [x] Phòng ban không nằm trong danh sách hợp lệ → 400 "Chọn phòng ban hợp lệ".
+- [x] Email đã tồn tại → 409.
+- [x] Phòng ban `TS` tự xếp bảng `ky_thuat` (Kỹ thuật) theo `departmentToBoard`.
+
 ## Trường hợp đặc biệt
 - [x] Candidate bị `returned` (trả về) đăng ký lại → tạo submission MỚI thành công (không
   chặn bởi check "đã có đề tài đang xử lý" vì status cũ là `returned`).
@@ -57,7 +121,9 @@ duyệt...) khớp dữ liệu seed.
 ## Chưa test được (cần điều kiện thật)
 - GitHub verify với PAT thật + repo thật (chỉ test được nhánh lỗi do chưa có credential).
 - Payload thật từ hệ chấm điểm ngoài (endpoint `/api/integrations/scores` mới test bằng
-  payload tự giả định — CHƯA đối chiếu với đội build bộ chấm điểm).
+  payload tự giả định — CHƯA đối chiếu với đội build bộ chấm điểm). Tương tự,
+  `GET /api/integrations/submissions/:id` mới test bằng client tự viết (curl), CHƯA có
+  bộ chấm điểm thật gọi vào để xác nhận format `prd`/`prdFileName` đủ dùng.
 - Tải thật ~30-40 đăng ký/tuần đồng thời (chỉ test tuần tự, chưa test concurrency).
 - Next.js `output: standalone` qua `node .next/standalone/server.js` (mới test qua
   `next start` để iterate nhanh + qua `docker compose up` cho bản build cuối).
