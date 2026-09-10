@@ -3,31 +3,47 @@ import { Button } from "@/components/dsvh/ui/Button";
 import { Card } from "@/components/dsvh/ui/Card";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { Note } from "@/components/dsvh/ui/data/Note";
-import { LogoWide } from "@/components/brand";
+import { LogoWide, LogoWideDark } from "@/components/brand";
+import { KPI_CATEGORY } from "@/lib/kpi";
 import {
   ArrowRightIcon,
   CheckCircleIcon,
   TrophyIcon,
   ShieldWarningIcon,
+  ChevronDownIcon,
 } from "@/components/dsvh/icons";
 
 /**
- * Trang giới thiệu cuộc thi — nguồn nội dung: `docs/reference/the-le-v3.html`.
+ * Trang giới thiệu cuộc thi. Nguồn nội dung: `docs/reference/the-le-v3.html`.
  *
- * Nguyên tắc biên tập: chỉ giữ thứ người sắp dự thi cần để quyết định THAM GIA HAY KHÔNG và biết
- * mình phải làm gì. Cố ý BỎ khỏi trang này: ngân sách chương trình, cơ cấu ban tổ chức, phân vai
- * công bố, quy chuẩn hoá Template, bảng khung giờ đăng bài chi tiết — đó là việc của BTC, đưa lên
- * đây chỉ làm loãng phần thí sinh phải đọc.
+ * Bố cục tham chiếu vietnamaichallenge.com (hero ảnh nền → giải thưởng → chủ đề → hành trình →
+ * FAQ → CTA), nhưng THU VỀ quy mô nội bộ: bỏ hẳn phần cố vấn, nhà tài trợ, địa điểm thi đấu và
+ * chuỗi workshop — cuộc thi này không có những thứ đó, dựng ra chỉ để trang trông hoành tráng là
+ * hứa thứ không tồn tại.
  *
- * Sáu mốc dưới đây dùng ĐÚNG nhãn CP1–CP6 của `lib/checkpoints.ts`, để thứ đọc ở trang giới thiệu
- * khớp từng chữ với thứ theo dõi trong khu thí sinh sau khi đăng nhập.
+ * Sáu mốc dưới đây dùng ĐÚNG nhãn CP1–CP6 của `lib/checkpoints.ts` để trang giới thiệu và khu thí
+ * sinh sau khi đăng nhập nói cùng một thứ.
  */
 
 const FACTS = [
   { value: "2 bảng", label: "Kỹ thuật · Văn phòng" },
   { value: "4 tháng", label: "nhận 30–40 bài/tuần" },
   { value: "≤15 ngày", label: "hạn nộp bạn tự chọn" },
-  { value: "130.000đ", label: "hoàn phí AI khi đậu" },
+  { value: "1 sản phẩm", label: "mỗi người, có database thật" },
+];
+
+/** Số liệu lấy nguyên từ mục M của thể lệ. */
+const MONTHLY_PRIZES = [
+  { rank: "🥇 Nhất bảng", money: "1.000.000đ" },
+  { rank: "🥈 Nhì bảng", money: "500.000đ" },
+  { rank: "🥉 Ba bảng", money: "300.000đ" },
+  { rank: "❤️ Yêu thích", money: "300.000đ" },
+];
+
+const FINAL_PRIZES = [
+  { rank: "🏆 Quán quân chung", money: "3.000.000đ" },
+  { rank: "🥈 Á quân chung", money: "2.000.000đ" },
+  { rank: "🥉 Quý quân chung", money: "1.000.000đ" },
 ];
 
 const BENEFITS = [
@@ -36,13 +52,25 @@ const BENEFITS = [
     body: "Đậu là được hoàn 130.000đ tiền đăng ký Google AI Pro qua kỳ lương tháng kế tiếp. Công cụ khác không nằm trong diện hoàn.",
   },
   {
-    title: "110% Năng lực AI tháng đó",
-    body: "Bài thi đạt được tính luôn là kết quả Năng lực AI của tháng, và bạn được miễn bài kiểm tra Năng lực AI trong 4 tuần.",
+    title: `Tính vào ${KPI_CATEGORY}`,
+    body: "Bài thi đạt được ghi nhận vào KPI của bạn ở mục đề xuất cải tiến / sáng kiến — làm thật, tính thật.",
   },
   {
-    title: "Giải thưởng theo bảng",
-    body: "Mỗi tháng mỗi bảng: 1.000.000đ · 500.000đ · 300.000đ, cộng giải Yêu thích 300.000đ. Cuối 4 tháng có Quán quân chung 3.000.000đ.",
+    title: "Chứng nhận & kho Template",
+    body: "Chứng nhận tham gia và quà mốc cho người đạt ngưỡng sàn; repo tốt được đưa vào kho Template Vibe Host, có ghi tên tác giả.",
   },
+];
+
+const TOPICS = [
+  "Tài chính cá nhân & doanh nghiệp",
+  "Kinh doanh / bán hàng",
+  "Marketing / Sales / CSKH",
+  "Website / Kỹ thuật",
+  "Quản lý / Vận hành",
+  "Văn phòng / Nhân sự",
+  "Pháp lý",
+  "Giáo dục / học tập",
+  "Cá nhân / đời sống",
 ];
 
 const CHECKPOINTS = [
@@ -89,55 +117,154 @@ const PITFALLS = [
   },
 ];
 
+const FAQ = [
+  {
+    q: "Không biết code thì có thi được không?",
+    a: "Được. Bảng Văn phòng (OP, MK, FI, HR, Kinh doanh) không yêu cầu biết code trước — vibe coding cùng AI đủ để dựng một sản phẩm giải đúng việc bạn hay làm. Hai bảng chấm cùng barem nhưng xếp hạng riêng.",
+  },
+  {
+    q: "Làm đề tài cá nhân có được không?",
+    a: "Được. Đề tài mở: việc công ty, việc cá nhân (ví dụ sổ thu chi) hay giải pháp cho SME đều nhận. Chỉ không nhận chủ đề Game.",
+  },
+  {
+    q: "Tôi phải tự trả tiền Vibe Host à?",
+    a: "Không. Người tham gia được cấp tài khoản Vibe Host miễn phí trong suốt cuộc thi. Gói cơ bản có 2 suất chạy nền = 1 website + 1 database, vừa đủ yêu cầu bắt buộc.",
+  },
+  {
+    q: "Ngại lộ danh tính khi đăng bài thì sao?",
+    a: "Bài đăng lên nhóm được đăng ẩn danh — dùng chế độ ẩn danh của nhóm, tài khoản phụ, hoặc nhờ BTC đăng hộ. Đăng bài là bắt buộc, nhưng lộ mặt thì không.",
+  },
+  {
+    q: "Nộp bài bị trả về là trượt luôn?",
+    a: "Không. Cả hai cổng (ngưỡng sàn kỹ thuật và rà soát an toàn) đều cho sửa và nộp lại trong hạn của bạn. BTC phải ghi rõ sai ở đâu — nhận xét chung chung không hợp lệ.",
+  },
+  {
+    q: "Không đồng ý với điểm thì làm gì?",
+    a: "Gửi phản biện một vòng duy nhất, trong 48h kể từ khi công bố điểm, bắt buộc kèm bằng chứng kiểm chứng được (link chức năng, commit, video, ảnh màn hình). Kết quả sau phản biện là chung cuộc.",
+  },
+];
+
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-surface-2">
-      <header className="border-b border-stroke bg-surface">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
-          <LogoWide height={30} />
-          <Link href="/login">
-            <Button variant="solid" size="sm" rightIcon={<ArrowRightIcon size={15} />}>
-              Đăng nhập
-            </Button>
-          </Link>
-        </div>
-      </header>
+      {/* ── HERO ─────────────────────────────────────────────────────────────────────────── */}
+      <section className="relative isolate overflow-hidden bg-canvas">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url(/auth-bg.jpg)" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-canvas/70 via-canvas/60 to-canvas" />
 
-      <section className="mx-auto max-w-5xl px-5 py-12 text-center">
-        <Badge tone="accent">Mắt Bão · Toàn công ty · Thi cá nhân</Badge>
-        <h1 className="mx-auto mt-4 max-w-2xl text-hero font-bold leading-tight tracking-tight text-ink">
-          Cuộc thi <span className="text-orange">Vibe Coding</span> nội bộ
-        </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-body text-ink-2">
-          Mỗi người tự làm một sản phẩm có database thật và đưa lên Vibe Host. Đề tài mở: việc công
-          ty, việc cá nhân hay giải pháp cho SME đều được — chỉ không nhận chủ đề Game.
-        </p>
-
-        <div className="mt-7 flex flex-col items-center gap-2.5">
-          <Link href="/login">
-            <Button variant="solid" size="lg" rightIcon={<ArrowRightIcon size={17} />}>
-              Đăng nhập để dự thi
-            </Button>
-          </Link>
-          <p className="text-caption text-ink-3">
-            Chưa có tài khoản?{" "}
-            <Link href="/signup" className="text-link hover:text-link-hover">
-              Đăng ký bằng email @matbao.com
+        <div className="relative mx-auto max-w-5xl px-5">
+          <header className="flex items-center justify-between py-5">
+            <LogoWideDark height={34} />
+            <Link href="/login">
+              <Button variant="solid" size="sm" rightIcon={<ArrowRightIcon size={15} />}>
+                Đăng nhập
+              </Button>
             </Link>
-          </p>
-        </div>
+          </header>
 
-        <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {FACTS.map((f) => (
-            <Card key={f.label} className="px-4 py-3 text-center">
-              <div className="text-title font-bold text-orange">{f.value}</div>
-              <div className="mt-0.5 text-caption text-ink-2">{f.label}</div>
-            </Card>
-          ))}
+          <div className="py-14 text-center sm:py-20">
+            <Badge tone="accent">Mắt Bão · Toàn công ty · Thi cá nhân</Badge>
+            <h1 className="mx-auto mt-5 max-w-3xl text-hero font-bold leading-tight tracking-tight text-cream">
+              Tự tay làm ra một sản phẩm.
+              <br />
+              Đưa lên Vibe Host.
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-body text-cream/75">
+              Chỉ khi tự làm mới đủ hiểu để tư vấn, bán và hỗ trợ khách. Mỗi người một sản phẩm có
+              database chạy thật — đề tài mở, không cần biết code trước.
+            </p>
+
+            <div className="mt-8 flex flex-col items-center gap-3">
+              <Link href="/login">
+                <Button variant="solid" size="lg" rightIcon={<ArrowRightIcon size={17} />}>
+                  Đăng nhập để dự thi
+                </Button>
+              </Link>
+              <p className="text-caption text-cream/60">
+                Chưa có tài khoản?{" "}
+                <Link href="/signup" className="font-medium text-cream hover:underline">
+                  Đăng ký bằng email @matbao.com
+                </Link>
+              </p>
+            </div>
+
+            <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {FACTS.map((f) => (
+                <div
+                  key={f.label}
+                  className="rounded-card border border-cream/15 bg-canvas/50 px-4 py-3 backdrop-blur-sm"
+                >
+                  <div className="text-title font-bold text-cream">{f.value}</div>
+                  <div className="mt-0.5 text-caption text-cream/60">{f.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Quyền lợi đặt NGAY sau hero: đây là thứ quyết định người ta có bấm đăng ký hay không. */}
+      {/* ── GIẢI THƯỞNG ──────────────────────────────────────────────────────────────────── */}
+      <section className="border-b border-stroke bg-surface">
+        <div className="mx-auto max-w-5xl px-5 py-14">
+          <div className="text-center">
+            <p className="text-caption font-semibold uppercase tracking-wide text-ink-3">
+              Tổng giá trị đến tay người dự thi
+            </p>
+            <p className="mt-2 text-hero font-bold tracking-tight text-orange">Hơn 50 triệu đồng</p>
+            <p className="mx-auto mt-3 max-w-2xl text-body text-ink-2">
+              Gồm 22,8 triệu tiền giải, 26–33 triệu hoàn phí công cụ AI qua lương, và khoảng 6 triệu
+              quà mốc cho người đạt ngưỡng sàn.
+            </p>
+          </div>
+
+          <div className="mt-9 grid gap-3 lg:grid-cols-2">
+            <Card className="p-5">
+              <div className="flex items-baseline justify-between gap-3">
+                <h3 className="text-title font-semibold text-ink">Giải tháng</h3>
+                <Badge tone="neutral">Trao riêng từng bảng · 4 đợt</Badge>
+              </div>
+              <p className="mt-1 text-caption text-ink-2">
+                Cuối mỗi tháng chốt bảng xếp hạng của bảng Kỹ thuật và bảng Văn phòng, mỗi bảng trao
+                đủ bộ giải dưới đây.
+              </p>
+              <ul className="mt-4 divide-y divide-stroke">
+                {MONTHLY_PRIZES.map((p) => (
+                  <li key={p.rank} className="flex items-center justify-between py-2.5">
+                    <span className="text-body text-ink">{p.rank}</span>
+                    <span className="text-title font-bold tabular-nums text-orange">{p.money}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            <Card className="p-5">
+              <div className="flex items-baseline justify-between gap-3">
+                <h3 className="text-title font-semibold text-ink">Giải chung cuối kỳ</h3>
+                <Badge tone="neutral">Giữa hai bảng · sau 4 tháng</Badge>
+              </div>
+              <p className="mt-1 text-caption text-ink-2">
+                Kết thúc chương trình, hội đồng chọn quán quân chung giữa hai bảng thi.
+              </p>
+              <ul className="mt-4 divide-y divide-stroke">
+                {FINAL_PRIZES.map((p) => (
+                  <li key={p.rank} className="flex items-center justify-between py-2.5">
+                    <span className="text-body text-ink">{p.rank}</span>
+                    <span className="text-title font-bold tabular-nums text-orange">{p.money}</span>
+                  </li>
+                ))}
+              </ul>
+              <Note className="mt-4">
+                Cơ cấu và mức giải theo thể lệ đã công bố, có thể điều chỉnh khi chốt chính thức.
+              </Note>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* ── QUYỀN LỢI ────────────────────────────────────────────────────────────────────── */}
       <Section
         title="Đậu thì được gì"
         subtitle='"Đậu" = hoàn thành đủ 6 mốc bắt buộc, qua cổng an toàn và được BGK duyệt đạt.'
@@ -153,29 +280,48 @@ export default function LandingPage() {
             </Card>
           ))}
         </div>
-        <Note className="mt-3">
-          Ngoài ra: chứng nhận tham gia và quà mốc cho người đạt ngưỡng sàn; repo tốt được đưa vào
-          kho Template Vibe Host, có ghi tên tác giả.
-        </Note>
       </Section>
 
+      {/* ── NHÓM CHỦ ĐỀ ──────────────────────────────────────────────────────────────────── */}
       <Section
-        title="Sáu mốc bạn phải hoàn thành"
-        subtitle="Đủ CP1–CP6 mới được công nhận đậu. Sau khi đăng nhập, khu thí sinh theo dõi đúng sáu mốc này."
+        title="Chín nhóm chủ đề"
+        subtitle="Chọn một nhóm khi đăng ký. Đề tài trùng nhau vẫn được duyệt — thể lệ không cấm."
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {CHECKPOINTS.map((c) => (
-            <Card key={c.code} className="p-4">
-              <div className="flex items-center gap-2">
-                <Badge tone="neutral">{c.code}</Badge>
-                <span className="text-body font-semibold text-ink">{c.label}</span>
-              </div>
-              <p className="mt-1.5 text-caption text-ink-2">{c.desc}</p>
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {TOPICS.map((t, i) => (
+            <Card key={t} className="flex items-center gap-3 p-3.5">
+              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-stroke-soft text-meta font-semibold tabular-nums text-ink-2">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span className="text-body text-ink">{t}</span>
             </Card>
           ))}
         </div>
+        <Note className="mt-3">Không nhận chủ đề Game.</Note>
       </Section>
 
+      {/* ── HÀNH TRÌNH ───────────────────────────────────────────────────────────────────── */}
+      <Section
+        title="Hành trình của bạn"
+        subtitle="Đủ CP1–CP6 mới được công nhận đậu. Sau khi đăng nhập, khu thí sinh theo dõi đúng sáu mốc này."
+      >
+        <ol className="relative space-y-3 border-l border-stroke pl-6">
+          {CHECKPOINTS.map((c) => (
+            <li key={c.code} className="relative">
+              <span className="absolute -left-[31px] top-3 grid size-3 place-items-center rounded-full border-2 border-orange bg-surface" />
+              <Card className="p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge tone="neutral">{c.code}</Badge>
+                  <span className="text-body font-semibold text-ink">{c.label}</span>
+                </div>
+                <p className="mt-1.5 text-caption text-ink-2">{c.desc}</p>
+              </Card>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      {/* ── CHẤM ĐIỂM ────────────────────────────────────────────────────────────────────── */}
       <Section
         title="Đậu được chấm thế nào"
         subtitle="Trước hết phải qua ngưỡng sàn (đạt / không đạt), qua rồi mới vào thang điểm 100."
@@ -225,12 +371,13 @@ export default function LandingPage() {
             </div>
             <Note className="mt-3">
               Có điểm rồi bạn được phản biện một vòng duy nhất, trong 48h, bắt buộc kèm bằng chứng
-              kiểm chứng được (link chức năng, commit, video, ảnh màn hình).
+              kiểm chứng được.
             </Note>
           </Card>
         </div>
       </Section>
 
+      {/* ── DỄ TRƯỢT ─────────────────────────────────────────────────────────────────────── */}
       <Section
         title="Bốn chỗ dễ trượt nhất"
         subtitle="Đọc kỹ bốn mục này trước khi bắt tay làm — đây là nguyên nhân trượt phổ biến, không phải chuyện kỹ thuật khó."
@@ -252,6 +399,7 @@ export default function LandingPage() {
         </div>
       </Section>
 
+      {/* ── BẢNG THI ─────────────────────────────────────────────────────────────────────── */}
       <Section
         title="Bạn thi ở bảng nào"
         subtitle="Hệ thống tự xếp bảng theo phòng ban bạn khai lúc đăng ký. Cùng barem, cùng ngưỡng sàn — tách bảng để so tài với người cùng xuất phát điểm."
@@ -276,9 +424,34 @@ export default function LandingPage() {
         </div>
       </Section>
 
+      {/* ── FAQ ──────────────────────────────────────────────────────────────────────────── */}
+      <Section title="Câu hỏi thường gặp" subtitle="Sáu câu được hỏi nhiều nhất khi mở đăng ký.">
+        <div className="space-y-2">
+          {FAQ.map((f) => (
+            /* `<details>` chứ không dựng accordion bằng JS: đóng mở là hành vi sẵn có của trình
+               duyệt, chạy cả khi JS chưa tải và trình đọc màn hình hiểu đúng ngay. */
+            <details
+              key={f.q}
+              className="group rounded-card border border-stroke bg-surface px-4 py-3 [&_summary::-webkit-details-marker]:hidden"
+            >
+              <summary className="flex cursor-pointer items-center justify-between gap-3 text-body font-medium text-ink">
+                {f.q}
+                <ChevronDownIcon
+                  size={16}
+                  className="shrink-0 text-ink-3 transition-transform group-open:rotate-180"
+                />
+              </summary>
+              <p className="mt-2 text-caption text-ink-2">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </Section>
+
+      {/* ── CTA CUỐI ─────────────────────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-5 pb-16">
         <Card className="p-6 text-center">
-          <h2 className="text-title font-semibold text-ink">Sẵn sàng đăng ký đề tài?</h2>
+          <LogoWide height={30} className="mx-auto" />
+          <h2 className="mt-4 text-title font-semibold text-ink">Sẵn sàng đăng ký đề tài?</h2>
           <p className="mx-auto mt-1.5 max-w-xl text-caption text-ink-2">
             Đăng nhập bằng email công ty để nộp đề tài kèm tài liệu PRD. BTC duyệt cuốn chiếu theo
             tuần — duyệt xong mới bắt đầu tính hạn nộp của bạn, nên đăng ký sớm là có nhiều thời
@@ -310,9 +483,9 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mx-auto max-w-5xl px-5 pb-12">
-      <h2 className="text-title font-semibold text-ink">{title}</h2>
-      <p className="mb-4 mt-1 max-w-3xl text-caption text-ink-2">{subtitle}</p>
+    <section className="mx-auto max-w-5xl px-5 pb-12 pt-12 first:pt-14">
+      <h2 className="text-page font-bold tracking-tight text-ink">{title}</h2>
+      <p className="mb-5 mt-1.5 max-w-3xl text-body text-ink-2">{subtitle}</p>
       {children}
     </section>
   );

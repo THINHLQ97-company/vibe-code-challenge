@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth/session";
 import { getSubmissionWithUser } from "@/lib/db/queries/submissions";
 import { getScoreOverviews, listJudgeScores } from "@/lib/db/queries/scores";
 import { formatDateVN } from "@/lib/datetime";
+import { KPI_CATEGORY } from "@/lib/kpi";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Badge } from "@/components/dsvh/ui/Badge";
@@ -195,7 +196,7 @@ export default async function ScoringDetailPage({
       <Card>
         <CardHeader
           title="Phản hồi Phase 2 cho thí sinh"
-          subtitle="Duyệt đạt là mốc thí sinh được tính 90% Ứng dụng AI theo KPI 3P và mở bước lan tỏa"
+          subtitle={`Duyệt đạt là mốc bài được tính vào ${KPI_CATEGORY} và mở bước lan tỏa`}
           action={
             <Link
               href={`/admin/posts`}

@@ -5,11 +5,15 @@ import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { StatCard } from "@/components/dsvh/ui/data/StatCard";
 import { Button } from "@/components/dsvh/ui/Button";
-import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
-import { InfoTile } from "@/components/dsvh/ui/data/InfoTile";
 import { submissionStage } from "@/lib/stage-status";
+import {
+  TopicDonut,
+  StageDonut,
+  DepartmentBars,
+  type StageSlice,
+} from "./_components/dashboard-charts";
 import { CandidatesTable, type CandidateRow } from "./_components/candidates-table";
 import {
   NotepadIcon,
@@ -17,7 +21,6 @@ import {
   RocketIcon,
   TrophyIcon,
   ShieldWarningIcon,
-  FolderIcon,
   ArrowRightIcon,
 } from "@/components/dsvh/icons";
 
@@ -38,12 +41,32 @@ export default async function AdminDashboardPage() {
   const flagged = submissions.filter((s) => s.securityStatus === "flagged");
   const awaitingPost = submissions.filter((s) => s.facebookPostUrl && !s.facebookApprovedAt);
 
-  const byTopicGroup = submissions.reduce<Record<string, number>>((acc, s) => {
-    acc[s.topicGroup] = (acc[s.topicGroup] ?? 0) + 1;
-    return acc;
-  }, {});
-  const topicEntries = Object.entries(byTopicGroup).sort((a, b) => b[1] - a[1]);
-  const maxTopic = Math.max(1, ...topicEntries.map(([, c]) => c));
+  // Cả ba biểu đồ đếm từ ĐĂNG KÝ THẬT trong DB, không có số liệu dựng sẵn.
+  const countBy = <T,>(items: T[], key: (i: T) => string) =>
+    Object.entries(
+      items.reduce<Record<string, number>>((acc, i) => {
+        const k = key(i);
+        acc[k] = (acc[k] ?? 0) + 1;
+        return acc;
+      }, {})
+    )
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value);
+
+  const topicSlices = countBy(submissions, (s) => s.topicGroup);
+  const departmentSlices = countBy(submissions, (s) => s.user.department ?? "—");
+
+  const stageSlices = Object.values(
+    submissions.reduce<Record<string, StageSlice>>(
+      (acc, s) => {
+        const st = submissionStage(s);
+        acc[st.label] = acc[st.label] ?? { label: st.label, value: 0, tone: st.state };
+        acc[st.label].value += 1;
+        return acc;
+      },
+      {}
+    )
+  ).sort((a, b) => b.value - a.value);
 
   const capLeft = season ? Math.max(0, season.capPerWeek - approvedThisWeek) : 0;
 
@@ -125,35 +148,12 @@ export default async function AdminDashboardPage() {
         </Alert>
       )}
 
-      <Card>
-        <CardHeader
-          title="Phân bổ theo nhóm chủ đề"
-          subtitle="Dùng để cân bằng ngân hàng đề tài và định hướng gợi ý cho đợt đăng ký sau"
-        />
-        {topicEntries.length === 0 ? (
-          <Empty
-            icon={<FolderIcon size={40} />}
-            title="Chưa có đăng ký nào"
-            description="Khi thí sinh đăng ký đề tài, phân bổ theo nhóm chủ đề sẽ hiện ở đây."
-          />
-        ) : (
-          <div className="space-y-3">
-            {topicEntries.map(([group, count]) => (
-              <InfoTile
-                key={group}
-                layout="row"
-                label={group}
-                value={String(count)}
-                progress={(count / maxTopic) * 100}
-                progressTone="orange"
-              />
-            ))}
-          </div>
-        )}
-        <Note className="mt-3">
-          Trần 30–40 bài/tuần là để hội đồng và hệ chấm kham nổi — không phải để loại người.
-        </Note>
-      </Card>
+      <div className="grid gap-3 lg:grid-cols-2">
+        <TopicDonut data={topicSlices} />
+        <StageDonut data={stageSlices} />
+      </div>
+
+      <DepartmentBars data={departmentSlices} />
 
       <Card>
         <CardHeader

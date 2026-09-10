@@ -35,6 +35,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <AppShell
       brandTitle="Vibe Code Challenge"
       brandSubtitle="Ban tổ chức"
+      brandTone="orange"
       nav={NAV}
       avatarUrl={user?.avatarUrl}
       profileHref="/admin/profile"

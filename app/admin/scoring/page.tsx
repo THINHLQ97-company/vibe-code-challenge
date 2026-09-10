@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth/session";
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { getScoreOverviews } from "@/lib/db/queries/scores";
 import { submissionStage } from "@/lib/stage-status";
+import { KPI_CATEGORY, KPI_SHORT } from "@/lib/kpi";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Note } from "@/components/dsvh/ui/data/Note";
@@ -79,7 +80,7 @@ export default async function ScoringPage() {
           icon={CheckCircleIcon}
           label="Đã duyệt đạt Phase 2"
           value={approvedPhase2}
-          desc="đạt mốc 90% KPI 3P"
+          desc={`được tính ${KPI_SHORT}`}
           tone="success"
         />
       </div>
@@ -97,7 +98,7 @@ export default async function ScoringPage() {
           </Note>
         )}
         <Note className="mt-3">
-          Duyệt đạt Phase 2 là mốc thí sinh được tính 90% Ứng dụng AI theo KPI 3P — hệ HRM đọc dữ
+          Duyệt đạt Phase 2 là mốc bài được tính vào {KPI_CATEGORY} — hệ HRM đọc dữ
           liệu này, app không đẩy đi đâu.
         </Note>
       </Card>

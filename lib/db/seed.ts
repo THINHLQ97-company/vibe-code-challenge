@@ -151,6 +151,26 @@ async function main() {
     })
     .returning();
 
+  /**
+   * Thí sinh CHƯA có đề tài — cố ý để trống.
+   *
+   * Năm hồ sơ kia đều đã đăng ký nên form "Đăng ký đề tài" không bao giờ hiện ra khi xem demo, và
+   * người xem tưởng luồng đó chưa dựng. Tài khoản này để mở đúng luồng đó.
+   */
+  const [candOp] = await db
+    .insert(users)
+    .values({
+      email: "thisinh.op@matbao.com",
+      name: "Đỗ Thị F",
+      passwordHash,
+      employeeCode: "NV006",
+      department: "OP",
+      board: departmentToBoard.OP,
+      role: "candidate",
+    })
+    .returning();
+  void candOp;
+
   const [candHR] = await db
     .insert(users)
     .values({
@@ -296,7 +316,8 @@ async function main() {
       kpi3pFlag: true,
       surveySubmittedAt: new Date(Date.now() - 5 * 24 * 3600 * 1000),
       finalScore: 91.5,
-      publishedAt: new Date(Date.now() - 4 * 24 * 3600 * 1000),
+      // Công bố cách đây 2 GIỜ để cửa sổ phản biện 48h còn mở — demo được luồng gửi phản biện.
+      publishedAt: new Date(Date.now() - 2 * 3600 * 1000),
     })
     .returning();
   // Điểm hệ chấm ngoài đẩy về trước, rồi hai giám khảo chấm tay đè lên — đúng thứ tự thực tế.
@@ -457,6 +478,7 @@ async function main() {
   console.log(`  candidate DE      thisinh.de@matbao.com / ${DEV_PASSWORD}     (đã công bố · 91.5đ, 2 giám khảo)`);
   console.log(`  candidate SALES   thisinh.sales@matbao.com / ${DEV_PASSWORD}  (đã công bố · 64đ)`);
   console.log(`  candidate HR      thisinh.hr@matbao.com / ${DEV_PASSWORD}     (bị trả về CP2)`);
+  console.log(`  candidate OP      thisinh.op@matbao.com / ${DEV_PASSWORD}     (CHƯA đăng ký — demo luồng đăng ký)`);
   process.exit(0);
 }
 

@@ -40,6 +40,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <AppShell
       brandTitle="Vibe Code Challenge"
       brandSubtitle="Khu vực thí sinh"
+      brandTone="teal"
       nav={NAV}
       avatarUrl={user?.avatarUrl}
       profileHref="/dashboard/profile"

@@ -93,7 +93,7 @@ export function PrebuiltPanel({
             onChange={(e) => setText(e.target.value)}
           />
           <Note tone="danger">
-            Gắn cờ là bài KHÔNG qua Phase 2: hạ trạng thái về &quot;cần sửa&quot;, gỡ cờ KPI 3P và
+            Gắn cờ là bài KHÔNG qua Phase 2: hạ trạng thái về &quot;cần sửa&quot;, gỡ cờ KPI và
             chặn công bố kết quả.
           </Note>
           <div className="flex flex-wrap gap-2">

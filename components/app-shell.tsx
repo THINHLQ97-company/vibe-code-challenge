@@ -20,10 +20,17 @@ import { LogoutButton } from "@/components/logout-button";
  */
 export type NavItem = { href: string; label: string; icon: ReactNode };
 
+/** Nhãn vai trò trên cột điều hướng — tô khác nhau để mở hai tab cạnh nhau là phân biệt được ngay. */
+const BRAND_TONE = {
+  orange: "border-orange/40 bg-orange/15 text-orange-bright",
+  teal: "border-teal/40 bg-teal/15 text-teal",
+} as const;
+
 export function AppShell({
   brandTitle,
   brandSubtitle,
   nav,
+  brandTone = "orange",
   userName,
   userMeta,
   avatarUrl,
@@ -33,6 +40,7 @@ export function AppShell({
   brandTitle: string;
   brandSubtitle: string;
   nav: NavItem[];
+  brandTone?: keyof typeof BRAND_TONE;
   userName: string;
   userMeta: string;
   avatarUrl?: string | null;
@@ -46,14 +54,19 @@ export function AppShell({
       <aside className="hidden w-60 shrink-0 flex-col bg-canvas md:flex">
         {/* Logo NGANG bản tối: đọc được tên cuộc thi ngay trên cột điều hướng, thay vì một khối
             vuông cụt kèm chữ gõ tay. `brandTitle` giờ chỉ còn dùng cho thanh đầu ở mobile. */}
-        <div className="px-4 py-5">
-          {/* Cột rộng 240px, trừ đệm còn 208px — logo tỉ lệ 3,62:1 ở chiều cao 40 chiếm 145px,
-              vừa đủ thoáng mà vẫn đọc rõ chữ. */}
+        {/* Logo và chữ trong menu phải bắt đầu ở CÙNG một mốc trái. Trước đây logo ở 16px còn chữ
+            menu ở 20px (8px khung + 12px mục) — lệch 4px là đủ để logo trông như bị ép sát mép
+            trong khi menu thì thụt vào. Nay hạ đệm mục menu xuống 8px để tổng thành đúng 16px. */}
+        <div className="px-4 pb-4 pt-6">
           <LogoWideDark height={40} />
-          <div className="mt-2 truncate text-meta text-cream/60">{brandSubtitle}</div>
+          <span
+            className={`mt-3 inline-flex items-center rounded-full border px-2.5 py-1 text-meta font-semibold ${BRAND_TONE[brandTone]}`}
+          >
+            {brandSubtitle}
+          </span>
         </div>
 
-        <nav className="flex flex-col gap-0.5 px-2 py-2">
+        <nav className="flex flex-col gap-0.5 px-2 pb-2">
           {nav.map((item) => {
             const isRoot = item.href === "/dashboard" || item.href === "/admin";
             const active = isRoot ? pathname === item.href : pathname.startsWith(item.href);
@@ -62,7 +75,7 @@ export function AppShell({
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-caption font-medium transition-colors ${
+                className={`relative flex items-center gap-2.5 rounded-lg px-2 py-2 text-caption font-medium transition-colors ${
                   active
                     ? "bg-orange/15 text-cream before:absolute before:left-0 before:top-1 before:bottom-1 before:w-[3px] before:rounded-r before:bg-orange before:content-['']"
                     : "text-cream/70 hover:bg-cream/10 hover:text-cream"

@@ -49,8 +49,9 @@ export function AuthSplit({
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url(/auth-bg.jpg)" }}
         />
-        {/* Lớp phủ để chữ và thẻ luôn đọc được dù ảnh nền sáng hay tối. */}
-        <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/55 to-canvas/70" />
+        {/* Lớp phủ chỉ ĐỦ để chữ đáy đọc được: đậm ở dưới, nhạt dần lên trên để phần tranh ở giữa
+            không bị dìm. Ảnh BTC cấp vốn đã tối sẵn nên phủ đều tay là mất luôn hình. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/35 to-canvas/25" />
 
         <div className="relative flex h-full flex-col justify-between p-8 xl:p-10">
           <LogoWideDark height={40} />

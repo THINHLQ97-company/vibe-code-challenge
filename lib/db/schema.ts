@@ -157,10 +157,16 @@ export const submissions = pgTable("submissions", {
 
   // Phản hồi Phase 2 là quyết định CHUNG của BTC về cả bài, không phải ý kiến riêng của một
   // giám khảo — để trên phiếu chấm thì mỗi phiếu mang một cờ KPI khác nhau và hệ HRM đọc
-  // "đạt 90% Ứng dụng AI" theo đúng phiếu nào nó bắt được trước.
+  // trúng phiếu nào nó bắt được trước.
   btcFeedback: text("btc_feedback"),
   feedbackStatus: feedbackStatusEnum("feedback_status").notNull().default("pending"),
-  /** Cờ cho hệ HRM đọc: đã đạt mốc 90% "Ứng dụng AI" theo KPI 3P. App chỉ gắn cờ, không đẩy đi. */
+  /**
+   * Cờ cho hệ HRM đọc: bài đã đạt, được tính vào mục KPI **5.2 Đề xuất cải tiến / sáng kiến**.
+   * App chỉ GẮN CỜ, không đẩy dữ liệu đi đâu — hệ HRM tự đọc.
+   *
+   * Tên cột giữ nguyên `kpi3p_flag` dù nhãn nghiệp vụ đã đổi: đổi tên cột kéo theo migration và mọi
+   * chỗ đọc, trong khi ý nghĩa "cờ KPI của bài này" không đổi. Nhãn hiển thị nằm ở `lib/kpi.ts`.
+   */
   kpi3pFlag: boolean("kpi3p_flag").notNull().default(false),
 
   // CP4 — cổng rà soát an toàn (7 điều cấm), điền từ hệ chấm ngoài hoặc admin
