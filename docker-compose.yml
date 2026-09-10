@@ -1,26 +1,41 @@
+# Deploy trên server B qua `mb-route`.
+#
+# Workspace này chạy Docker-in-Docker chứ KHÔNG mount socket của host B (đã kiểm: không có
+# container traefik nào trên daemon này, mạng `mb-edge` vừa tạo mới hoàn toàn). Nên cách route
+# bằng label Traefik trong skill /deploy không dùng được ở đây: Traefik của host không nhìn thấy
+# container nằm trong DinD. Thay vào đó map cổng 3000 ra workspace rồi `mb-route local --port 3000`
+# — Traefik trỏ thẳng vào container workspace.
+#
+# Chạy: docker compose -p matbao-vibe-challenge-thinhlq up -d --build
 services:
   web:
     build: .
+    restart: unless-stopped
+    networks: [internal]
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgres://app:app@db:5432/matbao-vibe-challenge
-      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
-      SCORING_API_KEY: ${SCORING_API_KEY:-dev-scoring-key}
+      # Docker tự đặt biến HOSTNAME = ID container cho MỌI container, và nó ĐÈ lên `ENV` khai
+      # trong Dockerfile. Next standalone đọc `process.env.HOSTNAME` để chọn địa chỉ bind, nên
+      # không khai lại ở đây thì app chỉ nghe trên IP container, không nghe 127.0.0.1 — và
+      # HEALTHCHECK gọi localhost sẽ hỏng vĩnh viễn dù app chạy tốt.
+      HOSTNAME: 0.0.0.0
+      DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-app}@db:5432/matbao-vibe-challenge
+      JWT_SECRET: ${JWT_SECRET:?cần đặt JWT_SECRET trong .env}
+      SCORING_API_KEY: ${SCORING_API_KEY:-}
       GITHUB_BOT_PAT: ${GITHUB_BOT_PAT:-}
     depends_on:
       db:
         condition: service_healthy
-    restart: unless-stopped
 
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
+    networks: [internal]
     environment:
       POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
       POSTGRES_DB: matbao-vibe-challenge
-    ports:
-      - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
@@ -28,7 +43,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    restart: unless-stopped
+
+networks:
+  internal: {}
 
 volumes:
   db-data:
