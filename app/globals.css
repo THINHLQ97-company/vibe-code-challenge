@@ -105,3 +105,12 @@ html[data-theme="dark"] {
     -webkit-font-smoothing: antialiased;
   }
 }
+
+/**
+ * WebKit vẽ sẵn một tam giác trước `<summary>`. `list-none` xử được Firefox, nhưng pseudo-element
+ * này thì Tailwind KHÔNG sinh ra từ biến thể tuỳ ý (`[&::-webkit-details-marker]:hidden` không
+ * xuất hiện trong CSS build — đã đo). Khai thẳng một dòng ở đây là cách chắc chắn duy nhất.
+ */
+summary::-webkit-details-marker {
+  display: none;
+}
