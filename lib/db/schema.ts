@@ -52,9 +52,22 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name"),
-  passwordHash: text("password_hash").notNull(),
+  /**
+   * CHO PHÉP RỖNG. Tài khoản đăng nhập bằng Microsoft không có mật khẩu nào cả — ép `NOT NULL` thì
+   * phải bịa ra một chuỗi băm giả để ghi vào, mà chuỗi băm giả nằm trong bảng mật khẩu là thứ
+   * không ai muốn phải giải thích về sau. Rỗng nghĩa là "tài khoản này không đăng nhập bằng mật
+   * khẩu được", và `verifyPassword` phải tự hiểu như vậy.
+   */
+  passwordHash: text("password_hash"),
   employeeCode: text("employee_code"),
   department: text("department"), // TS, DE, OP, MK, FI, HR, BZ
+  /**
+   * Chuỗi phòng ban THÔ do Microsoft Graph trả về (vd "Phòng Marketing", "Technical Support").
+   * Giữ nguyên bản gốc bên cạnh mã đã quy đổi: khi một giá trị lạ không khớp bảng quy đổi, đây là
+   * thứ duy nhất cho biết Graph thực sự trả về cái gì để bổ sung bảng — thiếu nó thì chỉ biết
+   * "không map được" mà không biết không map được từ cái gì.
+   */
+  departmentRaw: text("department_raw"),
   board: boardEnum("board"),
   role: roleEnum("role").notNull().default("candidate"),
   /**
@@ -68,6 +81,21 @@ export const users = pgTable("users", {
   oauthProvider: text("oauth_provider"),
   oauthSubject: text("oauth_subject"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+/**
+ * Cấu hình vận hành bật/tắt được từ trang BTC, không cần deploy lại.
+ *
+ * Dạng khoá–giá trị chứ không phải mỗi thiết lập một cột: các công tắc này sinh ra theo nhu cầu
+ * vận hành từng mùa thi, và thêm một công tắc mà phải chạy migration đổi bảng thì kiểu gì cũng có
+ * lúc cần gấp mà không kịp. Giá trị luôn là chuỗi; `lib/settings.ts` lo phần ép kiểu và giá trị
+ * mặc định để nơi gọi không phải tự đoán.
+ */
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: integer("updated_by"),
 });
 
 export const seasons = pgTable("seasons", {

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { users, departmentToBoard } from "@/lib/db/schema";
 import { hashPassword } from "@/lib/auth/password";
 import { signSession, toSessionPayload, AUTH_COOKIE } from "@/lib/auth/session";
+import { isPasswordLoginEnabled } from "@/lib/settings";
 
 const DEPARTMENTS = Object.keys(departmentToBoard) as [string, ...string[]];
 
@@ -22,6 +23,18 @@ const signupSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  /**
+   * Tắt đăng nhập mật khẩu thì phải tắt luôn đường TẠO tài khoản mật khẩu — để hở chỗ này thì
+   * người ta vẫn tự mở được một tài khoản có mật khẩu, chỉ là không đăng nhập được ngay, và khi
+   * BTC bật lại đường mật khẩu vì lý do gì đó thì cả đám tài khoản tự tạo đó sống dậy.
+   */
+  if (!(await isPasswordLoginEnabled())) {
+    return NextResponse.json(
+      { error: "Kỳ thi chỉ nhận đăng nhập bằng tài khoản Microsoft của công ty" },
+      { status: 403 }
+    );
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = signupSchema.safeParse(body);
   if (!parsed.success) {

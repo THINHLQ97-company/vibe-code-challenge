@@ -3,7 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { requireSession } from "@/lib/api-auth";
 import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
+import { users, departmentToBoard } from "@/lib/db/schema";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 
 /**
@@ -34,6 +34,17 @@ const schema = z.union([
     currentPassword: z.string().min(1, "Nhập mật khẩu hiện tại"),
     newPassword: z.string().min(8, "Mật khẩu mới tối thiểu 8 ký tự"),
   }),
+  /**
+   * Tự chọn phòng ban — lối thoát cho trường hợp Microsoft Graph trả về chuỗi phòng ban không khớp
+   * bảng quy đổi. CHỈ cho đặt khi đang trống: đổi được bất cứ lúc nào thì thí sinh thấy mình sắp
+   * thua ở bảng này là nhảy sang bảng kia.
+   */
+  z.object({
+    action: z.literal("department"),
+    department: z.enum(Object.keys(departmentToBoard) as [string, ...string[]], {
+      message: "Chọn phòng ban hợp lệ",
+    }),
+  }),
 ]);
 
 export async function POST(req: Request) {
@@ -58,6 +69,31 @@ export async function POST(req: Request) {
   const user = await db.query.users.findFirst({ where: eq(users.id, auth.session.userId) });
   if (!user) {
     return NextResponse.json({ error: "Không tìm thấy tài khoản" }, { status: 404 });
+  }
+
+  if (parsed.data.action === "department") {
+    if (user.department) {
+      return NextResponse.json(
+        { error: "Phòng ban đã được xác định — liên hệ ban tổ chức nếu cần sửa" },
+        { status: 409 }
+      );
+    }
+    const code = parsed.data.department;
+    await db
+      .update(users)
+      .set({ department: code, board: departmentToBoard[code] })
+      .where(eq(users.id, user.id));
+    return NextResponse.json({ ok: true });
+  }
+  /**
+   * Tài khoản đăng nhập bằng Microsoft không có mật khẩu để mà đổi. Chặn rõ ràng ở đây thay vì để
+   * `verifyPassword` nhận `null` — mật khẩu của họ do Microsoft giữ, đổi ở đó chứ không phải ở đây.
+   */
+  if (!user.passwordHash) {
+    return NextResponse.json(
+      { error: "Tài khoản này đăng nhập bằng Microsoft — đổi mật khẩu ở tài khoản công ty" },
+      { status: 400 }
+    );
   }
   // Bắt buộc xác nhận mật khẩu hiện tại: cookie phiên có thể bị mượn trên máy để quên đăng xuất,
   // và đổi mật khẩu là thao tác chiếm luôn tài khoản.

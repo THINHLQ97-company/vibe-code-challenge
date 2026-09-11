@@ -71,6 +71,13 @@
       "when": 1789092611549,
       "tag": "0009_rename_sales_to_bz",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789098523207,
+      "tag": "0010_ms_login_and_settings",
+      "breakpoints": true
     }
   ]
 }

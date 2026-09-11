@@ -10,6 +10,7 @@ import { Avatar } from "@/components/dsvh/ui/data/Avatar";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
+import { Select } from "@/components/dsvh/ui/form/Select";
 import { UploadSimpleIcon, TrashIcon } from "@/components/dsvh/icons";
 
 const ACCEPT = "image/jpeg,image/png,image/webp";
@@ -55,6 +56,8 @@ export function ProfileForm({
   boardLabel,
   roleLabel,
   avatarUrl,
+  canChangePassword,
+  departmentOptions,
 }: {
   name: string;
   email: string;
@@ -62,6 +65,9 @@ export function ProfileForm({
   boardLabel: string;
   roleLabel: string;
   avatarUrl: string | null;
+  /** Tài khoản đăng nhập bằng Microsoft không có mật khẩu để đổi. */
+  canChangePassword: boolean;
+  departmentOptions: Array<{ value: string; label: string }>;
 }) {
   const router = useRouter();
   const [avatar, setAvatar] = useState(avatarUrl);
@@ -75,6 +81,33 @@ export function ProfileForm({
   const [pwBusy, setPwBusy] = useState(false);
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwOk, setPwOk] = useState(false);
+
+  const [dept, setDept] = useState<string | null>(null);
+  const [deptBusy, setDeptBusy] = useState(false);
+  const [deptError, setDeptError] = useState<string | null>(null);
+
+  async function saveDepartment() {
+    if (!dept) return;
+    setDeptError(null);
+    setDeptBusy(true);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "department", department: dept }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setDeptError(data.error ?? "Không lưu được phòng ban");
+        return;
+      }
+      router.refresh();
+    } catch {
+      setDeptError("Không kết nối được máy chủ, thử lại sau");
+    } finally {
+      setDeptBusy(false);
+    }
+  }
 
   async function saveAvatar(next: string | null) {
     setAvatarError(null);
@@ -204,57 +237,105 @@ export function ProfileForm({
         <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
           <InfoRow layout="stack" label="Họ tên" value={name} size="sm" />
           <InfoRow layout="stack" label="Email công ty" value={email} size="sm" />
-          <InfoRow layout="stack" label="Phòng ban" value={department || "—"} size="sm" />
+          <InfoRow layout="stack" label="Phòng ban" value={department || "Chưa xác định"} size="sm" />
           <InfoRow layout="stack" label="Bảng thi" value={boardLabel} size="sm" />
           <InfoRow layout="stack" label="Vai trò" value={roleLabel} size="sm" />
         </dl>
-      </Card>
 
-      <Card>
-        <CardHeader
-          title="Đổi mật khẩu"
-          subtitle="Bắt buộc nhập mật khẩu hiện tại — đổi mật khẩu là thao tác chiếm luôn tài khoản"
-        />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <PasswordInput
-            label="Mật khẩu hiện tại"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            autoComplete="current-password"
-          />
-          <div />
-          <PasswordInput
-            label="Mật khẩu mới"
-            hint="Tối thiểu 8 ký tự"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            autoComplete="new-password"
-          />
-          <Input
-            label="Nhập lại mật khẩu mới"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            autoComplete="new-password"
-          />
-        </div>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button
-            variant="solid"
-            loading={pwBusy}
-            disabled={!currentPassword || newPassword.length < 8 || !confirmPassword}
-            onClick={() => void changePassword()}
-          >
-            Đổi mật khẩu
-          </Button>
-          {pwOk && <span className="text-caption text-teal-strong">Đã đổi mật khẩu.</span>}
-        </div>
-        {pwError && (
-          <div className="mt-3">
-            <Alert tone="error">{pwError}</Alert>
+        {/* Lối thoát khi Microsoft Graph trả về chuỗi phòng ban không khớp bảng quy đổi. Không có
+            chỗ này thì người dùng kẹt vĩnh viễn ở trạng thái không bảng thi, và chỉ lộ ra lúc xếp
+            hạng. Chọn xong thì mục này biến mất — máy chủ cũng chặn sửa lần hai. */}
+        {!department && (
+          <div className="mt-4 space-y-3 border-t border-stroke pt-4">
+            <Alert tone="warning" title="Chưa xác định được phòng ban của bạn">
+              Hệ thống không đọc được phòng ban từ tài khoản Microsoft của bạn, nên chưa xếp được
+              bạn vào bảng thi. Chọn đúng phòng ban bên dưới — <b>chọn xong không tự sửa lại được</b>,
+              cần đổi thì liên hệ ban tổ chức.
+            </Alert>
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="min-w-60 flex-1">
+                <Select
+                  label="Phòng ban của bạn"
+                  placeholder="— Chọn phòng ban —"
+                  options={departmentOptions}
+                  value={dept}
+                  onChange={setDept}
+                />
+              </div>
+              <Button
+                variant="solid"
+                loading={deptBusy}
+                disabled={!dept}
+                onClick={() => void saveDepartment()}
+              >
+                Lưu phòng ban
+              </Button>
+            </div>
+            {deptError && <Alert tone="error">{deptError}</Alert>}
           </div>
         )}
       </Card>
+
+      {/* Tài khoản đăng nhập bằng Microsoft không có mật khẩu nào để mà đổi — mật khẩu của họ do
+          hệ thống công ty giữ. Ẩn hẳn thẻ này thay vì hiện ra rồi báo lỗi khi bấm. */}
+      {canChangePassword ? (
+        <Card>
+          <CardHeader
+            title="Đổi mật khẩu"
+            subtitle="Bắt buộc nhập mật khẩu hiện tại — đổi mật khẩu là thao tác chiếm luôn tài khoản"
+          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <PasswordInput
+              label="Mật khẩu hiện tại"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              autoComplete="current-password"
+            />
+            <div />
+            <PasswordInput
+              label="Mật khẩu mới"
+              hint="Tối thiểu 8 ký tự"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+            <Input
+              label="Nhập lại mật khẩu mới"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Button
+              variant="solid"
+              loading={pwBusy}
+              disabled={!currentPassword || newPassword.length < 8 || !confirmPassword}
+              onClick={() => void changePassword()}
+            >
+              Đổi mật khẩu
+            </Button>
+            {pwOk && <span className="text-caption text-teal-strong">Đã đổi mật khẩu.</span>}
+          </div>
+          {pwError && (
+            <div className="mt-3">
+              <Alert tone="error">{pwError}</Alert>
+            </div>
+          )}
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader
+            title="Mật khẩu"
+            subtitle="Tài khoản này đăng nhập bằng Microsoft của công ty"
+          />
+          <Note>
+            Mật khẩu do hệ thống tài khoản công ty quản lý, không đặt riêng ở đây. Cần đổi thì đổi
+            ở tài khoản Microsoft, lần đăng nhập sau sẽ dùng mật khẩu mới.
+          </Note>
+        </Card>
+      )}
     </>
   );
 }

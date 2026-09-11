@@ -10,15 +10,24 @@ import {
   ShieldCheckIcon,
   MegaphoneIcon,
   ScalesIcon,
+  GearIcon,
 } from "@/components/dsvh/icons";
 
-const NAV: NavItem[] = [
+/**
+ * Mục "Cấu hình" CHỈ dành cho admin — công tắc trong đó đóng/mở đường đăng nhập của cả hệ thống,
+ * không phải việc của giám khảo. Route bên trong cũng tự kiểm quyền, menu chỉ là lớp che.
+ */
+const NAV_BASE: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: <ChartBarIcon size={17} /> },
   { href: "/admin/topics", label: "Duyệt đề tài", icon: <CheckCircleIcon size={17} /> },
   { href: "/admin/scoring", label: "Chấm điểm", icon: <RobotIcon size={17} /> },
   { href: "/admin/security", label: "Cổng an toàn", icon: <ShieldCheckIcon size={17} /> },
   { href: "/admin/posts", label: "Bài đăng & lan tỏa", icon: <MegaphoneIcon size={17} /> },
   { href: "/admin/appeals", label: "Phản biện", icon: <ScalesIcon size={17} /> },
+];
+
+const NAV_ADMIN_ONLY: NavItem[] = [
+  { href: "/admin/settings", label: "Cấu hình", icon: <GearIcon size={17} /> },
 ];
 
 export const metadata = { title: { default: "Ban tổ chức", template: "%s · Ban tổ chức" } };
@@ -36,7 +45,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       brandTitle="Vibe Code Challenge"
       brandSubtitle="Ban tổ chức"
       brandTone="orange"
-      nav={NAV}
+      nav={user?.role === "admin" ? [...NAV_BASE, ...NAV_ADMIN_ONLY] : NAV_BASE}
       avatarUrl={user?.avatarUrl}
       profileHref="/admin/profile"
       userName={user?.name ?? ""}
