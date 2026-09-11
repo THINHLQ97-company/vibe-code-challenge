@@ -1,29 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import { requireApiKey } from "@/lib/integration-auth";
 import { getSubmissionWithUser } from "@/lib/db/queries/submissions";
+import { RUBRIC } from "@/lib/scoring-rubric";
+
+export const dynamic = "force-dynamic";
 
 /**
- * Hệ chấm điểm ngoài ĐỌC dữ liệu bài dự thi qua endpoint này rồi đẩy điểm về
- * `POST /api/integrations/scores`.
+ * Toàn bộ dữ liệu của MỘT bài để công cụ chấm ngoài chấm.
  *
- * Trước đây chỉ có chiều đẩy điểm VÀO mà không có chiều đọc RA — nghĩa là bộ chấm không có cách
- * nào lấy được tài liệu PRD để chấm Phase 1 ("chấm điểm ý tưởng bằng API kết nối database" theo
- * thể lệ). Không trả về thông tin cá nhân thí sinh: bộ chấm không cần biết ai viết bài nào.
+ * KHÔNG trả thông tin cá nhân thí sinh (tên, email, mã nhân viên): công cụ chấm không cần biết ai
+ * viết bài nào, và không biết thì cũng không thiên vị được.
  */
-function validApiKey(header: string | null) {
-  const expected = process.env.SCORING_API_KEY;
-  if (!expected || !header) return false;
-  const a = Buffer.from(header);
-  const b = Buffer.from(expected);
-  // So sánh theo thời gian hằng định: `!==` thường trả lời sớm ở ký tự lệch đầu tiên, đủ để dò
-  // dần từng ký tự của khoá qua thời gian phản hồi.
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!validApiKey(req.headers.get("x-api-key"))) {
-    return NextResponse.json({ error: "API key không hợp lệ" }, { status: 401 });
-  }
+  const denied = requireApiKey(req);
+  if (denied) return denied;
 
   const id = Number((await params).id);
   if (!Number.isInteger(id)) {
@@ -43,22 +33,27 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       branch: s.branch,
       topicGroup: s.topicGroup,
       productName: s.productName,
-      // Phase 1 — chấm ý tưởng
+
+      // ── Phase 1 — chấm ý tưởng ─────────────────────────────────────────────────────────
+      // Các trường "Chức năng chính", "Phương án database", "Workflow tự động" đã NGƯNG thu thập
+      // từ 10/09/2026 — chúng luôn rỗng nên trả về chỉ làm công cụ chấm tưởng thí sinh bỏ trống.
+      // Toàn bộ phạm vi và chức năng nay nằm trong tài liệu PRD.
       problemDesc: s.problemDesc,
       targetUsers: s.targetUsers,
-      features: s.features,
-      databasePlan: s.databasePlan,
       prd: s.prdContent,
       prdFileName: s.prdFileName,
-      // Phase 2 — chấm sản phẩm
+
+      // ── Phase 2 — chấm sản phẩm ────────────────────────────────────────────────────────
       vibehostUrl: s.vibehostUrl,
       githubRepoUrl: s.githubRepoUrl,
       githubVerified: !!s.githubVerifiedAt,
-      hasWorkflow: s.hasWorkflow,
-      workflowDesc: s.workflowDesc,
       flaggedPrebuiltRepo: s.isPrebuiltRepo,
-      // Thang điểm kỹ thuật cố định 40 — dùng repo có sẵn nay là vi phạm, không phải hạ trần.
-      technicalMax: 40,
+
+      // ── Trạng thái cổng an toàn (CP4) ──────────────────────────────────────────────────
+      securityStatus: s.securityStatus,
     },
+    // Gửi kèm barem để công cụ chấm không phải gõ cứng trần điểm ở phía nó — đổi barem thì chỉ đổi
+    // một chỗ trong app này.
+    rubric: RUBRIC,
   });
 }

@@ -10,6 +10,7 @@ import {
   exchangeCode,
   verifyIdToken,
   fetchGraphProfile,
+  getBaseUrl,
 } from "@/lib/auth/microsoft";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +18,12 @@ export const dynamic = "force-dynamic";
 const STATE_COOKIE = "vcc_ms_state";
 const VERIFIER_COOKIE = "vcc_ms_verifier";
 
+/**
+ * Mọi chuyển hướng phải dựng từ ĐỊA CHỈ CÔNG KHAI, không phải `req.url`. Sau proxy `req.url` là
+ * địa chỉ nội bộ (đo được: http://0.0.0.0:3000) và người dùng bị đá tới một nơi không tồn tại.
+ */
 function fail(req: NextRequest, code: string) {
-  const res = NextResponse.redirect(new URL(`/login?error=${code}`, req.url));
+  const res = NextResponse.redirect(new URL(`/login?error=${code}`, getBaseUrl(req)));
   res.cookies.delete(STATE_COOKIE);
   res.cookies.delete(VERIFIER_COOKIE);
   return res;
@@ -135,7 +140,7 @@ export async function GET(req: NextRequest) {
    * xếp hạng mới lòi ra.
    */
   const dest = user.department ? "/dashboard" : "/dashboard/profile?canhbao=chua_co_phong_ban";
-  const res = NextResponse.redirect(new URL(dest, req.url));
+  const res = NextResponse.redirect(new URL(dest, getBaseUrl(req)));
   res.cookies.set(AUTH_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",

@@ -1,4 +1,4 @@
-import { eq, desc, and, gte, lte, lt, isNotNull } from "drizzle-orm";
+import { eq, desc, asc, and, gte, gt, lte, lt, isNotNull } from "drizzle-orm";
 import { db } from "../index";
 import { submissions, users, type NewSubmission } from "../schema";
 
@@ -286,4 +286,59 @@ export async function getEngagementCohort(submissionId: number) {
     ),
   });
   return rows.map((r) => r.engagementCount!).filter((n) => n != null);
+}
+
+/**
+ * Danh sách bài ĐANG CHỜ công cụ chấm ngoài xử lý, theo từng phase.
+ *
+ * Thiếu hàm này thì công cụ chấm không có đường nào biết phải chấm bài nào: cổng API cũ chỉ cho
+ * đọc theo `id`, mà `id` thì không ai đưa cho nó. Đội làm công cụ buộc phải dò `id` tăng dần —
+ * cách đó vừa gọi thừa hàng loạt vừa không biết khi nào dừng.
+ *
+ * Điều kiện ĐỦ ĐIỀU KIỆN CHẤM khác nhau theo phase:
+ *   · Phase 1 chấm ý tưởng ⇒ đề tài phải được BTC duyệt và phải có tài liệu PRD;
+ *   · Phase 2 chấm sản phẩm ⇒ phải có cả link sản phẩm lẫn link mã nguồn.
+ * Bài chưa đủ điều kiện KHÔNG xuất hiện, để công cụ không chấm bừa trên dữ liệu còn trống.
+ */
+export async function listForScoring(opts: {
+  phase: 1 | 2;
+  /** `false` = chỉ bài công cụ ngoài chưa chấm (mặc định); `true` = chỉ bài đã chấm; `undefined` = tất cả. */
+  scored?: boolean;
+  limit: number;
+  afterId: number;
+}) {
+  const eligible =
+    opts.phase === 1
+      ? and(
+          eq(submissions.registrationStatus, "approved"),
+          isNotNull(submissions.prdContent),
+          gt(submissions.id, opts.afterId)
+        )
+      : and(
+          isNotNull(submissions.githubRepoUrl),
+          isNotNull(submissions.vibehostUrl),
+          gt(submissions.id, opts.afterId)
+        );
+
+  const rows = await db.query.submissions.findMany({
+    where: eligible,
+    orderBy: asc(submissions.id),
+    // Lấy dư rồi lọc trong bộ nhớ: điều kiện "công cụ ngoài đã chấm chưa" nằm ở bảng điểm khác,
+    // và số bài mỗi mùa chỉ vài trăm nên không đáng dựng truy vấn con.
+    limit: opts.limit * 3,
+    with: {
+      user: { columns: { board: true } },
+      ideaScores: { columns: { id: true, source: true } },
+      productScores: { columns: { id: true, source: true } },
+    },
+  });
+
+  const filtered = rows.filter((r) => {
+    if (opts.scored === undefined) return true;
+    const list = opts.phase === 1 ? r.ideaScores : r.productScores;
+    const done = list.some((s) => s.source === "external_ai");
+    return opts.scored ? done : !done;
+  });
+
+  return filtered.slice(0, opts.limit);
 }

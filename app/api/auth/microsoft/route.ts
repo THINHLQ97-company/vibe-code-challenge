@@ -5,6 +5,7 @@ import {
   buildAuthorizeUrl,
   createPkcePair,
   randomToken,
+  getBaseUrl,
 } from "@/lib/auth/microsoft";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,9 @@ export async function GET(req: NextRequest) {
   const config = getMicrosoftConfig();
   if (!config) {
     // Chưa có thông tin app từ đội quản lý tenant. Nói thẳng lý do thay vì ném 500 khó hiểu.
-    return NextResponse.redirect(new URL("/login?error=ms_chua_cau_hinh", req.url));
+    // `req.url` sau proxy là địa chỉ NỘI BỘ (đo được: http://0.0.0.0:3000). Dựng chuyển hướng từ
+    // nó là đá người dùng tới một địa chỉ không tồn tại. Luôn dùng địa chỉ công khai.
+    return NextResponse.redirect(new URL("/login?error=ms_chua_cau_hinh", getBaseUrl(req)));
   }
 
   const { verifier, challenge } = await createPkcePair();
