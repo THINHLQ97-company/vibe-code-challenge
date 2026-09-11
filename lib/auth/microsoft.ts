@@ -20,10 +20,29 @@ export type MicrosoftConfig = {
   clientSecret: string;
 };
 
+/**
+ * Giá trị GIỮ CHỖ tính là CHƯA cấu hình.
+ *
+ * Nền tảng lưu trữ quét `.env.example` và tự bơm giá trị mẫu vào môi trường chạy thật (đo được
+ * trên Vibe Host: "1 biến đang giữ GIÁ TRỊ MẪU từ .env.example"). Nếu chỉ kiểm "có giá trị hay
+ * không" thì app tưởng đã cấu hình xong, hiện nút "Đăng nhập bằng Microsoft", người dùng bấm vào
+ * và ăn lỗi từ phía Microsoft — tệ hơn hẳn so với không hiện nút.
+ */
+const PLACEHOLDERS = new Set(["change-me", "changeme", "todo", "xxx", "your-value-here"]);
+
+function realValue(raw: string | undefined): string | null {
+  const v = raw?.trim();
+  if (!v) return null;
+  if (PLACEHOLDERS.has(v.toLowerCase())) return null;
+  // Dạng `<mô tả>` cũng là giữ chỗ do người ta chép từ tài liệu.
+  if (v.startsWith("<") && v.endsWith(">")) return null;
+  return v;
+}
+
 export function getMicrosoftConfig(): MicrosoftConfig | null {
-  const tenantId = process.env.AZURE_AD_TENANT_ID;
-  const clientId = process.env.AZURE_AD_CLIENT_ID;
-  const clientSecret = process.env.AZURE_AD_CLIENT_SECRET;
+  const tenantId = realValue(process.env.AZURE_AD_TENANT_ID);
+  const clientId = realValue(process.env.AZURE_AD_CLIENT_ID);
+  const clientSecret = realValue(process.env.AZURE_AD_CLIENT_SECRET);
   if (!tenantId || !clientId || !clientSecret) return null;
   return { tenantId, clientId, clientSecret };
 }
