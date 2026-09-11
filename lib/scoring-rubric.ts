@@ -1,11 +1,13 @@
 /**
- * BAREM ĐIỂM — nguồn sự thật duy nhất, dùng chung cho giao diện chấm của giám khảo, cho phép kiểm
- * dữ liệu ở cổng API, và cho tài liệu gửi đội làm công cụ chấm.
+ * BAREM ĐIỂM — nguồn sự thật duy nhất.
  *
- * Trước đây barem nằm rải: trần điểm gõ thẳng trong `app/admin/scoring/[id]/page.tsx`, còn cổng
- * API nhận `Record<string, number>` tức CHẤP NHẬN MỌI KHOÁ. Công cụ ngoài gõ nhầm `giatriUngDung`
- * (thiếu dấu hoa) là điểm vẫn lưu thành công, rồi phần tổng hợp đọc `giaTriUngDung` không thấy gì
- * nên trả 0 — bài bị 0 điểm mà cổng API đã báo "ghi nhận thành công".
+ * Dùng chung cho: giao diện chấm của giám khảo, bảng điểm thí sinh, phần "Cách chấm" trên trang
+ * giới thiệu, phép kiểm ở cổng API, và tài liệu gửi đội làm công cụ chấm.
+ *
+ * Vì sao gom về một chỗ: trước đây barem nằm rải bốn nơi và ĐÃ LỆCH NHAU thật. Trang giới thiệu
+ * liệt kê bốn nhóm phẳng không theo phase, trong khi hệ thống chấm theo phase; cổng API nhận
+ * `Record<string, number>` nên chấp nhận mọi khoá; bảng bậc lan tỏa được gõ lại lần hai trong màn
+ * chia sẻ của thí sinh. Mỗi bản sao là một cơ hội để chúng nói khác nhau.
  */
 export type ModuleKey = "giaTriUngDung" | "chatLuongKyThuat" | "hoanThien";
 
@@ -16,6 +18,8 @@ export type RubricModule = {
   phase: 1 | 2;
   /** Công cụ chấm cần đọc gì để cho điểm mục này. */
   basis: string;
+  /** Câu mô tả dành cho thí sinh, hiện trên trang giới thiệu. */
+  publicNote: string;
 };
 
 export const RUBRIC: RubricModule[] = [
@@ -25,6 +29,7 @@ export const RUBRIC: RubricModule[] = [
     max: 25,
     phase: 1,
     basis: "Tài liệu PRD, bài toán, người dùng mục tiêu",
+    publicNote: "Bài toán có thật và sản phẩm giải được nó",
   },
   {
     key: "chatLuongKyThuat",
@@ -32,6 +37,7 @@ export const RUBRIC: RubricModule[] = [
     max: 40,
     phase: 2,
     basis: "Mã nguồn trên GitHub, lịch sử commit",
+    publicNote: "Chức năng chạy đúng · database dùng thật · mở tốt trên di động",
   },
   {
     key: "hoanThien",
@@ -39,16 +45,57 @@ export const RUBRIC: RubricModule[] = [
     max: 15,
     phase: 2,
     basis: "Sản phẩm chạy thật trên Vibe Host",
+    publicNote: "Không còn phần dang dở, nội dung là của bạn",
   },
 ];
 
-/** Điểm lan tỏa KHÔNG nằm ở đây: nó tính theo bậc tương tác, không phải một phiếu chấm. */
+/**
+ * Bậc điểm lan tỏa (Phase 3). KHÔNG phải một phiếu chấm: điểm quy đổi từ lượt tương tác của bài
+ * đăng so với trung vị của nhóm cùng tuần, ban tổ chức chốt bậc trên giao diện quản trị.
+ */
+export const ENGAGEMENT_TIERS = [
+  { tier: 4, point: 20, label: "Trên 200% trung vị" },
+  { tier: 3, point: 15, label: "120–200% trung vị" },
+  { tier: 2, point: 10, label: "70–119% trung vị" },
+  { tier: 1, point: 5, label: "Dưới 70% trung vị" },
+] as const;
+
 export const ENGAGEMENT_MAX = 20;
+
+/** Barem gom theo PHASE — đúng thứ tự thí sinh đi qua, và đúng cách hai giao diện đang hiển thị. */
+export const PHASE_GROUPS = [
+  {
+    phase: 1 as const,
+    label: "Ý tưởng",
+    total: 25,
+    scoredByAi: true,
+    summary: "Chấm trên tài liệu PRD ngay sau khi BTC duyệt đề tài",
+  },
+  {
+    phase: 2 as const,
+    label: "Sản phẩm",
+    total: 55,
+    scoredByAi: true,
+    summary: "Chấm trên sản phẩm chạy thật và mã nguồn bạn nộp",
+  },
+  {
+    phase: 3 as const,
+    label: "Lan tỏa",
+    total: ENGAGEMENT_MAX,
+    scoredByAi: false,
+    summary: "Quy đổi từ lượt tương tác bài chia sẻ trong bảy ngày",
+  },
+];
 
 export const TOTAL_MAX = RUBRIC.reduce((s, m) => s + m.max, 0) + ENGAGEMENT_MAX;
 
 export function modulesForPhase(phase: 1 | 2): RubricModule[] {
   return RUBRIC.filter((m) => m.phase === phase);
+}
+
+/** Bậc tương tác → điểm. Bậc trống (chưa chốt) = 0. */
+export function engagementTierToScore(tier: number | null): number {
+  return ENGAGEMENT_TIERS.find((t) => t.tier === tier)?.point ?? 0;
 }
 
 /**

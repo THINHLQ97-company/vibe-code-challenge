@@ -14,13 +14,11 @@ import {
   ArrowSquareOutIcon,
   MegaphoneIcon,
 } from "@/components/dsvh/icons";
+import { ENGAGEMENT_TIERS } from "@/lib/scoring-rubric";
 
-const TIERS = [
-  { tier: 4, point: 20, label: "Trên 200% trung vị" },
-  { tier: 3, point: 15, label: "120–200% trung vị" },
-  { tier: 2, point: 10, label: "70–119% trung vị" },
-  { tier: 1, point: 5, label: "Dưới 70% trung vị" },
-];
+// Bảng bậc lấy từ barem chung. Gõ lại ở đây là cách chắc chắn nhất để một ngày nào đó màn này
+// hứa với thí sinh một thang điểm khác thang mà hệ thống thật sự cộng.
+const TIERS = ENGAGEMENT_TIERS;
 
 type StepState = "done" | "current" | "waiting";
 

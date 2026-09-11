@@ -6,6 +6,12 @@ import { Table, type ColumnDef } from "@/components/dsvh/ui/Table";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { Input } from "@/components/dsvh/ui/Input";
 import { MagnifyingGlassIcon, RobotIcon, ArrowRightIcon } from "@/components/dsvh/icons";
+import { RUBRIC, ENGAGEMENT_MAX, TOTAL_MAX } from "@/lib/scoring-rubric";
+
+// Trần điểm LẤY TỪ barem chung, không gõ cứng: bảng này từng ghi 25 và 55 bằng tay, và đó chính
+// là cách barem trên trang giới thiệu trôi đi một hướng khác với barem hệ thống đang dùng.
+const IDEA_MAX = RUBRIC.filter((m) => m.phase === 1).reduce((a, m) => a + m.max, 0);
+const PRODUCT_MAX = RUBRIC.filter((m) => m.phase === 2).reduce((a, m) => a + m.max, 0);
 
 export type ScoringRowData = {
   id: number;
@@ -20,6 +26,9 @@ export type ScoringRowData = {
   productValue: number | null;
   productBasis: "judges" | "external_ai" | "none";
   judgeCount: number;
+  /** Phase 3 — điểm quy đổi từ bậc tương tác; `null` = BTC chưa chốt bậc. */
+  engagementValue: number | null;
+  engagementTier: number | null;
   iScored: boolean;
   stageLabel: string;
   stageTone: "neutral" | "success" | "warning" | "danger";
@@ -103,13 +112,55 @@ export function ScoringTable({ rows }: { rows: ScoringRowData[] }) {
       key: "idea",
       header: "Ý tưởng",
       align: "right",
-      render: (r) => <ScoreCell value={r.ideaValue} basis={r.ideaBasis} max={25} />,
+      render: (r) => <ScoreCell value={r.ideaValue} basis={r.ideaBasis} max={IDEA_MAX} />,
     },
     {
       key: "productScore",
       header: "Sản phẩm",
       align: "right",
-      render: (r) => <ScoreCell value={r.productValue} basis={r.productBasis} max={55} />,
+      render: (r) => <ScoreCell value={r.productValue} basis={r.productBasis} max={PRODUCT_MAX} />,
+    },
+    {
+      key: "engagement",
+      header: "Lan tỏa",
+      align: "right",
+      render: (r) =>
+        r.engagementValue == null ? (
+          <span className="text-caption text-ink-3">chưa chốt</span>
+        ) : (
+          <span className="flex items-center justify-end gap-1.5">
+            <span className="font-semibold tabular-nums text-ink">{r.engagementValue}</span>
+            <span className="text-meta text-ink-3">/{ENGAGEMENT_MAX}</span>
+          </span>
+        ),
+    },
+    {
+      /**
+       * Tổng CẢ BA phase. Trước đây bảng chỉ có hai cột điểm rời nhau và điểm lan tỏa nằm ở màn
+       * khác — muốn biết một bài đang đứng ở đâu trên thang 100 thì phải tự cộng nhẩm qua hai màn.
+       * Cộng phần nào đã có, và nói rõ còn thiếu phần nào để con số không bị đọc nhầm là điểm chốt.
+       */
+      key: "total",
+      header: "Tổng",
+      align: "right",
+      render: (r) => {
+        const parts = [r.ideaValue, r.productValue, r.engagementValue];
+        const have = parts.filter((v): v is number => v != null);
+        if (have.length === 0) return <span className="text-caption text-ink-3">—</span>;
+        const sum = Math.round(have.reduce((a, v) => a + v, 0) * 10) / 10;
+        const missing = parts.length - have.length;
+        return (
+          <span className="flex flex-col items-end leading-tight">
+            <span>
+              <span className="font-semibold tabular-nums text-ink">{sum}</span>
+              <span className="text-meta text-ink-3">/{TOTAL_MAX}</span>
+            </span>
+            {missing > 0 && (
+              <span className="text-meta text-ink-3">thiếu {missing} phần</span>
+            )}
+          </span>
+        );
+      },
     },
     {
       key: "judges",

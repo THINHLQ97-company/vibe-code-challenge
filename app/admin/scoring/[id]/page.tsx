@@ -22,6 +22,7 @@ import {
 import { PhaseScoring } from "./phase-scoring";
 import { FeedbackPanel } from "./feedback-panel";
 import { PrebuiltPanel } from "./prebuilt-panel";
+import { modulesForPhase } from "@/lib/scoring-rubric";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const s = await getSubmissionWithUser(Number((await params).id));
@@ -160,8 +161,8 @@ export default async function ScoringDetailPage({
         submissionId={id}
         phase={1}
         title="Phase 1 · Điểm ý tưởng"
-        subtitle="Máy chấm dựa trên PRD; bạn xác nhận hoặc điều chỉnh"
-        modules={[{ key: "giaTriUngDung", label: "Giá trị ứng dụng", max: 25 }]}
+        subtitle="Máy chấm dựa trên PRD — bạn chỉ cần chấm tay khi muốn điều chỉnh"
+        modules={modulesForPhase(1)}
         aggregate={{ giaTriUngDung: o.giaTriUngDung }}
         myScore={o.myIdea}
         judges={judgeScores.ideas.map((r) => ({
@@ -175,11 +176,8 @@ export default async function ScoringDetailPage({
         submissionId={id}
         phase={2}
         title="Phase 2 · Điểm sản phẩm"
-        subtitle="Máy chấm dựa trên sản phẩm và mã nguồn; bạn xác nhận hoặc điều chỉnh"
-        modules={[
-          { key: "chatLuongKyThuat", label: "Chất lượng kỹ thuật", max: 40 },
-          { key: "hoanThien", label: "Độ hoàn thiện", max: 15 },
-        ]}
+        subtitle="Máy chấm dựa trên sản phẩm và mã nguồn — bạn chỉ cần chấm tay khi muốn điều chỉnh"
+        modules={modulesForPhase(2)}
         aggregate={{
           chatLuongKyThuat: o.chatLuongKyThuat,
           hoanThien: o.hoanThien,

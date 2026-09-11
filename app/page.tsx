@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark, LogoSquare } from "@/components/brand";
+import { RUBRIC, PHASE_GROUPS, TOTAL_MAX } from "@/lib/scoring-rubric";
 import { KPI_CATEGORY } from "@/lib/kpi";
 import {
   MarkSpark,
@@ -128,15 +129,20 @@ const FLOOR = [
 ];
 
 /**
- * CHỈ nêu nhóm nội dung và trọng số. Cố ý KHÔNG nói ai/cái gì chấm từng mục: cơ chế chấm là việc
- * vận hành nội bộ, công bố ra ngoài thì thành cam kết mà ban tổ chức phải giữ đúng từng chữ.
+ * Thang điểm hiển thị cho thí sinh, GOM THEO PHASE — đúng thứ tự họ đi qua và đúng cách khu thí
+ * sinh lẫn trang chấm của BTC đang hiển thị.
+ *
+ * Bản trước liệt kê bốn nhóm phẳng không theo phase, xếp theo trọng số giảm dần. Hệ quả: trang
+ * giới thiệu và hệ thống nói hai barem khác nhau, thí sinh đọc xong không nối được nhóm điểm nào
+ * thuộc vòng nào. Các con số lấy TỪ `lib/scoring-rubric.ts`, không gõ lại ở đây.
+ *
+ * Cố ý KHÔNG nói mục nào do máy chấm: cơ chế chấm là việc vận hành nội bộ, công bố ra ngoài thì
+ * thành cam kết phải giữ đúng từng chữ.
  */
-const RUBRIC = [
-  { module: "Chất lượng kỹ thuật", point: 40, note: "Chức năng chạy · database dùng thật · workflow tự động · mở tốt trên di động" },
-  { module: "Giá trị ứng dụng", point: 25, note: "Bài toán có thật và sản phẩm giải được nó" },
-  { module: "Lan tỏa cộng đồng", point: 20, note: "Tương tác bài chia sẻ trong bảy ngày" },
-  { module: "Độ hoàn thiện & nội dung riêng", point: 15, note: "Không còn phần dang dở, nội dung là của bạn" },
-];
+const SCORE_PHASES = PHASE_GROUPS.map((g) => ({
+  ...g,
+  modules: RUBRIC.filter((m) => m.phase === (g.phase as number)),
+}));
 
 const PITFALLS = [
   {
@@ -416,26 +422,49 @@ export default function LandingPage() {
             </GlassCard>
 
             <GlassCard className="p-4">
-              <h3 className="text-body font-semibold text-cream">Thang điểm 100</h3>
+              <h3 className="text-body font-semibold text-cream">Thang điểm {TOTAL_MAX}</h3>
               <p className="mt-0.5 text-caption text-cream/50">
-                Bốn nhóm nội dung và trọng số của từng nhóm.
+                Cộng dồn qua ba vòng, mỗi vòng chấm xong là cộng vào tổng.
               </p>
-              <ul className="mt-3.5 space-y-2.5">
-                {RUBRIC.map((r) => (
-                  <li key={r.module}>
+              <ul className="mt-3.5 space-y-3">
+                {SCORE_PHASES.map((g) => (
+                  <li key={g.phase}>
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-caption font-medium text-cream/90">{r.module}</span>
+                      <span className="text-caption font-medium text-cream/90">
+                        <span className="mr-1.5 rounded bg-cream/10 px-1.5 py-0.5 text-meta font-semibold text-cream/70">
+                          Vòng {g.phase}
+                        </span>
+                        {g.label}
+                      </span>
                       <span className="shrink-0 text-body font-bold tabular-nums text-orange-bright">
-                        {r.point}
+                        {g.total}
                       </span>
                     </div>
                     <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-cream/10">
                       <div
                         className="h-full rounded-full bg-orange/70"
-                        style={{ width: `${r.point}%` }}
+                        style={{ width: `${(g.total / TOTAL_MAX) * 100}%` }}
                       />
                     </div>
-                    <p className="mt-1 text-meta text-cream/50">{r.note}</p>
+                    {/* Vòng 1 và 3 chỉ có một hạng mục nên nêu lại tên là thừa; vòng 2 gồm hai
+                        hạng mục tách bạch, phải liệt kê ra mới biết 55 điểm chia thế nào. */}
+                    {g.modules.length > 1 ? (
+                      <ul className="mt-1 space-y-0.5">
+                        {g.modules.map((m) => (
+                          <li
+                            key={m.key}
+                            className="flex items-baseline justify-between gap-3 text-meta text-cream/50"
+                          >
+                            <span>· {m.label} — {m.publicNote}</span>
+                            <span className="shrink-0 tabular-nums text-cream/70">{m.max}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-1 text-meta text-cream/50">
+                        {g.modules[0]?.publicNote ?? g.summary}
+                      </p>
+                    )}
                   </li>
                 ))}
               </ul>

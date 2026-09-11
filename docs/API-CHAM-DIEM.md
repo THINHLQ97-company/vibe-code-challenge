@@ -14,27 +14,54 @@ chưa đặt biến `SCORING_API_KEY` thì mọi request đều bị từ chối
 
 ## 1. Barem điểm và phase nào cần AI
 
-Tổng 100 điểm:
+Thang **100 điểm**, cộng dồn qua ba vòng. Đây là barem đang chạy thật trong hệ thống — giao diện
+thí sinh, trang chấm của ban giám khảo và trang giới thiệu đều đọc từ cùng một nguồn
+(`lib/scoring-rubric.ts`), nên không có bản nào lệch bản nào.
 
-| Phase | Mã mục | Tên hiển thị | Trần | Căn cứ chấm | Cần AI? |
+| Vòng | Tên | Mã mục gửi qua API | Trần | Căn cứ chấm | Công cụ AI chấm |
 |---|---|---|---|---|---|
-| 1 | `giaTriUngDung` | Giá trị ứng dụng | 25 | Tài liệu PRD, bài toán, người dùng mục tiêu | **Có** |
-| 2 | `chatLuongKyThuat` | Chất lượng kỹ thuật | 40 | Mã nguồn GitHub, lịch sử commit | **Có** |
-| 2 | `hoanThien` | Độ hoàn thiện | 15 | Sản phẩm chạy thật trên Vibe Host | **Có** |
-| 3 | — | Lan tỏa cộng đồng | 20 | Bậc tương tác bài đăng Facebook | **Không** |
+| **Phase 1** | Ý tưởng | `giaTriUngDung` | 25 | Tài liệu PRD, bài toán, người dùng mục tiêu | **Có** |
+| **Phase 2** | Sản phẩm | `chatLuongKyThuat` | 40 | Mã nguồn GitHub, lịch sử commit | **Có** |
+| | | `hoanThien` | 15 | Sản phẩm chạy thật trên Vibe Host | **Có** |
+| **Phase 3** | Lan tỏa | — | 20 | Bậc tương tác bài đăng Facebook | **Không** |
 
-**Phase 3 không dùng AI.** Điểm lan tỏa tính theo bậc tương tác của bài đăng, ban tổ chức duyệt
-và nhập tay trên giao diện quản trị — không có API cho mục này. Cần tự động hoá thì báo trước,
-app đã có sẵn cột `engagement_count` / `engagement_tier` để mở thêm endpoint.
+Phase 2 gồm **hai** mục, tổng 55 điểm. Khi trả điểm Phase 2 phải gửi **cả hai** mục trong cùng một
+request (xem mục 4).
 
-**Cổng an toàn CP4 không phải điểm** mà là cổng chặn (mục 5). Công cụ có thể rà bảy điều cấm và
-đẩy kết quả về; bài bị gắn cờ sẽ không được công bố cho tới khi thí sinh sửa.
+### Phase 3 không có API và không dùng AI
 
-Điểm công cụ đẩy về là **điểm tham chiếu**, không phải điểm cuối. Hội đồng giám khảo vẫn chấm độc
-lập; khi đã có phiếu giám khảo thì điểm cuối lấy **trung bình các phiếu giám khảo**, điểm máy chỉ
-dùng khi chưa ai chấm tay. Thí sinh chỉ nhìn thấy điểm sau khi có phiếu giám khảo.
+Điểm lan tỏa quy đổi từ lượt tương tác của bài đăng so với **trung vị nhóm cùng tuần**, ban tổ
+chức chốt bậc trên giao diện quản trị:
 
----
+| Bậc | Điều kiện | Điểm |
+|---|---|---|
+| 4 | Trên 200% trung vị | 20 |
+| 3 | 120–200% trung vị | 15 |
+| 2 | 70–119% trung vị | 10 |
+| 1 | Dưới 70% trung vị | 5 |
+
+Muốn tự động hoá phần này thì báo trước — app đã có sẵn cột `engagement_count` và
+`engagement_tier`, mở thêm endpoint là xong.
+
+### Quan hệ giữa điểm AI và điểm giám khảo
+
+Điểm công cụ đẩy về là **điểm gợi ý**, không phải điểm cuối:
+
+1. Công cụ chấm đẩy điểm Phase 1 và Phase 2 về → hệ thống hiển thị đó là điểm sơ bộ.
+2. Giám khảo mở bài lên, thấy sẵn điểm máy. **Đồng ý thì bấm một nút xác nhận**, phiếu của họ
+   chính là điểm máy. Chỉ khi muốn điều chỉnh mới phải nhập tay.
+3. Có phiếu giám khảo rồi thì điểm cuối lấy **trung bình các phiếu giám khảo**; điểm máy chỉ được
+   dùng khi chưa ai chấm tay, và ban tổ chức **không được công bố** bài còn đang lấy nguyên điểm
+   máy.
+4. Thí sinh chỉ nhìn thấy điểm **sau khi** có phiếu giám khảo.
+
+Nghĩa là công cụ chấm càng sát thì giám khảo càng ít phải nhập tay — nhưng điểm máy sai cũng không
+gây hậu quả không sửa được.
+
+### Cổng an toàn CP4 — không phải điểm
+
+Rà bảy điều cấm, kết quả là **đạt / không đạt** (mục 5). Bài bị gắn cờ không được công bố cho tới
+khi thí sinh sửa và ban tổ chức rà lại.
 
 ## 2. `GET /api/integrations/submissions` — lấy danh sách bài cần chấm
 

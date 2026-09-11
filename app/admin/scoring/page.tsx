@@ -1,3 +1,4 @@
+import { engagementTierToScore } from "@/lib/scoring-rubric";
 import { getSession } from "@/lib/auth/session";
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { getScoreOverviews } from "@/lib/db/queries/scores";
@@ -39,6 +40,9 @@ export default async function ScoringPage() {
         : null,
       productBasis: o.chatLuongKyThuat.basis,
       judgeCount: Math.max(o.giaTriUngDung.judgeCount, o.chatLuongKyThuat.judgeCount),
+      // Lan tỏa không đi qua phiếu chấm — quy đổi từ bậc tương tác BTC chốt ở màn bài đăng.
+      engagementTier: s.engagementTier,
+      engagementValue: s.engagementTier == null ? null : engagementTierToScore(s.engagementTier),
       iScored: o.myIdea != null || o.myProduct != null,
       stageLabel: stage.label,
       stageTone: stage.tone,

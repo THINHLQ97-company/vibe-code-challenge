@@ -1,4 +1,7 @@
-// Barem thể lệ mục F: Chất lượng kỹ thuật 40 · Hoàn thiện 15 · Giá trị ứng dụng 25 · Lan tỏa 20.
+// Barem thể lệ mục F. Các con số KHÔNG khai ở đây — xem `lib/scoring-rubric.ts`, nguồn duy nhất.
+import { engagementTierToScore, RUBRIC, ENGAGEMENT_MAX } from "./scoring-rubric";
+
+export { engagementTierToScore };
 
 export function median(values: number[]): number {
   if (values.length === 0) return 0;
@@ -18,22 +21,10 @@ export function engagementTierFromCount(count: number, cohort: number[]): number
   return 1;
 }
 
-export function engagementTierToScore(tier: number | null): number {
-  switch (tier) {
-    case 4:
-      return 20;
-    case 3:
-      return 15;
-    case 2:
-      return 10;
-    case 1:
-      return 5;
-    default:
-      return 0;
-  }
-}
-
-export const TECHNICAL_MAX = 40;
+export const TECHNICAL_MAX = RUBRIC.find((m) => m.key === "chatLuongKyThuat")!.max;
+const COMPLETION_MAX = RUBRIC.find((m) => m.key === "hoanThien")!.max;
+const VALUE_MAX = RUBRIC.find((m) => m.key === "giaTriUngDung")!.max;
+const TOTAL_MAX = TECHNICAL_MAX + COMPLETION_MAX + VALUE_MAX + ENGAGEMENT_MAX;
 
 /**
  * Không còn trần điểm kỹ thuật theo cách deploy: dùng repo có sẵn nay là VI PHẠM (chặn ở Phase 2),
@@ -46,10 +37,10 @@ export function computeFinalScore(params: {
   engagementTier: number | null;
 }): number {
   const technical = Math.min(params.technicalRaw, TECHNICAL_MAX);
-  const completion = Math.min(params.completion, 15);
-  const applicationValue = Math.min(params.applicationValue, 25);
+  const completion = Math.min(params.completion, COMPLETION_MAX);
+  const applicationValue = Math.min(params.applicationValue, VALUE_MAX);
   const engagement = engagementTierToScore(params.engagementTier);
-  const total = Math.min(technical + completion + applicationValue + engagement, 100);
+  const total = Math.min(technical + completion + applicationValue + engagement, TOTAL_MAX);
   // Trung bình nhiều giám khảo hay ra số lẻ dài (vd 3 người → x.6666). Chốt 1 chữ số thập phân
   // để bảng xếp hạng và khiếu nại đối chiếu được cùng một con số.
   return Math.round(total * 10) / 10;
