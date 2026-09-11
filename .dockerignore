@@ -1,0 +1,19 @@
+# Không có file này thì `COPY . .` chép luôn `.env` của máy dev vào ảnh — build trên máy đọc được
+# khoá thật nên chạy ngon, còn build từ bản sao sạch của repo (thứ nền tảng lưu trữ thực sự làm)
+# lại gãy vì thiếu biến. Lỗi kiểu đó chỉ lộ ra khi đã deploy, nên chặn ngay từ đây.
+.env
+.env.*
+!.env.example
+
+.git
+.gitignore
+node_modules
+.next
+out
+dist
+coverage
+*.log
+.DS_Store
+
+# Tài liệu và ảnh nguồn không tham gia build
+docs
