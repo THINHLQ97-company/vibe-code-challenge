@@ -57,8 +57,18 @@ export default async function BuildPage() {
     );
   }
 
+  /**
+   * "Quá hạn" chỉ đúng khi CHƯA nộp.
+   *
+   * Lỗi đã gặp với tài khoản demo Kinh doanh: bài đã nộp và BTC đã chấm xong Phase 2, nhưng thẻ
+   * hạn nộp vẫn đỏ "quá hạn 3 ngày" vì nó chỉ so ngày mà không hỏi đã nộp hay chưa. Cảnh báo bên
+   * dưới thì có kiểm — tức hai chỗ trên cùng một màn nói hai chuyện trái nhau.
+   */
+  const submitted = !!submission.githubVerifiedAt || !!submission.vibehostUrl;
   const overdue =
-    !!submission.submissionDeadline && submission.submissionDeadline.getTime() < Date.now();
+    !submitted &&
+    !!submission.submissionDeadline &&
+    submission.submissionDeadline.getTime() < Date.now();
 
   /**
    * Khoá sửa link khi BTC ĐÃ chấm Phase 2 — điểm chấm theo sản phẩm tại thời điểm chấm, đổi link
@@ -73,7 +83,9 @@ export default async function BuildPage() {
       title="Nộp bài — sản phẩm & mã nguồn"
       subtitle="Phase 2: chấm chất lượng kỹ thuật và độ hoàn thiện"
       action={
-        submission.submissionDeadline ? (
+        submitted ? (
+          <Badge tone="success">Đã nộp sản phẩm</Badge>
+        ) : submission.submissionDeadline ? (
           <Badge tone={overdue ? "danger" : "neutral"}>
             Hạn nộp {formatDateVN(submission.submissionDeadline)}
           </Badge>
@@ -93,7 +105,7 @@ export default async function BuildPage() {
         <Note>Bài đã qua cổng rà soát an toàn (CP4) — không vướng điều cấm nào.</Note>
       )}
 
-      {overdue && !submission.githubVerifiedAt && (
+      {overdue && (
         <Alert tone="warning" title="Đã quá hạn nộp">
           Hạn nộp của bạn là {formatDateVN(submission.submissionDeadline!)}. Vẫn nộp được, nhưng
           BTC có quyền không nhận bài trễ — liên hệ ban tổ chức nếu có lý do chính đáng.

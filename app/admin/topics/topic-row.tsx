@@ -17,7 +17,6 @@ export type PendingTopic = {
   branch: string;
   problemDesc: string;
   targetUsers: string;
-  requestedDeadlineDays: number;
   prdContent: string | null;
   prdFileName: string | null;
   createdAt: string;
@@ -79,13 +78,6 @@ export function TopicRow({ submission, capLeft }: { submission: PendingTopic; ca
         {/* "Chức năng", "Database", "Tự đánh giá rủi ro" đã ngưng thu thập ở form đăng ký
             (10/09/2026) — phạm vi và chức năng nay nằm trong tài liệu PRD ngay bên dưới. Giữ lại
             chỉ tạo ra một cột toàn dấu "—" khiến người duyệt tưởng thí sinh bỏ trống. */}
-        <InfoRow
-          layout="stack"
-          label="Hạn nộp xin"
-          value={`${submission.requestedDeadlineDays} ngày`}
-          size="sm"
-          numeric
-        />
       </dl>
 
       <div className="mt-3">

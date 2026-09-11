@@ -51,7 +51,6 @@ export default async function TopicsPage() {
                   branch: s.branch,
                   problemDesc: s.problemDesc,
                   targetUsers: s.targetUsers,
-                  requestedDeadlineDays: s.requestedDeadlineDays,
                   prdContent: s.prdContent,
                   prdFileName: s.prdFileName,
                   createdAt: formatDateVN(s.createdAt),

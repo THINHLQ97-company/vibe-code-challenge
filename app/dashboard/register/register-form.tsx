@@ -44,7 +44,6 @@ type Initial = {
   problemDesc: string;
   targetUsers: string;
   aiTool: string | null;
-  requestedDeadlineDays: number;
   prdContent: string | null;
   prdFileName: string | null;
 };
@@ -61,9 +60,6 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
   const [problemDesc, setProblemDesc] = useState(initial?.problemDesc ?? "");
   const [targetUsers, setTargetUsers] = useState(initial?.targetUsers ?? "");
   const [aiTool, setAiTool] = useState(initial?.aiTool ?? "");
-  const [requestedDeadlineDays, setRequestedDeadlineDays] = useState(
-    initial?.requestedDeadlineDays ?? 15
-  );
   const [prdContent, setPrdContent] = useState(initial?.prdContent ?? "");
   const [prdFileName, setPrdFileName] = useState(initial?.prdFileName ?? "");
   const [prdError, setPrdError] = useState<string | null>(null);
@@ -100,7 +96,6 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
           prdFileName: prdFileName || undefined,
           deployMethod: DEPLOY_METHOD,
           aiTool,
-          requestedDeadlineDays,
           confirmFakeData,
           confirmNoMatbaoInfo,
           confirmTemplateConsent,
@@ -225,26 +220,19 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
       <Card>
         <CardHeader
           title="Thông tin thi"
-          subtitle="Hai mục còn lại — phần mô tả sản phẩm đã nằm trong tài liệu PRD ở trên"
+          subtitle="Hạn nộp cố định 15 ngày kể từ khi BTC duyệt đề tài — nộp sớm hơn lúc nào cũng được"
         />
         <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              label="Hạn nộp mong muốn (ngày kể từ khi duyệt)"
-              type="number"
-              min={1}
-              max={15}
-              value={String(requestedDeadlineDays)}
-              onChange={(e) => setRequestedDeadlineDays(Number(e.target.value))}
-            />
-            <Input
-              label="Công cụ AI dự định dùng"
-              hint="Liệt kê là đủ, không bắt buộc"
-              placeholder="VD: Google AI Pro, Claude, Cursor"
-              value={aiTool}
-              onChange={(e) => setAiTool(e.target.value)}
-            />
-          </div>
+          {/* Bỏ ô "Hạn nộp mong muốn": mọi thí sinh đều có 15 ngày kể từ khi đề tài được duyệt.
+              Cho tự chọn ít hơn chỉ tạo ra một quyết định không ai được lợi — nộp sớm lúc nào cũng
+              được, và chọn nhầm số nhỏ là tự siết hạn của chính mình. */}
+          <Input
+            label="Công cụ AI dự định dùng"
+            hint="Liệt kê là đủ, không bắt buộc"
+            placeholder="VD: Google AI Pro, Claude, Cursor"
+            value={aiTool}
+            onChange={(e) => setAiTool(e.target.value)}
+          />
           <Note tone="warning">
             Sản phẩm phải được <b>tự dựng mới trong kỳ thi</b>. Bài bị phát hiện dùng lại repo hoặc
             mẫu có sẵn sẽ không qua được Phase 2 — ban tổ chức đối chiếu lịch sử commit khi chấm mã

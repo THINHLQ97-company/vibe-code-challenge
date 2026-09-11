@@ -1,6 +1,6 @@
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { missingCheckpoints } from "@/lib/checkpoints";
-import { formatDateVN } from "@/lib/datetime";
+import { formatDateTimeVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { StatCard } from "@/components/dsvh/ui/data/StatCard";
@@ -20,7 +20,9 @@ export default async function PostsPage() {
     userName: s.user.name ?? "",
     department: s.user.department ?? "",
     facebookPostUrl: s.facebookPostUrl!,
-    approvedAt: s.facebookApprovedAt ? formatDateVN(s.facebookApprovedAt) : null,
+    // GIỜ chứ không chỉ NGÀY: điểm lan tỏa so với trung vị của nhóm cùng khung đăng, nên khi đối
+    // chiếu BTC cần thấy bài này được duyệt lúc mấy giờ. Chỉ hiện ngày thì không đối chiếu được.
+    approvedAt: s.facebookApprovedAt ? formatDateTimeVN(s.facebookApprovedAt) : null,
     engagementCount: s.engagementCount,
     engagementTier: s.engagementTier,
     published: !!s.publishedAt,

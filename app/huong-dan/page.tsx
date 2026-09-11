@@ -107,9 +107,11 @@ export default function HuongDanPage() {
           </p>
 
           <div className="mt-7 flex flex-wrap gap-2.5">
-            <Link href="/signup">
+            {/* Không còn đường tự tạo tài khoản: thí sinh đăng nhập bằng tài khoản Microsoft của
+                công ty, hệ thống tự lập hồ sơ và tự xếp bảng thi theo phòng ban. */}
+            <Link href="/login">
               <Button variant="solid" size="lg" rightIcon={<MarkArrowRight size={16} />}>
-                Tạo tài khoản dự thi
+                Đăng nhập bằng tài khoản Microsoft
               </Button>
             </Link>
             <Link href="/#giai-thuong">
@@ -157,9 +159,9 @@ export default function HuongDanPage() {
               được duyệt.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-2.5">
-              <Link href="/signup">
+              <Link href="/login">
                 <Button variant="solid" size="lg" rightIcon={<MarkArrowRight size={16} />}>
-                  Tạo tài khoản
+                  Đăng nhập bằng Microsoft
                 </Button>
               </Link>
               <Link href="/login">

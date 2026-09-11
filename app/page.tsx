@@ -10,7 +10,6 @@ import {
   MarkSeal,
   MarkShieldAlert,
   MarkDatabase,
-  MarkBroadcast,
   MarkBranch,
   MarkTrophy,
   MarkCheck,
@@ -107,16 +106,59 @@ const BENEFITS = [
   },
 ];
 
+/**
+ * Chín nhóm chủ đề, mỗi nhóm kèm hai đề tài minh hoạ.
+ *
+ * Ví dụ là thứ quyết định người đọc có hình dung được hay không: "Quản lý / Vận hành" không gợi
+ * ra điều gì cụ thể, còn "bảng theo dõi tiến độ công việc nhóm" thì hình dung được ngay. Cố ý
+ * chọn ví dụ nhỏ, làm được trong 15 ngày, để không ai nghĩ phải dựng cả một hệ thống.
+ */
 const TOPICS = [
-  { icon: <TopicFinance size={20} />, label: "Tài chính cá nhân & doanh nghiệp" },
-  { icon: <TopicSales size={20} />, label: "Kinh doanh / bán hàng" },
-  { icon: <TopicMarketing size={20} />, label: "Marketing / Sales / CSKH" },
-  { icon: <TopicWeb size={20} />, label: "Website / Kỹ thuật" },
-  { icon: <TopicOps size={20} />, label: "Quản lý / Vận hành" },
-  { icon: <TopicPeople size={20} />, label: "Văn phòng / Nhân sự" },
-  { icon: <TopicLegal size={20} />, label: "Pháp lý" },
-  { icon: <TopicEdu size={20} />, label: "Giáo dục / học tập" },
-  { icon: <TopicLife size={20} />, label: "Cá nhân / đời sống" },
+  {
+    icon: <TopicFinance size={20} />,
+    label: "Tài chính cá nhân & doanh nghiệp",
+    examples: ["Sổ thu chi cá nhân có biểu đồ theo tháng", "Bảng theo dõi công nợ khách lẻ"],
+  },
+  {
+    icon: <TopicSales size={20} />,
+    label: "Kinh doanh / bán hàng",
+    examples: ["Trợ lý tạo báo giá theo combo dịch vụ", "Sổ tay chăm khách kèm nhắc lịch gọi lại"],
+  },
+  {
+    icon: <TopicMarketing size={20} />,
+    label: "Marketing / Sales / CSKH",
+    examples: ["Lịch đăng bài đa kênh có nhắc hạn", "Kho câu trả lời mẫu cho câu hỏi hay gặp"],
+  },
+  {
+    icon: <TopicWeb size={20} />,
+    label: "Website / Kỹ thuật",
+    examples: ["Trang tra cứu lỗi thường gặp theo triệu chứng", "Bảng theo dõi hạn tên miền và chứng chỉ"],
+  },
+  {
+    icon: <TopicOps size={20} />,
+    label: "Quản lý / Vận hành",
+    examples: ["Bảng theo dõi tiến độ công việc nhóm", "Sổ đặt phòng họp và thiết bị dùng chung"],
+  },
+  {
+    icon: <TopicPeople size={20} />,
+    label: "Văn phòng / Nhân sự",
+    examples: ["Checklist onboarding nhân viên mới theo phòng ban", "Cổng nhận đề xuất nội bộ ẩn danh"],
+  },
+  {
+    icon: <TopicLegal size={20} />,
+    label: "Pháp lý",
+    examples: ["Tra cứu điều khoản hợp đồng mẫu theo tình huống", "Bảng nhắc hạn hiệu lực các văn bản"],
+  },
+  {
+    icon: <TopicEdu size={20} />,
+    label: "Giáo dục / học tập",
+    examples: ["Bộ thẻ ghi nhớ tự kiểm tra theo chủ đề", "Nhật ký học tập có thống kê thời gian"],
+  },
+  {
+    icon: <TopicLife size={20} />,
+    label: "Cá nhân / đời sống",
+    examples: ["Sổ theo dõi thói quen hằng ngày", "Bảng lên thực đơn và danh sách đi chợ trong tuần"],
+  },
 ];
 
 const FLOOR = [
@@ -144,6 +186,11 @@ const SCORE_PHASES = PHASE_GROUPS.map((g) => ({
   modules: RUBRIC.filter((m) => m.phase === (g.phase as number)),
 }));
 
+/**
+ * Những chỗ làm bài KHÔNG ĐẠT. Cố ý không có mục "quên đăng bài" ở đây: thiếu bài đăng thì thí
+ * sinh vẫn có điểm và vẫn đậu, chỉ là không vào diện xét giải thưởng — xếp nó cạnh các lỗi khiến
+ * bài trượt hẳn là doạ sai và làm người đọc hiểu nhầm mức nghiêm trọng.
+ */
 const PITFALLS = [
   {
     icon: <MarkShieldAlert size={20} />,
@@ -154,11 +201,6 @@ const PITFALLS = [
     icon: <MarkDatabase size={20} />,
     title: "Sản phẩm bắt buộc có database",
     body: "Sản phẩm phải đọc và ghi dữ liệu thật, không phải dữ liệu gắn cứng trong mã. Đây là tiêu chí đạt hoặc không đạt: thiếu cơ sở dữ liệu là chưa vượt ngưỡng sàn, bất kể giao diện hoàn chỉnh đến đâu.",
-  },
-  {
-    icon: <MarkBroadcast size={20} />,
-    title: "Đăng bài là nghĩa vụ, không phải tuỳ chọn",
-    body: "Bài chia sẻ trên nhóm cộng đồng là một trong sáu mốc bắt buộc. Sản phẩm tốt đến đâu mà thiếu bước này vẫn chưa hoàn thành nghĩa vụ. Đổi lại, bạn được quyền đăng ẩn danh nên không phải cân nhắc chuyện lộ danh tính.",
   },
   {
     icon: <MarkBranch size={20} />,
@@ -187,6 +229,10 @@ const FAQ = [
   {
     q: "Bài bị trả về ở vòng kiểm tra thì có bị loại không?",
     a: "Không bị loại. Cả hai cổng kiểm tra — ngưỡng sàn kỹ thuật và rà soát an toàn — đều cho phép chỉnh sửa và nộp lại trong thời hạn của bạn. Lưu ý: điểm đã chấm được ghi nhận ngay tại thời điểm bạn nộp bài; ban giám khảo chỉ ra chỗ chưa đạt để bạn sửa và bước vào vòng kế tiếp. Nhận xét kiểu chung chung không được xem là hợp lệ.",
+  },
+  {
+    q: "Không đăng bài chia sẻ thì có bị trượt không?",
+    a: "Không trượt. Bài của bạn vẫn được chấm và vẫn có điểm — điểm ý tưởng và điểm sản phẩm ghi nhận ngay khi bạn nộp, không phụ thuộc bước đăng bài. Nhưng bài chia sẻ là một trong sáu mốc của chương trình, và chỉ những thí sinh đủ cả sáu mốc mới vào diện xét giải thưởng. Nói ngắn gọn: thiếu bước này bạn mất cơ hội nhận giải, không mất điểm. Bạn được đăng ẩn danh nên không phải cân nhắc chuyện lộ danh tính.",
   },
   {
     q: "Nếu tôi không đồng tình với kết quả chấm?",
@@ -272,11 +318,10 @@ export default function LandingPage() {
                 Đăng nhập để dự thi
               </Button>
             </Link>
+            {/* Không mời tự tạo tài khoản nữa: đăng nhập bằng tài khoản Microsoft công ty là đủ,
+                hệ thống tự lập hồ sơ ở lần đăng nhập đầu. */}
             <p className="text-caption text-cream/55">
-              Chưa có tài khoản?{" "}
-              <Link href="/signup" className="font-medium text-cream hover:underline">
-                Đăng ký bằng email @matbao.com
-              </Link>
+              Dùng tài khoản Microsoft @matbao.com — không cần đăng ký riêng.
             </p>
           </div>
 
@@ -374,15 +419,24 @@ export default function LandingPage() {
           id="de-tai"
           eyebrow="Đề tài"
           title="Chín nhóm chủ đề"
-          subtitle="Bạn chọn một nhóm khi nộp đăng ký. Đề tài trùng nhau giữa các thí sinh vẫn được duyệt bình thường; ban tổ chức chỉ theo dõi phân bổ để cân bằng ngân hàng đề tài. Chương trình không nhận đề tài thuộc nhóm trò chơi."
+          subtitle="Bạn chọn một nhóm khi nộp đăng ký — ví dụ dưới mỗi nhóm chỉ để gợi ý, bạn không bắt buộc làm đúng những đề tài đó. Đề tài trùng nhau giữa các thí sinh vẫn được duyệt bình thường; ban tổ chức chỉ theo dõi phân bổ để cân bằng ngân hàng đề tài. Chương trình không nhận đề tài thuộc nhóm trò chơi."
         >
           <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {TOPICS.map((t) => (
-              <GlassCard key={t.label} className="flex items-center gap-3 p-3.5">
+              <GlassCard key={t.label} className="flex gap-3 p-3.5">
                 <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-orange/12 text-orange-bright">
                   {t.icon}
                 </span>
-                <span className="text-body text-cream/85">{t.label}</span>
+                <div className="min-w-0">
+                  <p className="text-body text-cream/85">{t.label}</p>
+                  <ul className="mt-1 space-y-0.5">
+                    {t.examples.map((e) => (
+                      <li key={e} className="text-meta text-cream/50">
+                        · {e}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </GlassCard>
             ))}
           </div>
@@ -391,9 +445,9 @@ export default function LandingPage() {
         {/* ── HÀNH TRÌNH ─────────────────────────────────────────────────────────────────── */}
         <Band
           id="hanh-trinh"
-          eyebrow="Sáu mốc bắt buộc"
+          eyebrow="Sáu mốc của chương trình"
           title="Hành trình của bạn"
-          subtitle="Sáu mốc dưới đây là bắt buộc với mọi thí sinh. Bấm vào từng toa hoặc dùng mũi tên để xem chi tiết mốc đó: bạn phải làm gì, ban tổ chức làm gì, và điều gì quyết định bạn được đi tiếp."
+          subtitle="Hoàn thành tới mốc 3 là bài của bạn đã có điểm. Đủ cả sáu mốc mới vào diện xét giải thưởng. Bấm vào từng toa hoặc dùng mũi tên để xem chi tiết: bạn phải làm gì, và điều gì quyết định bạn được đi tiếp."
         >
           <JourneyTrain />
         </Band>
@@ -482,8 +536,8 @@ export default function LandingPage() {
         <Band
           id="doc-ky"
           eyebrow="Đọc kỹ"
-          title="Bốn chỗ dễ trượt nhất"
-          subtitle="Qua các kỳ tổ chức, phần lớn trường hợp chưa đạt không đến từ khó khăn kỹ thuật mà từ bốn điều dưới đây. Đọc kỹ trước khi bắt tay vào làm sẽ tiết kiệm cho bạn một vòng chỉnh sửa."
+          title="Ba chỗ dễ trượt nhất"
+          subtitle="Qua các kỳ tổ chức, phần lớn trường hợp chưa đạt không đến từ khó khăn kỹ thuật mà từ ba điều dưới đây. Đọc kỹ trước khi bắt tay vào làm sẽ tiết kiệm cho bạn một vòng chỉnh sửa."
         >
           <div className="grid gap-3 md:grid-cols-2">
             {PITFALLS.map((p) => (
@@ -588,7 +642,7 @@ export default function LandingPage() {
                   Đăng nhập
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/huong-dan">
                 {/* `ghost` của DSVH mang sẵn `bg-surface` (TRẮNG) vì nó dựng cho nền sáng — đặt
                     nguyên lên đây là nút trắng trên nền tối. Phải đè cả nền, viền lẫn chữ, không
                     chỉ thêm viền. */}
@@ -597,7 +651,7 @@ export default function LandingPage() {
                   size="lg"
                   className="border-cream/25 bg-transparent text-cream hover:border-cream/45 hover:bg-cream/10 hover:text-cream"
                 >
-                  Tạo tài khoản
+                  Xem hướng dẫn dự thi
                 </Button>
               </Link>
             </div>
