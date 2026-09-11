@@ -45,7 +45,7 @@ export const departmentToBoard: Record<string, "ky_thuat" | "van_phong"> = {
   MK: "van_phong",
   FI: "van_phong",
   HR: "van_phong",
-  SALES: "van_phong",
+  BZ: "van_phong",
 };
 
 export const users = pgTable("users", {
@@ -54,7 +54,7 @@ export const users = pgTable("users", {
   name: text("name"),
   passwordHash: text("password_hash").notNull(),
   employeeCode: text("employee_code"),
-  department: text("department"), // TS, DE, OP, MK, FI, HR, SALES
+  department: text("department"), // TS, DE, OP, MK, FI, HR, BZ
   board: boardEnum("board"),
   role: roleEnum("role").notNull().default("candidate"),
   /**

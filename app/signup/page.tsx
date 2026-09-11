@@ -19,7 +19,7 @@ const DEPARTMENTS = [
   { value: "MK", label: "MK — Marketing" },
   { value: "FI", label: "FI — Tài chính / Kế toán" },
   { value: "HR", label: "HR — Nhân sự" },
-  { value: "SALES", label: "Kinh Doanh" },
+  { value: "BZ", label: "BZ — Kinh doanh" },
 ];
 
 export default function SignupPage() {

@@ -58,7 +58,7 @@ const PRD_SECTIONS = [
 
 export default function HuongDanPage() {
   return (
-    <main id="top" className="landing-scale relative isolate min-h-screen overflow-hidden bg-canvas">
+    <main id="top" className="landing-scale relative isolate min-h-screen overflow-x-clip bg-canvas">
       <HeroBackdrop image="/home-bg.webp" position="top" scrim />
 
       <div className="relative">

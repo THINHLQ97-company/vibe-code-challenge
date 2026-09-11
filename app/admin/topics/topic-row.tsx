@@ -17,10 +17,7 @@ export type PendingTopic = {
   branch: string;
   problemDesc: string;
   targetUsers: string;
-  databasePlan: string;
-  features: string[];
   requestedDeadlineDays: number;
-  riskSelfAssessment: string | null;
   prdContent: string | null;
   prdFileName: string | null;
   createdAt: string;
@@ -79,23 +76,9 @@ export function TopicRow({ submission, capLeft }: { submission: PendingTopic; ca
       <dl className="mt-3 grid gap-x-6 gap-y-3 border-t border-stroke pt-3 sm:grid-cols-2">
         <InfoRow layout="stack" label="Bài toán" value={submission.problemDesc} wrap size="sm" />
         <InfoRow layout="stack" label="Người dùng" value={submission.targetUsers} wrap size="sm" />
-        <InfoRow
-          layout="stack"
-          label="Chức năng"
-          value={
-            submission.features.length > 0 ? (
-              <ul className="space-y-0.5">
-                {submission.features.map((f) => (
-                  <li key={f}>· {f}</li>
-                ))}
-              </ul>
-            ) : (
-              "—"
-            )
-          }
-          size="sm"
-        />
-        <InfoRow layout="stack" label="Database" value={submission.databasePlan} wrap size="sm" />
+        {/* "Chức năng", "Database", "Tự đánh giá rủi ro" đã ngưng thu thập ở form đăng ký
+            (10/09/2026) — phạm vi và chức năng nay nằm trong tài liệu PRD ngay bên dưới. Giữ lại
+            chỉ tạo ra một cột toàn dấu "—" khiến người duyệt tưởng thí sinh bỏ trống. */}
         <InfoRow
           layout="stack"
           label="Hạn nộp xin"
@@ -103,15 +86,6 @@ export function TopicRow({ submission, capLeft }: { submission: PendingTopic; ca
           size="sm"
           numeric
         />
-        {submission.riskSelfAssessment && (
-          <InfoRow
-            layout="stack"
-            label="Tự đánh giá rủi ro"
-            value={submission.riskSelfAssessment}
-            wrap
-            size="sm"
-          />
-        )}
       </dl>
 
       <div className="mt-3">

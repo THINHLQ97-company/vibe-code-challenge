@@ -107,19 +107,8 @@ export default async function ScoringDetailPage({
         <dl className="mt-4 grid gap-x-6 gap-y-3 border-t border-stroke pt-4 sm:grid-cols-2">
           <InfoRow layout="stack" label="Bài toán" value={submission.problemDesc} wrap size="sm" />
           <InfoRow layout="stack" label="Người dùng" value={submission.targetUsers} wrap size="sm" />
-          <InfoRow
-            layout="stack"
-            label="Chức năng đăng ký"
-            value={
-              <ul className="space-y-0.5">
-                {(submission.features as string[]).map((f) => (
-                  <li key={f}>· {f}</li>
-                ))}
-              </ul>
-            }
-            size="sm"
-          />
-          <InfoRow layout="stack" label="Database" value={submission.databasePlan} wrap size="sm" />
+          {/* "Chức năng đăng ký" và "Database" đã ngưng thu thập ở form (10/09/2026) — căn cứ
+              chấm ý tưởng nay là tài liệu PRD, hiển thị ngay dưới khối này. */}
           <InfoRow
             layout="stack"
             label="Hạn nộp"

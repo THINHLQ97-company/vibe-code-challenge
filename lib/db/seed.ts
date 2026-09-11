@@ -149,8 +149,8 @@ export async function seedDemoData() {
       name: "Phạm Thị D",
       passwordHash,
       employeeCode: "NV004",
-      department: "SALES",
-      board: departmentToBoard.SALES,
+      department: "BZ",
+      board: departmentToBoard.BZ,
       role: "candidate",
     })
     .returning();
@@ -480,7 +480,7 @@ export async function seedDemoData() {
   console.log(`  candidate TS      thisinh.ts@matbao.com / ${DEV_PASSWORD}     (Phase 2, chưa nộp Vibe Host)`);
   console.log(`  candidate MK      thisinh.mk@matbao.com / ${DEV_PASSWORD}     (chờ duyệt CP2)`);
   console.log(`  candidate DE      thisinh.de@matbao.com / ${DEV_PASSWORD}     (đã công bố · 91.5đ, 2 giám khảo)`);
-  console.log(`  candidate SALES   thisinh.sales@matbao.com / ${DEV_PASSWORD}  (đã công bố · 64đ)`);
+  console.log(`  candidate BZ      thisinh.sales@matbao.com / ${DEV_PASSWORD}  (đã công bố · 64đ)`);
   console.log(`  candidate HR      thisinh.hr@matbao.com / ${DEV_PASSWORD}     (bị trả về CP2)`);
   console.log(`  candidate OP      thisinh.op@matbao.com / ${DEV_PASSWORD}     (CHƯA đăng ký — demo luồng đăng ký)`);
 }

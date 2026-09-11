@@ -198,14 +198,20 @@ const FAQ = [
 
 export default function LandingPage() {
   return (
-    <main id="top" className="landing-scale relative isolate min-h-screen overflow-hidden bg-canvas">
+    <main id="top" className="landing-scale relative isolate min-h-screen overflow-x-clip bg-canvas">
       {/* MỘT ảnh nền cho cả trang, neo đỉnh và mờ dần xuống — thay vì mỗi dải một lớp nền. */}
       <HeroBackdrop image="/home-bg.webp" position="top" scrim />
 
       <div className="relative">
         {/* Thanh đầu DÍNH: menu là các điểm neo tới từng mục trên chính trang này, cộng một lối
             sang trang Hướng dẫn. `backdrop-blur` + nền canvas mờ để chữ vẫn đọc được khi cuộn qua
-            vùng sáng của ảnh nền. */}
+            vùng sáng của ảnh nền.
+
+            Thẻ `main` bọc ngoài phải dùng `overflow-x-clip`, KHÔNG được dùng `overflow-hidden`:
+            `overflow-hidden` biến `main` thành một vùng cuộn riêng, và `position: sticky` thì dính
+            vào vùng cuộn gần nhất — tức thanh này dính vào `main` rồi trôi theo trang, nhìn y như
+            không hề dính. `overflow-x-clip` cắt tràn ngang y hệt nhưng KHÔNG tạo vùng cuộn, nên
+            thanh dính lại vào khung nhìn như mong đợi. */}
         <header className="sticky top-0 z-30 border-b border-cream/10 bg-canvas/80 backdrop-blur-md">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5 sm:px-6">
             <Link href="/" aria-label="Vibe Code Challenge — về đầu trang">
@@ -494,7 +500,7 @@ export default function LandingPage() {
                 { icon: <DeptMarketing size={18} />, code: "MK", name: "Marketing" },
                 { icon: <DeptFinance size={18} />, code: "FI", name: "Tài chính / Kế toán" },
                 { icon: <DeptHR size={18} />, code: "HR", name: "Nhân sự" },
-                { icon: <DeptSales size={18} />, code: "KD", name: "Kinh doanh" },
+                { icon: <DeptSales size={18} />, code: "BZ", name: "Kinh doanh" },
               ]}
               expectation="Không cần biết code trước. Vibe coding cùng AI đủ để dựng sản phẩm giải đúng việc bạn hay làm."
             />
