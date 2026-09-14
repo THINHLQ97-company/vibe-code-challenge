@@ -26,7 +26,12 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
 
   const open = waves.find((w) => w.state === "open");
   const next = waves.find((w) => w.state === "upcoming");
-  const upcoming = waves.filter((w) => w.state === "upcoming");
+  const closedBefore = waves.some((w) => w.state === "closed");
+  /**
+   * Đợt đang được đếm ngược KHÔNG lặp lại trong danh sách "các đợt tiếp theo" — nó vừa được nói
+   * ngay phía trên kèm đồng hồ, liệt kê lần nữa chỉ khiến người đọc tưởng có hai đợt.
+   */
+  const upcoming = waves.filter((w) => w.state === "upcoming" && w.id !== next?.id);
 
   return (
     <section id="dot-thi" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-7 sm:px-6">
@@ -43,7 +48,10 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
               </>
             ) : next ? (
               <>
-                <Pill tone="neutral">Đang giữa hai đợt</Pill>
+                {/* "Đang giữa hai đợt" chỉ đúng khi ĐÃ có đợt đóng trước đó. Ở đợt đầu tiên thì
+                    chưa có đợt nào phía trước để mà nằm giữa — câu đó vừa sai vừa làm người đọc
+                    tưởng mình đã lỡ mất một đợt. */}
+                <Pill tone="neutral">{closedBefore ? "Đang giữa hai đợt" : "Sắp mở đăng ký"}</Pill>
                 <p className="mt-2 text-caption text-cream/60">{next.name} mở đăng ký sau</p>
                 <div className="mt-2">
                   <WaveCountdown to={next.registrationOpensAt} tone="muted" />
