@@ -10,6 +10,8 @@ import { Note } from "@/components/dsvh/ui/data/Note";
 import { StatCard } from "@/components/dsvh/ui/data/StatCard";
 import { RobotIcon, HourglassIcon, CheckCircleIcon, ScalesIcon } from "@/components/dsvh/icons";
 import { ScoringTable, type ScoringRowData } from "./scoring-table";
+import { getActiveSeason } from "@/lib/db/queries/seasons";
+import { listWaves } from "@/lib/db/queries/waves";
 
 export const metadata = { title: "Chấm điểm" };
 
@@ -20,6 +22,15 @@ export default async function ScoringPage() {
   const overviews = await getScoreOverviews(
     approved.map((s) => s.id),
     session?.userId ?? 0
+  );
+
+  /**
+   * Nạp TẤT CẢ các đợt một lần rồi tra theo map, không gọi `getWave` trong vòng lặp: 35 bài mỗi
+   * đợt là 35 lượt đi database cho một lần mở trang, trong khi số đợt chỉ có vài cái.
+   */
+  const season = await getActiveSeason();
+  const waveById = new Map(
+    (season ? await listWaves(season.id) : []).map((w) => [w.id, w])
   );
 
   const rows: ScoringRowData[] = approved.map((s) => {
@@ -43,6 +54,8 @@ export default async function ScoringPage() {
       // Lan tỏa không đi qua phiếu chấm — quy đổi từ bậc tương tác BTC chốt ở màn bài đăng.
       engagementTier: s.engagementTier,
       engagementValue: s.engagementTier == null ? null : engagementTierToScore(s.engagementTier),
+      waveBonus: s.waveId != null ? (waveById.get(s.waveId)?.bonusPoints ?? 0) : 0,
+      waveName: s.waveId != null ? (waveById.get(s.waveId)?.name ?? null) : null,
       iScored: o.myIdea != null || o.myProduct != null,
       stageLabel: stage.label,
       stageTone: stage.tone,

@@ -3,6 +3,7 @@ import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark, LogoSquare } from "@/components/brand";
 import { RUBRIC, PHASE_GROUPS, TOTAL_MAX } from "@/lib/scoring-rubric";
 import { WaveSchedule, type PublicWave } from "@/components/wave-schedule";
+import { MAX_WAVE_BONUS } from "@/lib/wave-bonus";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
 import { listWaves, countByWave } from "@/lib/db/queries/waves";
 import { KPI_CATEGORY } from "@/lib/kpi";
@@ -523,7 +524,8 @@ export default async function LandingPage() {
             <GlassCard className="p-4">
               <h3 className="text-body font-semibold text-cream">Thang điểm {TOTAL_MAX}</h3>
               <p className="mt-0.5 text-caption text-cream/50">
-                Cộng dồn qua ba vòng, mỗi vòng chấm xong là cộng vào tổng.
+                Cộng dồn qua ba vòng, mỗi vòng chấm xong là cộng vào tổng. Điểm thưởng đăng ký sớm
+                cộng thêm ngoài thang này, nên đăng ký đợt đầu có thể đạt tới {TOTAL_MAX + MAX_WAVE_BONUS} điểm.
               </p>
               <ul className="mt-3.5 space-y-3">
                 {SCORE_PHASES.map((g) => (

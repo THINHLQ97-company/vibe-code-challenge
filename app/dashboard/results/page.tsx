@@ -17,6 +17,7 @@ import { Progress } from "@/components/dsvh/ui/Progress";
 import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
 import { NotepadIcon, HourglassIcon } from "@/components/dsvh/icons";
 import { AppealForm } from "./appeal-form";
+import { getWave } from "@/lib/db/queries/waves";
 
 export const metadata = { title: "Kết quả" };
 
@@ -78,6 +79,12 @@ export default async function ResultsPage() {
     scores.chatLuongKyThuat.judgeCount
   );
 
+  // Điểm thưởng đọc từ chính đợt của bài, cùng nguồn với lúc công bố — không tính lại theo thứ tự
+  // đợt, vì BTC sửa được điểm thưởng của một đợt và bài phải ăn theo đúng con số đã áp dụng.
+  const myWave = submission.waveId != null ? await getWave(submission.waveId) : null;
+  const waveBonus = myWave?.bonusPoints ?? 0;
+  const waveName = myWave?.name ?? "";
+
   const appealGate = checkAppealGate({
     publishedAt: submission.publishedAt,
     existingAppeals: appeals.length,
@@ -90,16 +97,33 @@ export default async function ResultsPage() {
       action={<Badge tone="success">Đã công bố · {formatDateTimeVN(submission.publishedAt)}</Badge>}
     >
       <Card>
-        <CardHeader title="Tổng điểm" subtitle="Thang 100 — barem 40 · 15 · 25 · 20 theo thể lệ" />
+        {/* Trần hiển thị là 100 + điểm thưởng đợt CỦA CHÍNH BẠN, không phải 100 cứng: điểm thưởng
+            cộng ngoài thang 100 nên một bài hoàn hảo ở Đợt 1 ra 105, và "105/100" thì trông như
+            lỗi tính toán. */}
+        <CardHeader
+          title="Tổng điểm"
+          subtitle={
+            waveBonus > 0
+              ? `Thang 100 theo barem, cộng thêm ${waveBonus} điểm thưởng đăng ký sớm của ${waveName}`
+              : "Thang 100 — barem 40 · 15 · 25 · 20 theo thể lệ"
+          }
+        />
         <div className="flex items-baseline gap-2">
           <span className="text-kpi font-bold text-orange">{submission.finalScore}</span>
-          <span className="text-body text-ink-2">/100</span>
+          <span className="text-body text-ink-2">/{100 + waveBonus}</span>
         </div>
         <div className="mt-4 space-y-3">
           <ScoreLine label="Chất lượng kỹ thuật" value={technical} max={40} />
           <ScoreLine label="Độ hoàn thiện & nội dung riêng" value={completion} max={15} />
           <ScoreLine label="Giá trị ứng dụng" value={applicationValue} max={25} />
           <ScoreLine label="Lan tỏa cộng đồng" value={engagement} max={20} />
+          {waveBonus > 0 && (
+            <ScoreLine
+              label={`Thưởng đăng ký sớm · ${waveName}`}
+              value={waveBonus}
+              max={waveBonus}
+            />
+          )}
         </div>
         {judgeCount > 0 && (
           <Note className="mt-4">

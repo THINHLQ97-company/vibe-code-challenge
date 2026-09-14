@@ -29,6 +29,9 @@ export type ScoringRowData = {
   /** Phase 3 — điểm quy đổi từ bậc tương tác; `null` = BTC chưa chốt bậc. */
   engagementValue: number | null;
   engagementTier: number | null;
+  /** Điểm thưởng đăng ký sớm của đợt mà bài thuộc về. */
+  waveBonus: number;
+  waveName: string | null;
   iScored: boolean;
   stageLabel: string;
   stageTone: "neutral" | "success" | "warning" | "danger";
@@ -147,17 +150,23 @@ export function ScoringTable({ rows }: { rows: ScoringRowData[] }) {
         const parts = [r.ideaValue, r.productValue, r.engagementValue];
         const have = parts.filter((v): v is number => v != null);
         if (have.length === 0) return <span className="text-caption text-ink-3">—</span>;
-        const sum = Math.round(have.reduce((a, v) => a + v, 0) * 10) / 10;
+        /**
+         * PHẢI cộng điểm thưởng đợt vào đây. Không cộng thì cột này ra 91.5 trong khi điểm công bố
+         * của đúng bài đó là 96.5 — hai màn của cùng một hệ thống nói hai con số khác nhau, và BTC
+         * không có cách nào biết bên nào đúng.
+         */
+        const sum = Math.round((have.reduce((a, v) => a + v, 0) + r.waveBonus) * 10) / 10;
         const missing = parts.length - have.length;
         return (
           <span className="flex flex-col items-end leading-tight">
             <span>
               <span className="font-semibold tabular-nums text-ink">{sum}</span>
-              <span className="text-meta text-ink-3">/{TOTAL_MAX}</span>
+              <span className="text-meta text-ink-3">/{TOTAL_MAX + r.waveBonus}</span>
             </span>
-            {missing > 0 && (
-              <span className="text-meta text-ink-3">thiếu {missing} phần</span>
+            {r.waveBonus > 0 && (
+              <span className="text-meta text-teal-strong">gồm +{r.waveBonus} thưởng đợt</span>
             )}
+            {missing > 0 && <span className="text-meta text-ink-3">thiếu {missing} phần</span>}
           </span>
         );
       },

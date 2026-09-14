@@ -43,6 +43,17 @@ chức chốt bậc trên giao diện quản trị:
 Muốn tự động hoá phần này thì báo trước — app đã có sẵn cột `engagement_count` và
 `engagement_tier`, mở thêm endpoint là xong.
 
+### Điểm thưởng đăng ký sớm — nằm NGOÀI thang 100
+
+Thí sinh đăng ký ở đợt thi (wave) càng sớm thì được cộng thêm điểm thưởng: đợt 1 cộng 5, đợt 2 cộng
+4, giảm dần về 0 từ đợt 6. Điểm này **cộng ngoài** thang 100 — nó thưởng thời điểm đăng ký chứ không
+đo chất lượng bài, gộp vào 100 sẽ làm loãng phần đo chất lượng và khiến một bài hoàn hảo ở đợt cuối
+không bao giờ đạt được điểm tuyệt đối của barem.
+
+Hệ quả cho công cụ chấm: **điểm cuối của một thí sinh có thể lên tới 105**. Công cụ không cần tính
+phần này và cũng không được gửi nó qua API — hệ thống tự cộng theo đợt của bài lúc công bố. Công cụ
+chỉ chấm ba mục trong bảng trên, đúng trần của từng mục.
+
 ### Quan hệ giữa điểm AI và điểm giám khảo
 
 Điểm công cụ đẩy về là **điểm gợi ý**, không phải điểm cuối:
