@@ -16,7 +16,14 @@ import { Note } from "@/components/dsvh/ui/data/Note";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Stepper } from "@/components/dsvh/ui/Stepper";
 import { InfoTile } from "@/components/dsvh/ui/data/InfoTile";
-import { NotepadIcon, ArrowRightIcon } from "@/components/dsvh/icons";
+import {
+  NotepadIcon,
+  ArrowRightIcon,
+  CalendarIcon,
+  UsersThreeIcon,
+  StarIcon,
+} from "@/components/dsvh/icons";
+import { getWave, countInWave } from "@/lib/db/queries/waves";
 
 const PHASE_STEPS = [
   { label: "Ý tưởng", description: "Đăng ký & chấm điểm đề tài" },
@@ -52,6 +59,10 @@ export default async function DashboardOverviewPage() {
     );
   }
 
+  // Đợt thi của thí sinh — quyết định điểm thưởng đăng ký sớm và nhóm so bảng điểm.
+  const myWave = submission.waveId != null ? await getWave(submission.waveId) : null;
+  const waveMates = myWave ? await countInWave(myWave.id) : 0;
+
   // Cùng nguồn tổng hợp với màn chấm điểm bên BTC — hai bên không được nói hai con số khác nhau.
   const scores = await getAggregatedScores(submission.id);
   const ideaView = candidateScoreView(scores.giaTriUngDung);
@@ -73,6 +84,24 @@ export default async function DashboardOverviewPage() {
       subtitle={`Nhánh ${submission.branch} · ${submission.topicGroup}`}
       action={<Badge tone={stage.tone}>{stage.label}</Badge>}
     >
+      {/* Đợt thi đặt ngay đầu trang: nó quyết định bạn so điểm với ai và được cộng bao nhiêu điểm
+          thưởng — hai thứ thí sinh hay hỏi nhất mà trước đây không hiện ở đâu cả. */}
+      {myWave && (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <InfoTile icon={CalendarIcon} label="Đợt thi của bạn" value={myWave.name} />
+          <InfoTile
+            icon={UsersThreeIcon}
+            label="Thí sinh cùng đợt"
+            value={`${waveMates} người`}
+          />
+          <InfoTile
+            icon={StarIcon}
+            label="Thưởng đăng ký sớm"
+            value={myWave.bonusPoints > 0 ? `+${myWave.bonusPoints} điểm` : "Không có"}
+          />
+        </div>
+      )}
+
       <Note tone={stage.state === "blocked" ? "danger" : stage.state === "waiting" ? "warning" : "neutral"}>
         {stage.detail}
       </Note>

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSession } from "@/lib/api-auth";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
 import { createSubmission, getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
+import { listWaves, getOpenWave, countInWave } from "@/lib/db/queries/waves";
 
 const registerSchema = z.object({
   productName: z.string().min(3),
@@ -80,10 +81,38 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Chưa có mùa thi nào đang mở" }, { status: 400 });
   }
 
+  /**
+   * Gắn bài vào ĐỢT THI đang mở đăng ký.
+   *
+   * Nếu mùa thi CHƯA có wave nào thì giữ nguyên cách cũ (đăng ký tự do, trần theo tuần) — để bản
+   * đang chạy và dữ liệu demo không gãy khi cơ chế wave mới được bật. Nhưng khi đã có wave, mở
+   * đăng ký ngoài cửa sổ là vô nghĩa: thí sinh sẽ không thuộc đợt nào, không có điểm thưởng, và
+   * không so trung vị lan tỏa với ai được.
+   */
+  const waves = await listWaves(season.id);
+  let waveId: number | null = null;
+  if (waves.length > 0) {
+    const openWave = await getOpenWave(season.id);
+    if (!openWave) {
+      return NextResponse.json(
+        { error: "Hiện chưa tới đợt đăng ký nào — xem lịch các đợt ở trang chủ" },
+        { status: 409 }
+      );
+    }
+    if ((await countInWave(openWave.id)) >= openWave.capacity) {
+      return NextResponse.json(
+        { error: `${openWave.name} đã đủ ${openWave.capacity} thí sinh — chờ đợt kế tiếp` },
+        { status: 409 }
+      );
+    }
+    waveId = openWave.id;
+  }
+
   const submission = await createSubmission({
     ...parsed.data,
     userId: auth.session.userId,
     seasonId: season.id,
+    waveId,
   });
   return NextResponse.json({ submission });
 }

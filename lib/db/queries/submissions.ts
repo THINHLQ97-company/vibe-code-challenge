@@ -272,19 +272,35 @@ export async function listCohortByBoard(
 
 // Đếm tương tác cùng khung giờ/tuần để tính trung vị điểm lan tỏa (thể lệ mục F) —
 // MVP dùng cùng tuần duyệt bài đăng (facebookApprovedAt) làm "cohort", chưa tách khung giờ cụ thể.
+/**
+ * Nhóm để so trung vị khi tính điểm lan tỏa — lấy theo ĐỢT THI.
+ *
+ * Trước đây lấy theo tuần lịch của ngày duyệt bài đăng. Từ khi có wave thì tuần lịch không còn là
+ * ranh giới đúng: hai người cùng wave có thể được duyệt bài lệch nhau vài ngày và rơi sang hai
+ * tuần khác nhau, rồi bị so với hai nhóm khác nhau dù họ thi cùng điều kiện. Cùng wave mới thật sự
+ * là cùng điều kiện.
+ *
+ * Bài chưa thuộc wave nào (tạo trước khi có cơ chế này) vẫn so theo tuần như cũ.
+ */
 export async function getEngagementCohort(submissionId: number) {
   const target = await getSubmissionById(submissionId);
   if (!target?.facebookApprovedAt) return [];
-  const from = startOfWeek(target.facebookApprovedAt);
-  const to = endOfWeek(target.facebookApprovedAt);
-  const rows = await db.query.submissions.findMany({
-    where: and(
-      isNotNull(submissions.facebookApprovedAt),
-      isNotNull(submissions.engagementCount),
-      gte(submissions.facebookApprovedAt, from),
-      lte(submissions.facebookApprovedAt, to)
-    ),
-  });
+
+  const where =
+    target.waveId != null
+      ? and(
+          eq(submissions.waveId, target.waveId),
+          isNotNull(submissions.facebookApprovedAt),
+          isNotNull(submissions.engagementCount)
+        )
+      : and(
+          isNotNull(submissions.facebookApprovedAt),
+          isNotNull(submissions.engagementCount),
+          gte(submissions.facebookApprovedAt, startOfWeek(target.facebookApprovedAt)),
+          lte(submissions.facebookApprovedAt, endOfWeek(target.facebookApprovedAt))
+        );
+
+  const rows = await db.query.submissions.findMany({ where });
   return rows.map((r) => r.engagementCount!).filter((n) => n != null);
 }
 
@@ -341,4 +357,31 @@ export async function listForScoring(opts: {
   });
 
   return filtered.slice(0, opts.limit);
+}
+
+/**
+ * Bảng điểm của ĐỢT THI — cùng wave và cùng bảng thi.
+ *
+ * Thay cho cách cũ cắt theo tuần lịch của ngày duyệt đề tài. Từ khi có wave, tuần lịch không còn
+ * là ranh giới đúng: hai người cùng đợt vẫn có thể được duyệt lệch nhau vài ngày và rơi sang hai
+ * tuần khác nhau, rồi nhìn thấy hai bảng điểm khác nhau dù họ thi cùng nhau.
+ */
+export async function listWaveCohortByBoard(
+  waveId: number,
+  board: "ky_thuat" | "van_phong"
+) {
+  return db
+    .select({
+      id: submissions.id,
+      productName: submissions.productName,
+      finalScore: submissions.finalScore,
+      publishedAt: submissions.publishedAt,
+      userId: submissions.userId,
+      userName: users.name,
+      department: users.department,
+    })
+    .from(submissions)
+    .innerJoin(users, eq(submissions.userId, users.id))
+    .where(and(eq(submissions.waveId, waveId), eq(users.board, board)))
+    .orderBy(desc(submissions.finalScore));
 }

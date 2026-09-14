@@ -4,6 +4,7 @@ import { getSubmissionById, publishSubmission } from "@/lib/db/queries/submissio
 import { getAggregatedScores } from "@/lib/db/queries/scores";
 import { missingCheckpoints } from "@/lib/checkpoints";
 import { computeFinalScore } from "@/lib/scoring";
+import { getWave } from "@/lib/db/queries/waves";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireSession(["admin"]);
@@ -43,11 +44,16 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Chưa đủ điểm Phase 1/2 để công bố" }, { status: 409 });
   }
 
+  // Điểm thưởng đăng ký sớm đọc từ chính wave của bài, không tính lại từ thứ tự — BTC sửa được
+  // điểm thưởng của một wave, và bài đã thuộc wave nào thì ăn theo đúng con số của wave đó.
+  const wave = submission.waveId != null ? await getWave(submission.waveId) : null;
+
   const finalScore = computeFinalScore({
     technicalRaw: scores.chatLuongKyThuat.value,
     completion: scores.hoanThien.value,
     applicationValue: scores.giaTriUngDung.value,
     engagementTier: submission.engagementTier,
+    waveBonus: wave?.bonusPoints ?? 0,
   });
 
   const row = await publishSubmission(submission.id, finalScore);

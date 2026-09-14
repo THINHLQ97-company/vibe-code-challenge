@@ -11,6 +11,7 @@ import {
   MegaphoneIcon,
   ScalesIcon,
   GearIcon,
+  CalendarIcon,
 } from "@/components/dsvh/icons";
 
 /**
@@ -27,6 +28,7 @@ const NAV_BASE: NavItem[] = [
 ];
 
 const NAV_ADMIN_ONLY: NavItem[] = [
+  { href: "/admin/waves", label: "Đợt thi", icon: <CalendarIcon size={17} /> },
   { href: "/admin/settings", label: "Cấu hình", icon: <GearIcon size={17} /> },
 ];
 

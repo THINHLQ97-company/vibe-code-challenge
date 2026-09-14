@@ -30,6 +30,7 @@ export const appealStatusEnum = pgEnum("appeal_status", [
   "accepted",
   "rejected",
 ]);
+export const waveStatusEnum = pgEnum("wave_status", ["draft", "open", "closed"]);
 export const scoreSourceEnum = pgEnum("score_source", ["external_ai", "judge"]);
 export const securityStatusEnum = pgEnum("security_status", [
   "pending",
@@ -107,6 +108,41 @@ export const seasons = pgTable("seasons", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+/**
+ * ĐỢT THI (wave) — đơn vị tổ chức thay cho "trần N đề tài duyệt mỗi tuần".
+ *
+ * Cơ chế cũ là một con số `capPerWeek` chạy theo tuần lịch, không ai điều khiển được: không dời
+ * được ngày, không đóng sớm được, và thí sinh không có cách nào biết khi nào tới lượt mình. Wave
+ * là đúng cơ chế đó nhưng BTC tự chọn ngày mở/đóng, và thí sinh nhìn thấy lịch.
+ *
+ * `orderIndex` quyết định ĐIỂM THƯỞNG đăng ký sớm, nên nó phải cố định ngay khi tạo wave: đổi thứ
+ * tự về sau là đổi điểm của những người đã thi xong.
+ */
+export const waves = pgTable("waves", {
+  id: serial("id").primaryKey(),
+  seasonId: integer("season_id")
+    .notNull()
+    .references(() => seasons.id),
+  name: text("name").notNull(),
+  /** 1, 2, 3… — thứ tự công bố, dùng để tính điểm thưởng. */
+  orderIndex: integer("order_index").notNull(),
+  registrationOpensAt: timestamp("registration_opens_at").notNull(),
+  registrationClosesAt: timestamp("registration_closes_at").notNull(),
+  /** Trần số thí sinh của wave này — thay cho `seasons.capPerWeek`. */
+  capacity: integer("capacity").notNull().default(35),
+  /**
+   * Điểm thưởng cộng thêm cho người đăng ký ở wave này.
+   *
+   * Mặc định giảm dần 1 điểm mỗi wave, tối đa 5 (xem `lib/wave-bonus.ts`). Giảm về 0 chứ không đi
+   * âm: đăng ký muộn thì KHÔNG được cộng, không bị phạt. Để thành cột trong bảng chứ không gõ
+   * cứng trong mã vì BTC có thể muốn một wave nào đó khác lệ thường.
+   */
+  bonusPoints: integer("bonus_points").notNull().default(0),
+  status: waveStatusEnum("status").notNull().default("draft"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const submissions = pgTable("submissions", {
   id: serial("id").primaryKey(),
   userId: integer("user_id")
@@ -115,6 +151,11 @@ export const submissions = pgTable("submissions", {
   seasonId: integer("season_id")
     .notNull()
     .references(() => seasons.id),
+  /**
+   * Đợt thi của bài này. CHO PHÉP RỖNG vì các bài tạo trước khi có cơ chế wave không thuộc đợt
+   * nào — ép NOT NULL thì migration phải bịa một wave giả để nhét chúng vào.
+   */
+  waveId: integer("wave_id").references(() => waves.id),
 
   // Phần 2 — Đề tài (thể lệ mục Q)
   productName: text("product_name").notNull(),
@@ -303,11 +344,18 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const seasonsRelations = relations(seasons, ({ many }) => ({
   submissions: many(submissions),
+  waves: many(waves),
+}));
+
+export const wavesRelations = relations(waves, ({ one, many }) => ({
+  season: one(seasons, { fields: [waves.seasonId], references: [seasons.id] }),
+  submissions: many(submissions),
 }));
 
 export const submissionsRelations = relations(submissions, ({ one, many }) => ({
   user: one(users, { fields: [submissions.userId], references: [users.id] }),
   season: one(seasons, { fields: [submissions.seasonId], references: [seasons.id] }),
+  wave: one(waves, { fields: [submissions.waveId], references: [waves.id] }),
   ideaScores: many(ideaScores),
   productScores: many(productScores),
   appeals: many(appeals),
@@ -348,6 +396,8 @@ export const experienceSurveysRelations = relations(experienceSurveys, ({ one })
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Season = typeof seasons.$inferSelect;
+export type Wave = typeof waves.$inferSelect;
+export type NewWave = typeof waves.$inferInsert;
 export type NewSeason = typeof seasons.$inferInsert;
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;

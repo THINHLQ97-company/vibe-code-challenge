@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db } from "./index";
+import { defaultBonusForWave } from "../wave-bonus";
 import {
   users,
   seasons,
@@ -8,6 +9,7 @@ import {
   ideaScores,
   productScores,
   appeals,
+  waves,
   departmentToBoard,
 } from "./schema";
 
@@ -59,7 +61,7 @@ export const DEV_PASSWORD = process.env.SEED_PASSWORD ?? "Test@1234";
  */
 export async function seedDemoData() {
   await db.execute(
-    sql`TRUNCATE TABLE appeals, experience_surveys, idea_scores, product_scores, submissions, seasons, users RESTART IDENTITY CASCADE`
+    sql`TRUNCATE TABLE appeals, experience_surveys, idea_scores, product_scores, submissions, waves, seasons, users RESTART IDENTITY CASCADE`
   );
 
   const passwordHash = await bcrypt.hash(DEV_PASSWORD, 10);
@@ -198,12 +200,59 @@ export async function seedDemoData() {
     })
     .returning();
 
+  /**
+   * Ba đợt thi ở ba trạng thái khác nhau, để demo được cả ba mặt của giao diện: một đợt đã đóng,
+   * một đợt đang mở (trang chủ hiện đồng hồ đếm ngược tới giờ đóng), một đợt sắp tới (đồng hồ đếm
+   * ngược tới giờ mở). Mốc thời gian tính TƯƠNG ĐỐI so với lúc chạy seed, nếu không thì vài ngày
+   * sau mọi đợt đều thành quá khứ và đồng hồ đứng im ở 0.
+   */
+  const day = 24 * 3600 * 1000;
+  const [wave1] = await db
+    .insert(waves)
+    .values({
+      seasonId: season.id,
+      name: "Đợt 1",
+      orderIndex: 1,
+      registrationOpensAt: new Date(Date.now() - 21 * day),
+      registrationClosesAt: new Date(Date.now() - 14 * day),
+      capacity: 35,
+      bonusPoints: defaultBonusForWave(1),
+      status: "closed",
+    })
+    .returning();
+
+  const [wave2] = await db
+    .insert(waves)
+    .values({
+      seasonId: season.id,
+      name: "Đợt 2",
+      orderIndex: 2,
+      registrationOpensAt: new Date(Date.now() - 2 * day),
+      registrationClosesAt: new Date(Date.now() + 5 * day),
+      capacity: 35,
+      bonusPoints: defaultBonusForWave(2),
+      status: "open",
+    })
+    .returning();
+
+  await db.insert(waves).values({
+    seasonId: season.id,
+    name: "Đợt 3",
+    orderIndex: 3,
+    registrationOpensAt: new Date(Date.now() + 12 * day),
+    registrationClosesAt: new Date(Date.now() + 19 * day),
+    capacity: 35,
+    bonusPoints: defaultBonusForWave(3),
+    status: "open",
+  });
+
   // 1) TS — đã duyệt, đang ở Phase 2 (đã có điểm ý tưởng, đang chờ nộp/chấm sản phẩm)
   const [sub1] = await db
     .insert(submissions)
     .values({
       userId: candTS.id,
       seasonId: season.id,
+      waveId: wave1.id,
       productName: "Chẩn đoán lỗi website mini",
       branch: "A",
       topicGroup: "Website / Kỹ thuật",
@@ -246,6 +295,7 @@ export async function seedDemoData() {
   await db.insert(submissions).values({
     userId: candMK.id,
     seasonId: season.id,
+    waveId: wave1.id,
     productName: "Lịch nội dung Marketing mini",
     branch: "B",
     topicGroup: "Marketing / Sales / CSKH",
@@ -279,6 +329,7 @@ export async function seedDemoData() {
     .values({
       userId: candDE.id,
       seasonId: season.id,
+      waveId: wave1.id,
       productName: "Trợ lý báo giá nhanh",
       branch: "A",
       topicGroup: "Kinh doanh / bán hàng",
@@ -372,6 +423,7 @@ export async function seedDemoData() {
     .values({
       userId: candSales.id,
       seasonId: season.id,
+      waveId: wave2.id,
       productName: "CRM cá nhân mini",
       branch: "B",
       topicGroup: "Kinh doanh / bán hàng",
@@ -435,6 +487,7 @@ export async function seedDemoData() {
   await db.insert(submissions).values({
     userId: candHR.id,
     seasonId: season.id,
+    waveId: wave2.id,
     productName: "Checklist onboarding",
     branch: "A",
     topicGroup: "Văn phòng / Nhân sự",

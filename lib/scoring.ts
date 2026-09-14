@@ -35,12 +35,19 @@ export function computeFinalScore(params: {
   completion: number; // /15
   applicationValue: number; // /25
   engagementTier: number | null;
+  /**
+   * Điểm thưởng đăng ký sớm theo đợt thi. Cộng NGOÀI thang 100 chứ không nằm trong: nó thưởng cho
+   * thời điểm đăng ký, không phải cho chất lượng bài — gộp vào 100 là làm loãng phần đo chất lượng
+   * và khiến một bài hoàn hảo ở wave cuối không bao giờ đạt được điểm tuyệt đối của barem.
+   */
+  waveBonus?: number;
 }): number {
   const technical = Math.min(params.technicalRaw, TECHNICAL_MAX);
   const completion = Math.min(params.completion, COMPLETION_MAX);
   const applicationValue = Math.min(params.applicationValue, VALUE_MAX);
   const engagement = engagementTierToScore(params.engagementTier);
-  const total = Math.min(technical + completion + applicationValue + engagement, TOTAL_MAX);
+  const base = Math.min(technical + completion + applicationValue + engagement, TOTAL_MAX);
+  const total = base + Math.max(0, params.waveBonus ?? 0);
   // Trung bình nhiều giám khảo hay ra số lẻ dài (vd 3 người → x.6666). Chốt 1 chữ số thập phân
   // để bảng xếp hạng và khiếu nại đối chiếu được cùng một con số.
   return Math.round(total * 10) / 10;

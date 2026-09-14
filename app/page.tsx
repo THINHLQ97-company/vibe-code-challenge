@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark, LogoSquare } from "@/components/brand";
 import { RUBRIC, PHASE_GROUPS, TOTAL_MAX } from "@/lib/scoring-rubric";
+import { WaveSchedule, type PublicWave } from "@/components/wave-schedule";
+import { getActiveSeason } from "@/lib/db/queries/seasons";
+import { listWaves, countByWave } from "@/lib/db/queries/waves";
 import { KPI_CATEGORY } from "@/lib/kpi";
 import {
   MarkSpark,
@@ -70,8 +73,11 @@ const NAV_ANCHORS = [
 const FACTS = [
   { value: "2,5 tháng", label: "toàn bộ chương trình" },
   { value: "2 bảng", label: "Kỹ thuật · Văn phòng" },
-  { value: "≤15 ngày", label: "thời gian làm bài bạn tự chọn" },
-  { value: "30–40", label: "đề tài được duyệt mỗi tuần" },
+  // Hai dòng này từng ghi "thời gian làm bài bạn tự chọn" và "30–40 đề tài duyệt mỗi tuần" —
+  // cả hai đều không còn đúng: hạn nộp nay cố định 15 ngày cho mọi người, và việc chia người theo
+  // tuần lịch đã thay bằng đợt thi có lịch mở/đóng riêng.
+  { value: "15 ngày", label: "thời gian làm bài kể từ khi duyệt đề tài" },
+  { value: "Theo đợt", label: "đăng ký sớm được cộng điểm thưởng" },
 ];
 
 /** Số liệu lấy nguyên từ mục M của thể lệ. */
@@ -248,7 +254,42 @@ const FAQ = [
   },
 ];
 
-export default function LandingPage() {
+/**
+ * Trang này nay đọc DATABASE (lịch các đợt thi) nên phải dựng lại mỗi lượt truy cập, không được
+ * đóng băng lúc build: một đồng hồ đếm ngược sinh từ trang tĩnh sẽ đếm ngược tới mốc của lần build
+ * gần nhất và càng ngày càng sai.
+ */
+export const dynamic = "force-dynamic";
+
+export default async function LandingPage() {
+  const season = await getActiveSeason();
+  const [waveRows, waveCounts] = season
+    ? await Promise.all([listWaves(season.id), countByWave(season.id)])
+    : [[], new Map<number, number>()];
+
+  const now = Date.now();
+  const waves: PublicWave[] = waveRows
+    // Đợt còn NHÁP không hiện ra: BTC đang soạn lịch, công bố nửa chừng là hứa một ngày chưa chốt.
+    .filter((w) => w.status !== "draft")
+    .map((w) => ({
+      id: w.id,
+      name: w.name,
+      orderIndex: w.orderIndex,
+      registrationOpensAt: w.registrationOpensAt.toISOString(),
+      registrationClosesAt: w.registrationClosesAt.toISOString(),
+      capacity: w.capacity,
+      bonusPoints: w.bonusPoints,
+      registered: waveCounts.get(w.id) ?? 0,
+      state:
+        w.status === "open" &&
+        w.registrationOpensAt.getTime() <= now &&
+        w.registrationClosesAt.getTime() >= now
+          ? "open"
+          : w.registrationOpensAt.getTime() > now
+            ? "upcoming"
+            : "closed",
+    }));
+
   return (
     <main id="top" className="landing-scale relative isolate min-h-screen overflow-x-clip bg-canvas">
       {/* MỘT ảnh nền cho cả trang, neo đỉnh và mờ dần xuống — thay vì mỗi dải một lớp nền. */}
@@ -334,6 +375,10 @@ export default function LandingPage() {
             ))}
           </div>
         </section>
+
+        {/* Lịch đợt thi đặt NGAY SAU hero: đây là thông tin có hạn — biết còn bao lâu để đăng ký
+            quan trọng hơn biết giải thưởng là gì, vì lỡ đợt thì giải thưởng không còn nghĩa lý. */}
+        <WaveSchedule waves={waves} />
 
         <HairlineDivider />
 
