@@ -1,7 +1,7 @@
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
-import { listWaves, countByWave } from "@/lib/db/queries/waves";
+import { listWaves, countByWave, listSubmissionsInWave } from "@/lib/db/queries/waves";
 import { WavesManager, type WaveRow } from "./waves-manager";
 
 export const metadata = { title: "Đợt thi" };
@@ -18,7 +18,10 @@ export default async function AdminWavesPage() {
   }
 
   const [waves, counts] = await Promise.all([listWaves(season.id), countByWave(season.id)]);
-  const rows: WaveRow[] = waves.map((w) => ({
+  // Nạp danh sách thí sinh của mọi đợt song song — số đợt chỉ vài cái nên không cần gộp truy vấn.
+  const memberLists = await Promise.all(waves.map((w) => listSubmissionsInWave(w.id)));
+
+  const rows: WaveRow[] = waves.map((w, i) => ({
     id: w.id,
     name: w.name,
     orderIndex: w.orderIndex,
@@ -28,6 +31,13 @@ export default async function AdminWavesPage() {
     bonusPoints: w.bonusPoints,
     status: w.status,
     registered: counts.get(w.id) ?? 0,
+    members: memberLists[i].map((m) => ({
+      submissionId: m.id,
+      productName: m.productName,
+      userName: m.user.name ?? m.user.email,
+      department: m.user.department ?? "—",
+      registrationStatus: m.registrationStatus,
+    })),
   }));
 
   return (

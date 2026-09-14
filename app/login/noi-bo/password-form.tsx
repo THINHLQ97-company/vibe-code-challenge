@@ -7,20 +7,7 @@ import { PasswordInput } from "@/components/dsvh/ui/auth/PasswordInput";
 import { Input } from "@/components/dsvh/ui/Input";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
-import { Note } from "@/components/dsvh/ui/data/Note";
 import { EnvelopeIcon, ArrowRightIcon } from "@/components/dsvh/icons";
-
-/** Dấu bốn ô của Microsoft, vẽ tay theo đúng bốn màu thương hiệu. */
-function MicrosoftMark({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 20 20" aria-hidden="true">
-      <rect x="1" y="1" width="8" height="8" fill="#F25022" />
-      <rect x="11" y="1" width="8" height="8" fill="#7FBA00" />
-      <rect x="1" y="11" width="8" height="8" fill="#00A4EF" />
-      <rect x="11" y="11" width="8" height="8" fill="#FFB900" />
-    </svg>
-  );
-}
 
 /** Mã lỗi trên thanh địa chỉ → câu giải thích cho người dùng. */
 const ERRORS: Record<string, string> = {
@@ -34,13 +21,11 @@ const ERRORS: Record<string, string> = {
   ms_that_bai: "Không kết nối được với Microsoft. Thử lại sau ít phút.",
 };
 
-export function LoginForm({
+export function PasswordLoginForm({
   passwordEnabled,
-  microsoftEnabled,
   errorCode,
 }: {
   passwordEnabled: boolean;
-  microsoftEnabled: boolean;
   errorCode?: string;
 }) {
   const router = useRouter();
@@ -77,24 +62,6 @@ export function LoginForm({
     <div className="flex flex-col gap-4">
       {error && <Alert tone="error">{error}</Alert>}
 
-      {/* Đường Microsoft đặt TRÊN: khi thi thật đây là cách đăng nhập duy nhất, nên nó phải là thứ
-          mắt chạm đầu tiên chứ không nằm dưới đáy như một lựa chọn phụ. */}
-      {microsoftEnabled && (
-        <a href="/api/auth/microsoft" className="block">
-          <Button variant="ghost" className="w-full" leftIcon={<MicrosoftMark size={17} />}>
-            Đăng nhập bằng tài khoản Microsoft công ty
-          </Button>
-        </a>
-      )}
-
-      {microsoftEnabled && passwordEnabled && (
-        <div className="flex items-center gap-3">
-          <span className="h-px flex-1 bg-stroke" />
-          <span className="text-caption text-ink-3">hoặc</span>
-          <span className="h-px flex-1 bg-stroke" />
-        </div>
-      )}
-
       {passwordEnabled && (
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <Input
@@ -126,27 +93,20 @@ export function LoginForm({
 
       {passwordEnabled && (
         <p className="text-center text-caption text-ink-3">
-          Chưa có tài khoản?{" "}
+          Tài khoản nội bộ dùng cho ban tổ chức và tài khoản thử nghiệm.{" "}
           <Link href="/signup" className="font-medium text-link hover:text-link-hover">
-            Đăng ký ngay
+            Tạo tài khoản nội bộ
           </Link>
         </p>
       )}
 
-      {/* Cả hai đường đều đóng = không ai vào được. Nói rõ ra, vì một trang đăng nhập trống trơn
-          trông y như trang bị lỗi. */}
-      {!passwordEnabled && !microsoftEnabled && (
-        <Alert tone="error" title="Chưa có cách đăng nhập nào đang mở">
-          Ban tổ chức đã tắt đăng nhập bằng mật khẩu nhưng đăng nhập Microsoft chưa được cấu hình.
-          Liên hệ ban tổ chức để mở lại.
+      {!passwordEnabled && (
+        <Alert tone="warning" title="Đăng nhập bằng mật khẩu đang tắt">
+          Ban tổ chức đã chuyển sang chỉ nhận tài khoản Microsoft.{" "}
+          <Link href="/login" className="font-medium text-link hover:text-link-hover">
+            Về trang đăng nhập
+          </Link>
         </Alert>
-      )}
-
-      {!passwordEnabled && microsoftEnabled && (
-        <Note>
-          Kỳ thi đang chạy nên chỉ nhận đăng nhập bằng tài khoản Microsoft của công ty — cách này
-          cũng giúp hệ thống tự xếp bạn vào đúng bảng thi theo phòng ban.
-        </Note>
       )}
     </div>
   );

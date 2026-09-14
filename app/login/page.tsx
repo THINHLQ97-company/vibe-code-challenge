@@ -1,37 +1,53 @@
 import { AuthSplit } from "@/components/auth-split";
-import { isPasswordLoginEnabled } from "@/lib/settings";
+import { Note } from "@/components/dsvh/ui/data/Note";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { isMicrosoftConfigured } from "@/lib/auth/microsoft";
-import { LoginForm } from "./login-form";
+import { MicrosoftLoginButton } from "@/components/microsoft-login";
 
 /**
- * Component MÁY CHỦ: hai câu hỏi "mật khẩu có đang mở không" và "Microsoft đã cấu hình chưa" chỉ
- * trả lời được ở máy chủ (một cái đọc database, một cái đọc biến môi trường bí mật). Phần tương
- * tác tách sang `login-form.tsx`.
+ * Trang đăng nhập CÔNG KHAI — chỉ có một đường: tài khoản Microsoft của công ty.
+ *
+ * Đường mật khẩu đã dời sang `/login/noi-bo`, không liên kết từ đâu cả. Lý do tách hẳn: thí sinh
+ * thấy hai lựa chọn thì sẽ có người đi nhầm đường rồi báo "không đăng nhập được", trong khi đường
+ * mật khẩu chỉ dành cho ban tổ chức và tài khoản thử nghiệm.
  */
 export const dynamic = "force-dynamic";
+
+/** Mã lỗi trên thanh địa chỉ → câu giải thích cho người dùng. */
+const ERRORS: Record<string, string> = {
+  ms_chua_cau_hinh:
+    "Đăng nhập Microsoft chưa được kết nối. Báo ban tổ chức — đây là việc của hệ thống, không phải lỗi của bạn.",
+  ms_tu_choi: "Bạn đã huỷ ở màn hình Microsoft, hoặc quản trị viên chưa cấp quyền cho ứng dụng.",
+  ms_phien_khong_hop_le:
+    "Phiên đăng nhập hết hạn hoặc không hợp lệ. Bấm đăng nhập lại từ đầu giúp bạn.",
+  ms_thieu_thong_tin: "Microsoft không trả về email của bạn. Báo ban tổ chức để kiểm tra hồ sơ.",
+  ms_ngoai_cong_ty: "Chỉ tài khoản @matbao.com mới dự thi được.",
+  ms_that_bai: "Không kết nối được với Microsoft. Thử lại sau ít phút.",
+};
 
 export default async function LoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const [{ error }, passwordEnabled] = await Promise.all([searchParams, isPasswordLoginEnabled()]);
-  const microsoftEnabled = isMicrosoftConfigured();
+  const { error } = await searchParams;
+  const microsoftReady = isMicrosoftConfigured();
 
   return (
     <AuthSplit
       title="Đăng nhập"
-      subtitle={
-        microsoftEnabled && !passwordEnabled
-          ? "Dùng tài khoản Microsoft của công ty để vào khu vực thí sinh."
-          : "Chào mừng trở lại! Nhập thông tin để tiếp tục."
-      }
+      subtitle="Dùng tài khoản Microsoft của công ty để vào khu vực thí sinh."
     >
-      <LoginForm
-        passwordEnabled={passwordEnabled}
-        microsoftEnabled={microsoftEnabled}
-        errorCode={error}
-      />
+      <div className="flex flex-col gap-4">
+        {error && ERRORS[error] && <Alert tone="error">{ERRORS[error]}</Alert>}
+
+        <MicrosoftLoginButton ready={microsoftReady} size="lg" />
+
+        <Note>
+          Không cần đăng ký riêng. Lần đăng nhập đầu tiên, hệ thống tự lập hồ sơ dự thi và xếp bạn
+          vào bảng thi theo phòng ban trên tài khoản công ty của bạn.
+        </Note>
+      </div>
     </AuthSplit>
   );
 }

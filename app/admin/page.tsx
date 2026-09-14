@@ -24,6 +24,7 @@ import {
   ShieldWarningIcon,
   ArrowRightIcon,
 } from "@/components/dsvh/icons";
+import { listWaves } from "@/lib/db/queries/waves";
 
 const BOARD_LABEL: Record<string, string> = {
   ky_thuat: "Kỹ thuật",
@@ -74,6 +75,9 @@ export default async function AdminDashboardPage() {
   // Danh sách thí sinh nằm NGAY TRÊN dashboard chứ không phải một menu riêng: nó là cùng một tập
   // dữ liệu với các ô thống kê phía trên, tách ra thành trang riêng chỉ bắt BTC bấm thêm một lần
   // để xem chi tiết của con số họ vừa đọc.
+  // Nạp các đợt một lần rồi tra map — không gọi trong vòng lặp qua từng bài.
+  const waveById = new Map((season ? await listWaves(season.id) : []).map((w) => [w.id, w]));
+
   const candidateRows: CandidateRow[] = submissions.map((s) => {
     const stage = submissionStage(s);
     const cps = getCheckpoints(s);
@@ -87,6 +91,8 @@ export default async function AdminDashboardPage() {
       productName: s.productName,
       stageLabel: stage.label,
       stageTone: stage.tone,
+      waveId: s.waveId,
+      waveName: s.waveId != null ? (waveById.get(s.waveId)?.name ?? null) : null,
       cpDone: cps.filter((c) => c.state === "done").length,
       cpTotal: cps.length,
       cpBlocked: blocked ? blocked.label : null,

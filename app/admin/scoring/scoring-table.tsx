@@ -172,6 +172,26 @@ export function ScoringTable({ rows }: { rows: ScoringRowData[] }) {
       },
     },
     {
+      /**
+       * Đặt NGAY SAU cột Tổng: tổng điểm đã gồm điểm thưởng của đợt, nên người đọc phải thấy ngay
+       * bài này thuộc đợt nào mới hiểu con số cộng thêm từ đâu ra.
+       */
+      key: "wave",
+      header: "Đợt",
+      align: "center",
+      render: (r) =>
+        r.waveName ? (
+          <span className="flex flex-col items-center leading-tight">
+            <span className="text-caption text-ink">{r.waveName}</span>
+            {r.waveBonus > 0 && (
+              <span className="text-meta text-teal-strong">+{r.waveBonus} điểm</span>
+            )}
+          </span>
+        ) : (
+          <span className="text-caption text-ink-3">—</span>
+        ),
+    },
+    {
       key: "judges",
       header: "Giám khảo",
       align: "center",

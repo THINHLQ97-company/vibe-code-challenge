@@ -4,6 +4,8 @@ import { LogoWideDark, LogoSquare } from "@/components/brand";
 import { RUBRIC, PHASE_GROUPS, TOTAL_MAX } from "@/lib/scoring-rubric";
 import { WaveSchedule, type PublicWave } from "@/components/wave-schedule";
 import { MAX_WAVE_BONUS } from "@/lib/wave-bonus";
+import { MicrosoftLoginButton } from "@/components/microsoft-login";
+import { isMicrosoftConfigured } from "@/lib/auth/microsoft";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
 import { listWaves, countByWave } from "@/lib/db/queries/waves";
 import { KPI_CATEGORY } from "@/lib/kpi";
@@ -268,6 +270,9 @@ export default async function LandingPage() {
     ? await Promise.all([listWaves(season.id), countByWave(season.id)])
     : [[], new Map<number, number>()];
 
+  // Nút Microsoft luôn hiện; `ready` chỉ quyết định bấm được hay chưa.
+  const microsoftReady = isMicrosoftConfigured();
+
   const now = Date.now();
   const waves: PublicWave[] = waveRows
     // Đợt còn NHÁP không hiện ra: BTC đang soạn lịch, công bố nửa chừng là hứa một ngày chưa chốt.
@@ -355,16 +360,14 @@ export default async function LandingPage() {
           </p>
 
           <div className="mt-7 flex flex-col items-center gap-3">
-            <Link href="/login">
-              <Button variant="solid" size="lg" rightIcon={<MarkArrowRight size={17} />}>
-                Đăng nhập để dự thi
-              </Button>
+            {/* Nút Microsoft là lối vào CHÍNH, đặt ngay ở hero. Không mời tự tạo tài khoản nữa:
+                đăng nhập bằng tài khoản công ty là đủ, hệ thống tự lập hồ sơ ở lần đầu. */}
+            <div className="w-full max-w-xs">
+              <MicrosoftLoginButton ready={microsoftReady} size="lg" />
+            </div>
+            <Link href="/login" className="text-caption text-cream/55 hover:text-cream/80">
+              Hoặc vào trang đăng nhập
             </Link>
-            {/* Không mời tự tạo tài khoản nữa: đăng nhập bằng tài khoản Microsoft công ty là đủ,
-                hệ thống tự lập hồ sơ ở lần đăng nhập đầu. */}
-            <p className="text-caption text-cream/55">
-              Dùng tài khoản Microsoft @matbao.com — không cần đăng ký riêng.
-            </p>
           </div>
 
           <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -701,6 +704,11 @@ export default async function LandingPage() {
                   Xem hướng dẫn dự thi
                 </Button>
               </Link>
+            </div>
+            <div className="mt-4 flex justify-center">
+              <div className="w-full max-w-xs">
+                <MicrosoftLoginButton ready={microsoftReady} size="lg" />
+              </div>
             </div>
           </GlassCard>
         </section>

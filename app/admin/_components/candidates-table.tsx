@@ -6,6 +6,7 @@ import { Badge } from "@/components/dsvh/ui/Badge";
 import { Input } from "@/components/dsvh/ui/Input";
 import { Avatar } from "@/components/dsvh/ui/data/Avatar";
 import { UsersThreeIcon, MagnifyingGlassIcon } from "@/components/dsvh/icons";
+import { SegmentedControl } from "@/components/dsvh/ui/SegmentedControl";
 
 export type CandidateRow = {
   id: number;
@@ -22,35 +23,63 @@ export type CandidateRow = {
   cpBlocked: string | null;
   finalScore: number | null;
   reimburse: boolean;
+  waveId: number | null;
+  waveName: string | null;
 };
 
 export function CandidatesTable({ rows }: { rows: CandidateRow[] }) {
   const [search, setSearch] = useState("");
+  const [wave, setWave] = useState("all");
+
+  /**
+   * Các đợt suy TỪ DỮ LIỆU của bảng, không truyền riêng từ ngoài: bộ lọc chỉ nên liệt kê những đợt
+   * thật sự có người, nếu không BTC bấm vào một đợt rồi thấy bảng trống và không rõ do lọc sai hay
+   * do đợt đó chưa ai đăng ký.
+   */
+  const waveTabs = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const r of rows) {
+      if (r.waveId != null && r.waveName) seen.set(String(r.waveId), r.waveName);
+    }
+    const tabs = [{ value: "all", label: "Tất cả" }];
+    for (const [value, label] of seen) tabs.push({ value, label });
+    if (rows.some((r) => r.waveId == null)) tabs.push({ value: "none", label: "Chưa có đợt" });
+    return tabs;
+  }, [rows]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(
-      (r) =>
+    return rows.filter((r) => {
+      if (wave === "none" && r.waveId != null) return false;
+      if (wave !== "all" && wave !== "none" && String(r.waveId) !== wave) return false;
+      if (!q) return true;
+      return (
         r.userName.toLowerCase().includes(q) ||
         r.productName.toLowerCase().includes(q) ||
         r.department.toLowerCase().includes(q)
-    );
-  }, [rows, search]);
+      );
+    });
+  }, [rows, search, wave]);
 
   return (
     <div className="space-y-3">
-      <Input
-        placeholder="Tìm theo tên, phòng ban hoặc sản phẩm"
-        leftIcon={<MagnifyingGlassIcon size={16} />}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="max-w-sm"
-      />
+      <div className="flex flex-wrap items-center gap-3">
+        <Input
+          placeholder="Tìm theo tên, phòng ban hoặc sản phẩm"
+          leftIcon={<MagnifyingGlassIcon size={16} />}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-sm"
+        />
+        {/* Chỉ hiện bộ lọc khi thật sự có đợt để lọc — một dải nút chỉ có mỗi "Tất cả" là nhiễu. */}
+        {waveTabs.length > 1 && (
+          <SegmentedControl options={waveTabs} value={wave} onChange={setWave} size="sm" />
+        )}
+      </div>
       <Table<CandidateRow>
         data={filtered}
         getRowId={(r) => r.id}
-        emptyText={search ? "Không có thí sinh nào khớp" : "Chưa có thí sinh nào đăng ký"}
+        emptyText={search || wave !== "all" ? "Không có thí sinh nào khớp" : "Chưa có thí sinh nào đăng ký"}
         emptySubtext={
           search
             ? "Thử từ khoá khác hoặc xoá ô tìm kiếm."

@@ -11,6 +11,7 @@ import { Note } from "@/components/dsvh/ui/data/Note";
 import { Progress } from "@/components/dsvh/ui/Progress";
 import { PlusIcon } from "@/components/dsvh/icons";
 import { MAX_WAVE_BONUS } from "@/lib/wave-bonus";
+import { WaveMembers, type Member } from "./wave-members";
 
 export type WaveRow = {
   id: number;
@@ -22,6 +23,7 @@ export type WaveRow = {
   bonusPoints: number;
   status: "draft" | "open" | "closed";
   registered: number;
+  members: Member[];
 };
 
 const STATUS: Record<WaveRow["status"], { tone: "neutral" | "success" | "warning"; label: string }> = {
@@ -38,6 +40,7 @@ function toLocalInput(iso: string): string {
 }
 
 export function WavesManager({ initial }: { initial: WaveRow[] }) {
+  const waveOptions = initial.map((w) => ({ value: String(w.id), label: w.name }));
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<number | "new" | null>(null);
@@ -161,6 +164,7 @@ export function WavesManager({ initial }: { initial: WaveRow[] }) {
               <WaveCard
                 key={w.id}
                 wave={w}
+                waveOptions={waveOptions}
                 busy={busy === w.id}
                 onPatch={(body) => void call(`/api/admin/waves/${w.id}`, body, w.id)}
               />
@@ -174,10 +178,12 @@ export function WavesManager({ initial }: { initial: WaveRow[] }) {
 
 function WaveCard({
   wave,
+  waveOptions,
   busy,
   onPatch,
 }: {
   wave: WaveRow;
+  waveOptions: Array<{ value: string; label: string }>;
   busy: boolean;
   onPatch: (body: Record<string, unknown>) => void;
 }) {
@@ -244,6 +250,8 @@ function WaveCard({
           </Button>
         )}
       </div>
+
+      <WaveMembers members={wave.members} waveOptions={waveOptions} currentWaveId={wave.id} />
     </div>
   );
 }
