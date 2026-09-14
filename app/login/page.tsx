@@ -1,7 +1,6 @@
 import { AuthSplit } from "@/components/auth-split";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
-import { isMicrosoftConfigured } from "@/lib/auth/microsoft";
 import { MicrosoftLoginButton } from "@/components/microsoft-login";
 
 /**
@@ -31,8 +30,6 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
-  const microsoftReady = isMicrosoftConfigured();
-
   return (
     <AuthSplit
       title="Đăng nhập"
@@ -41,11 +38,11 @@ export default async function LoginPage({
       <div className="flex flex-col gap-4">
         {error && ERRORS[error] && <Alert tone="error">{ERRORS[error]}</Alert>}
 
-        <MicrosoftLoginButton ready={microsoftReady} size="lg" />
+        <MicrosoftLoginButton size="lg" />
 
         <Note>
-          Không cần đăng ký riêng. Lần đăng nhập đầu tiên, hệ thống tự lập hồ sơ dự thi và xếp bạn
-          vào bảng thi theo phòng ban trên tài khoản công ty của bạn.
+          Hệ thống tự lập hồ sơ dự thi và xếp bạn vào bảng thi theo phòng ban trên tài khoản công ty
+          của bạn.
         </Note>
       </div>
     </AuthSplit>

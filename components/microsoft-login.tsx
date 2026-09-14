@@ -15,47 +15,32 @@ export function MicrosoftMark({ size = 16 }: { size?: number }) {
 /**
  * Nút đăng nhập Microsoft.
  *
- * LUÔN hiện, kể cả khi chưa nối tenant — để giao diện đã sẵn sàng và ngày nối xong là chạy ngay,
- * không phải sửa gì thêm. Nhưng khi chưa nối thì nút KHÔNG bấm được và nói rõ lý do: một nút bấm
- * vào chỉ để nhận thông báo lỗi còn tệ hơn một nút mờ có giải thích.
+ * LUÔN bấm được, kể cả khi chưa nối tenant. Bản trước làm nút mờ kèm một dòng giải thích "sẽ hoạt
+ * động khi kết nối tenant" — nhìn như một tính năng hỏng, và dòng chú thích đó chiếm chỗ ngay dưới
+ * lời kêu gọi hành động chính của trang. Chưa nối tenant thì bấm vào sẽ về trang đăng nhập kèm câu
+ * báo rõ ràng, đủ để người dùng biết chuyện gì đang xảy ra mà không phải cảnh báo trước.
+ *
+ * `href` mặc định đi thẳng vào luồng đăng nhập Microsoft. Ở các trang giới thiệu thì truyền
+ * `/login` để đưa người dùng tới trang đăng nhập trước, thay vì đẩy thẳng sang Microsoft.
  *
  * Không dùng `Button` của DSVH: nút đăng nhập của nhà cung cấp danh tính có quy ước hình thức
  * riêng (nền trắng, viền xám, logo bên trái) mà người dùng nhận ra ngay, đổi sang màu thương hiệu
  * của mình sẽ làm nó trông như một nút thường.
  */
 export function MicrosoftLoginButton({
-  ready,
+  href = "/api/auth/microsoft",
   size = "md",
   className = "",
 }: {
-  ready: boolean;
+  href?: string;
   size?: "md" | "lg";
   className?: string;
 }) {
   const pad = size === "lg" ? "px-5 py-3 text-body" : "px-4 py-2.5 text-caption";
-  const base = `inline-flex w-full items-center justify-center gap-2.5 rounded-lg border font-medium transition-colors ${pad}`;
-
-  if (!ready) {
-    return (
-      <div className={className}>
-        <span
-          aria-disabled="true"
-          className={`${base} cursor-not-allowed border-[#d1d1d1] bg-white/70 text-[#5e5e5e]`}
-        >
-          <MicrosoftMark size={size === "lg" ? 20 : 17} />
-          Đăng nhập với Microsoft
-        </span>
-        <p className="mt-1.5 text-center text-meta text-ink-3">
-          Sẽ hoạt động ngay khi ban tổ chức kết nối tenant Microsoft của công ty.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <Link
-      href="/api/auth/microsoft"
-      className={`${base} border-[#d1d1d1] bg-white text-[#3c3c3c] hover:bg-[#f3f3f3] ${className}`}
+      href={href}
+      className={`inline-flex w-full items-center justify-center gap-2.5 rounded-lg border border-[#d1d1d1] bg-white font-medium text-[#3c3c3c] transition-colors hover:bg-[#f3f3f3] ${pad} ${className}`}
     >
       <MicrosoftMark size={size === "lg" ? 20 : 17} />
       Đăng nhập với Microsoft

@@ -139,6 +139,35 @@ export function ScoringTable({ rows }: { rows: ScoringRowData[] }) {
     },
     {
       /**
+       * Đợt và điểm thưởng đứng CẠNH NHAU, ngay TRƯỚC cột Tổng — đọc theo thứ tự trái sang phải
+       * là thấy đủ các số hạng rồi mới tới tổng. Trước đây điểm thưởng chỉ nằm ẩn trong ghi chú
+       * dưới ô Tổng, nên nhìn bảng không biết con số cộng thêm từ đâu ra.
+       */
+      key: "wave",
+      header: "Đợt",
+      align: "center",
+      render: (r) =>
+        r.waveName ? (
+          <span className="text-caption text-ink">{r.waveName}</span>
+        ) : (
+          <span className="text-caption text-ink-3">—</span>
+        ),
+    },
+    {
+      key: "bonus",
+      header: "Thưởng",
+      align: "right",
+      render: (r) =>
+        r.waveName == null ? (
+          <span className="text-caption text-ink-3">—</span>
+        ) : r.waveBonus > 0 ? (
+          <span className="font-semibold tabular-nums text-teal-strong">+{r.waveBonus}</span>
+        ) : (
+          <span className="tabular-nums text-caption text-ink-3">0</span>
+        ),
+    },
+    {
+      /**
        * Tổng CẢ BA phase. Trước đây bảng chỉ có hai cột điểm rời nhau và điểm lan tỏa nằm ở màn
        * khác — muốn biết một bài đang đứng ở đâu trên thang 100 thì phải tự cộng nhẩm qua hai màn.
        * Cộng phần nào đã có, và nói rõ còn thiếu phần nào để con số không bị đọc nhầm là điểm chốt.
@@ -163,33 +192,10 @@ export function ScoringTable({ rows }: { rows: ScoringRowData[] }) {
               <span className="font-semibold tabular-nums text-ink">{sum}</span>
               <span className="text-meta text-ink-3">/{TOTAL_MAX + r.waveBonus}</span>
             </span>
-            {r.waveBonus > 0 && (
-              <span className="text-meta text-teal-strong">gồm +{r.waveBonus} thưởng đợt</span>
-            )}
             {missing > 0 && <span className="text-meta text-ink-3">thiếu {missing} phần</span>}
           </span>
         );
       },
-    },
-    {
-      /**
-       * Đặt NGAY SAU cột Tổng: tổng điểm đã gồm điểm thưởng của đợt, nên người đọc phải thấy ngay
-       * bài này thuộc đợt nào mới hiểu con số cộng thêm từ đâu ra.
-       */
-      key: "wave",
-      header: "Đợt",
-      align: "center",
-      render: (r) =>
-        r.waveName ? (
-          <span className="flex flex-col items-center leading-tight">
-            <span className="text-caption text-ink">{r.waveName}</span>
-            {r.waveBonus > 0 && (
-              <span className="text-meta text-teal-strong">+{r.waveBonus} điểm</span>
-            )}
-          </span>
-        ) : (
-          <span className="text-caption text-ink-3">—</span>
-        ),
     },
     {
       key: "judges",

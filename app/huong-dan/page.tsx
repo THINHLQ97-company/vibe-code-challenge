@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark } from "@/components/brand";
 import { MicrosoftLoginButton } from "@/components/microsoft-login";
-import { isMicrosoftConfigured } from "@/lib/auth/microsoft";
 import { HeroBackdrop } from "@/components/hero-backdrop";
 import { GlassCard, Pill, DarkNote, ImageSlot, BackToTop } from "@/components/landing-ui";
 import { PrdMockup } from "@/components/prd-mockup";
@@ -58,12 +57,7 @@ const PRD_SECTIONS = [
   { h: "Tiêu chí hoàn thành", d: "Dấu hiệu nào cho thấy sản phẩm đã làm xong việc của nó." },
 ];
 
-/** Đọc trạng thái kết nối Microsoft ở máy chủ nên trang phải là async. */
-export const dynamic = "force-dynamic";
-
-export default async function HuongDanPage() {
-  const microsoftReady = isMicrosoftConfigured();
-
+export default function HuongDanPage() {
   return (
     <main id="top" className="landing-scale relative isolate min-h-screen overflow-x-clip bg-canvas">
       <HeroBackdrop image="/home-bg.webp" position="top" scrim />
@@ -117,7 +111,7 @@ export default async function HuongDanPage() {
             {/* Không còn đường tự tạo tài khoản: thí sinh đăng nhập bằng tài khoản Microsoft của
                 công ty, hệ thống tự lập hồ sơ và tự xếp bảng thi theo phòng ban. */}
             <div className="w-full max-w-xs">
-              <MicrosoftLoginButton ready={microsoftReady} size="lg" />
+              <MicrosoftLoginButton href="/login" size="lg" />
             </div>
             <Link href="/#giai-thuong">
               <Button
@@ -165,7 +159,7 @@ export default async function HuongDanPage() {
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-2.5">
               <div className="w-full max-w-xs">
-                <MicrosoftLoginButton ready={microsoftReady} size="lg" />
+                <MicrosoftLoginButton href="/login" size="lg" />
               </div>
               <Link href="/login">
                 <Button
