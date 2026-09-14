@@ -130,12 +130,6 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
                 </li>
               ))}
             </ul>
-            {/* Nói thẳng cơ chế: đăng ký sớm được cộng điểm, muộn thì không bị trừ. Giấu đi rồi
-                để người ta tự phát hiện sau khi đã lỡ đợt là cách nhanh nhất tạo cảm giác bị gài. */}
-            <p className="mt-3 text-meta text-cream/45">
-              Đợt càng sớm điểm thưởng càng cao, giảm dần về 0 — đăng ký muộn thì không được cộng,
-              không bị trừ.
-            </p>
           </div>
         )}
       </GlassCard>

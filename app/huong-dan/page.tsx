@@ -161,15 +161,6 @@ export default function HuongDanPage() {
               <div className="w-full max-w-xs">
                 <MicrosoftLoginButton href="/login" size="lg" />
               </div>
-              <Link href="/login">
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="border-cream/25 bg-transparent text-cream hover:border-cream/45 hover:bg-cream/10 hover:text-cream"
-                >
-                  Tôi đã có tài khoản
-                </Button>
-              </Link>
             </div>
           </GlassCard>
         </section>
