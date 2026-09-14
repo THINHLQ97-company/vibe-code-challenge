@@ -139,6 +139,11 @@ export async function GET(req: NextRequest) {
    * trang tổng quan với bảng thi trống là kiểu lỗi im lặng — mọi thứ trông vẫn chạy cho tới lúc
    * xếp hạng mới lòi ra.
    */
+  /**
+   * Chưa xếp được phòng ban thì đưa thẳng tới màn hồ sơ để chọn, kèm ghi chú lý do. Thả họ vào
+   * trang tổng quan với bảng thi trống là kiểu lỗi im lặng — mọi thứ trông vẫn chạy cho tới lúc
+   * xếp hạng mới lòi ra.
+   */
   const dest = user.department ? "/dashboard" : "/dashboard/profile?canhbao=chua_co_phong_ban";
   const res = NextResponse.redirect(new URL(dest, getBaseUrl(req)));
   res.cookies.set(AUTH_COOKIE, token, {

@@ -39,14 +39,30 @@ export const securityStatusEnum = pgEnum("security_status", [
 ]);
 
 // Phòng ban → tự xếp bảng thi theo thể lệ mục Q
+/**
+ * Phòng ban → bảng thi (thể lệ mục Q).
+ *
+ * Danh sách mã bám theo phòng ban THẬT trên Odoo (24 mục, chốt 14/09/2026) — xem `lib/department.ts`.
+ * Bảng Kỹ thuật tách làm bốn team theo yêu cầu BTC; Chăm sóc khách hàng và các nhóm Tư vấn gộp vào
+ * BZ vì cùng khối kinh doanh. Administration, BOD, Company và TE không thuộc diện dự thi nên không
+ * có mã ở đây.
+ */
 export const departmentToBoard: Record<string, "ky_thuat" | "van_phong"> = {
   TS: "ky_thuat",
+  AI: "ky_thuat",
   DE: "ky_thuat",
+  SA: "ky_thuat",
   OP: "van_phong",
   MK: "van_phong",
   FI: "van_phong",
   HR: "van_phong",
   BZ: "van_phong",
+  /**
+   * Nhân sự không thuộc phòng chuyên môn nào (Administration, BOD, Company, TE). Vẫn dự thi bình
+   * thường, xếp Bảng Văn phòng — chặn họ dự thi chỉ vì phòng ban của họ không nằm trong danh mục
+   * là loại người muốn tham gia vì một lý do hành chính.
+   */
+  KHAC: "van_phong",
 };
 
 export const users = pgTable("users", {
@@ -61,7 +77,7 @@ export const users = pgTable("users", {
    */
   passwordHash: text("password_hash"),
   employeeCode: text("employee_code"),
-  department: text("department"), // TS, DE, OP, MK, FI, HR, BZ
+  department: text("department"), // TS, AI, DE, SA, OP, MK, FI, HR, BZ, KHAC
   /**
    * Chuỗi phòng ban THÔ do Microsoft Graph trả về (vd "Phòng Marketing", "Technical Support").
    * Giữ nguyên bản gốc bên cạnh mã đã quy đổi: khi một giá trị lạ không khớp bảng quy đổi, đây là

@@ -27,11 +27,18 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
   const open = waves.find((w) => w.state === "open");
   const next = waves.find((w) => w.state === "upcoming");
   const closedBefore = waves.some((w) => w.state === "closed");
+
   /**
-   * Đợt đang được đếm ngược KHÔNG lặp lại trong danh sách "các đợt tiếp theo" — nó vừa được nói
-   * ngay phía trên kèm đồng hồ, liệt kê lần nữa chỉ khiến người đọc tưởng có hai đợt.
+   * Đợt kế tiếp chỉ bị loại khỏi danh sách khi NÓ ĐANG ĐƯỢC ĐẾM NGƯỢC ở phía trên.
+   *
+   * Đồng hồ đếm cho đợt đang mở nếu có; chỉ khi không đợt nào mở thì nó mới đếm tới đợt kế. Bản
+   * trước loại `next` vô điều kiện, nên lúc có đợt đang mở thì đợt ngay sau đó vừa không được đếm
+   * vừa bị loại khỏi danh sách — biến mất hoàn toàn khỏi trang chủ.
    */
-  const upcoming = waves.filter((w) => w.state === "upcoming" && w.id !== next?.id);
+  const nextIsCounted = !open && next != null;
+  const upcoming = waves.filter(
+    (w) => w.state === "upcoming" && !(nextIsCounted && w.id === next?.id)
+  );
 
   return (
     <section id="dot-thi" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-7 sm:px-6">

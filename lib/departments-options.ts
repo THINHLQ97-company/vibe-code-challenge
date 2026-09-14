@@ -8,13 +8,16 @@ import { departmentToBoard } from "./db/schema";
  * ra rỗng.
  */
 const NAMES: Record<string, string> = {
-  TS: "Hỗ trợ Kỹ thuật",
-  DE: "Lập trình / Dev",
+  TS: "Technical Support",
+  AI: "Technical Support - AI",
+  DE: "Developers",
+  SA: "System Admin",
   OP: "Vận hành",
   MK: "Marketing",
   FI: "Tài chính / Kế toán",
   HR: "Nhân sự",
-  BZ: "Kinh doanh",
+  BZ: "Kinh doanh & CSKH",
+  KHAC: "Khác",
 };
 
 export const DEPARTMENT_OPTIONS = Object.keys(departmentToBoard).map((code) => ({

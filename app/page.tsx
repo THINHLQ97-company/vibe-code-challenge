@@ -612,8 +612,10 @@ export default async function LandingPage() {
               name="Bảng Kỹ thuật"
               tagline="Khối làm kỹ thuật"
               departments={[
-                { icon: <DeptSupport size={18} />, code: "TS", name: "Hỗ trợ Kỹ thuật" },
-                { icon: <DeptDev size={18} />, code: "DE", name: "Lập trình / Dev" },
+                { icon: <DeptSupport size={18} />, code: "TS", name: "Technical Support" },
+                { icon: <DeptDev size={18} />, code: "AI", name: "Technical Support - AI" },
+                { icon: <DeptDev size={18} />, code: "DE", name: "Developers" },
+                { icon: <DeptSupport size={18} />, code: "SA", name: "System Admin" },
               ]}
               expectation="Nền tảng tốt nên kỳ vọng khai thác sâu database và workflow tự động của Vibe Host."
             />
@@ -626,7 +628,8 @@ export default async function LandingPage() {
                 { icon: <DeptMarketing size={18} />, code: "MK", name: "Marketing" },
                 { icon: <DeptFinance size={18} />, code: "FI", name: "Tài chính / Kế toán" },
                 { icon: <DeptHR size={18} />, code: "HR", name: "Nhân sự" },
-                { icon: <DeptSales size={18} />, code: "BZ", name: "Kinh doanh" },
+                { icon: <DeptSales size={18} />, code: "BZ", name: "Kinh doanh & CSKH" },
+                { icon: <DeptOps size={18} />, code: "KHÁC", name: "Phòng ban khác" },
               ]}
               expectation="Không cần biết code trước. Vibe coding cùng AI đủ để dựng sản phẩm giải đúng việc bạn hay làm."
             />
@@ -697,11 +700,6 @@ export default async function LandingPage() {
                   Xem hướng dẫn dự thi
                 </Button>
               </Link>
-            </div>
-            <div className="mt-4 flex justify-center">
-              <div className="w-full max-w-xs">
-                <MicrosoftLoginButton href="/login" size="lg" />
-              </div>
             </div>
           </GlassCard>
         </section>

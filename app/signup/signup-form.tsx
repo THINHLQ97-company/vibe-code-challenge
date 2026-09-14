@@ -1,5 +1,7 @@
 "use client";
 
+import { DEPARTMENT_OPTIONS } from "@/lib/departments-options";
+
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -12,15 +14,9 @@ import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { EnvelopeIcon, UserIcon, ArrowRightIcon } from "@/components/dsvh/icons";
 import { Note } from "@/components/dsvh/ui/data/Note";
 
-const DEPARTMENTS = [
-  { value: "TS", label: "TS — Hỗ trợ Kỹ thuật" },
-  { value: "DE", label: "DE — Lập trình / Dev" },
-  { value: "OP", label: "OP — Vận hành" },
-  { value: "MK", label: "MK — Marketing" },
-  { value: "FI", label: "FI — Tài chính / Kế toán" },
-  { value: "HR", label: "HR — Nhân sự" },
-  { value: "BZ", label: "BZ — Kinh doanh" },
-];
+// Dựng TỪ bảng quy đổi chung. Gõ lại ở đây là cách chắc chắn nhất để một ngày nào đó form cho
+// chọn một mã mà bảng quy đổi không biết, rồi bảng thi của người đó ra rỗng.
+const DEPARTMENTS = DEPARTMENT_OPTIONS;
 
 export function SignupForm() {
   const router = useRouter();
