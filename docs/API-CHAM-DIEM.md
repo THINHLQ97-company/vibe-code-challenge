@@ -3,7 +3,9 @@
 Tài liệu dành cho đội xây dựng công cụ chấm điểm. App quản lý cuộc thi **không tự chấm**: nó lưu
 bài dự thi, mở cổng cho công cụ ngoài đọc dữ liệu và nhận điểm trả về, rồi hiển thị.
 
-- Địa chỉ gốc: `https://vibecodechallenge.matbao.ai`
+- Địa chỉ gốc hiện tại: `https://vibe-code-challenge.n1.tinhgon.xyz`
+- Địa chỉ chính thức (khi DNS xong): `https://vibecodechallenge.matbao.ai` — đội chấm nên để địa
+  chỉ gốc thành một biến cấu hình, đừng gõ cứng, vì nó sẽ đổi đúng một lần
 - Xác thực: header `X-API-Key: <SCORING_API_KEY>` trên **mọi** endpoint dưới đây
 - Định dạng: JSON, UTF-8
 
@@ -30,8 +32,8 @@ request (xem mục 4).
 
 ### Phase 3 không có API và không dùng AI
 
-Điểm lan tỏa quy đổi từ lượt tương tác của bài đăng so với **trung vị nhóm cùng tuần**, ban tổ
-chức chốt bậc trên giao diện quản trị:
+Điểm lan tỏa quy đổi từ lượt tương tác của bài đăng so với **trung vị của những người cùng đợt
+thi**, ban tổ chức chốt bậc trên giao diện quản trị:
 
 | Bậc | Điều kiện | Điểm |
 |---|---|---|
@@ -163,8 +165,13 @@ ai viết bài nào, và không biết thì cũng không thiên vị được.
 `flaggedPrebuiltRepo = true` nghĩa là BTC đã xác định bài dùng lại repo có sẵn — vi phạm thể lệ,
 không phải mục để trừ điểm. Bài đó không qua được Phase 2 bất kể điểm kỹ thuật.
 
-Mã nguồn để **private**; tài khoản `matbao-vibe-bot` đã có quyền đọc. Công cụ cần đọc repo thì
-dùng khoá riêng của tài khoản đó, app này không cấp token GitHub qua API.
+Mã nguồn để **private**; tài khoản `matbao-vibe-bot` được thí sinh thêm làm collaborator quyền
+đọc. Công cụ cần đọc repo thì dùng khoá riêng của tài khoản đó — app này không cấp token GitHub
+qua API.
+
+> Lưu ý trạng thái hiện tại: biến `GITHUB_BOT_PAT` trên bản đang chạy vẫn là giá trị mẫu, nên
+> trường `githubVerified` chưa phản ánh việc xác minh thật. Sẽ đúng sau khi ban tổ chức cấp token
+> của tài khoản bot.
 
 ---
 
