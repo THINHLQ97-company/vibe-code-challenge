@@ -6,11 +6,11 @@ import { createSubmission, getCurrentSubmissionForUser } from "@/lib/db/queries/
 import { listWaves, getOpenWave, countInWave } from "@/lib/db/queries/waves";
 
 const registerSchema = z.object({
-  productName: z.string().min(3),
+  productName: z.string().min(3, "Tên sản phẩm tối thiểu 3 ký tự"),
   branch: z.enum(["A", "B"]),
-  topicGroup: z.string().min(1),
-  problemDesc: z.string().min(10),
-  targetUsers: z.string().min(3),
+  topicGroup: z.string().min(1, "Chọn nhóm chủ đề"),
+  problemDesc: z.string().min(10, "Mô tả bài toán tối thiểu 10 ký tự — nêu ai gặp, bao lâu một lần, đang xử lý ra sao"),
+  targetUsers: z.string().min(3, "Nêu rõ ai là người dùng sản phẩm"),
   /**
    * NGƯNG thu thập từ form (10/09/2026) — PRD đã mô tả phạm vi và chức năng. Vẫn nhận nếu có, để
    * bản ghi cũ và các công cụ ngoài không gãy, nhưng không còn bắt buộc.
@@ -21,7 +21,7 @@ const registerSchema = z.object({
     .string({ required_error: "Cần đính tài liệu PRD — đây là căn cứ chấm điểm ý tưởng ở Phase 1" })
     .min(200, "Tài liệu PRD quá ngắn — đây là căn cứ chấm điểm ý tưởng ở Phase 1")
     .max(200_000, "Tài liệu quá dài, rút gọn còn phần mô tả sản phẩm"),
-  prdFileName: z.string().max(255).optional(),
+  prdFileName: z.string().max(255, "Tên file quá dài").optional(),
   databasePlan: z.string().optional(),
   hasWorkflow: z.boolean().optional().default(false),
   workflowDesc: z.string().optional(),
@@ -70,8 +70,11 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const parsed = registerSchema.safeParse(body);
   if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    // Trả kèm TÊN TRƯỜNG để giao diện đặt câu lỗi ngay dưới ô sai, thay vì một dải đỏ dưới đáy
+    // biểu mẫu mà người điền phải tự dò xem mình sai ở đâu.
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ" },
+      { error: issue?.message ?? "Dữ liệu không hợp lệ", field: issue?.path?.[0] ?? null },
       { status: 400 }
     );
   }

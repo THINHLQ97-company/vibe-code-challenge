@@ -68,11 +68,14 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
   const [confirmTemplateConsent, setConfirmTemplateConsent] = useState(false);
   const [confirmSelfBuilt, setConfirmSelfBuilt] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Lỗi gắn với đúng ô nào — máy chủ trả về tên trường cùng câu báo lỗi. */
+  const [fieldError, setFieldError] = useState<{ field: string; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setFieldError(null);
     if (!topicGroup) {
       setError("Chọn nhóm chủ đề.");
       return;
@@ -103,7 +106,16 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Gửi đăng ký thất bại");
+        if (data.field) {
+          setFieldError({ field: String(data.field), message: data.error });
+          // Cuộn tới đúng ô sai: biểu mẫu này dài hơn một màn hình, đặt câu lỗi đúng chỗ mà không
+          // đưa mắt người dùng tới đó thì họ vẫn phải tự dò.
+          document
+            .querySelector(`[data-field="${data.field}"]`)
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          setError(data.error ?? "Gửi đăng ký thất bại");
+        }
         return;
       }
       router.push("/dashboard");
@@ -142,7 +154,9 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
         <CardHeader title="Đề tài" subtitle="Phần này là căn cứ để BTC duyệt và để chấm điểm ý tưởng" />
         <div className="space-y-4">
           <Input
+            data-field="productName"
             label="Tên sản phẩm dự kiến"
+            error={fieldError?.field === "productName" ? fieldError.message : undefined}
             placeholder="VD: Sổ thu chi cá nhân"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
@@ -159,14 +173,18 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
             />
           </div>
           <Textarea
+            data-field="problemDesc"
             label="Bài toán đang giải là gì"
+            error={fieldError?.field === "problemDesc" ? fieldError.message : undefined}
             hint="3–5 câu: ai gặp, bao nhiêu lần/tuần, đang xử lý ra sao, mất bao lâu"
             value={problemDesc}
             onChange={(e) => setProblemDesc(e.target.value)}
             required
           />
           <Textarea
+            data-field="targetUsers"
             label="Người dùng của sản phẩm"
+            error={fieldError?.field === "targetUsers" ? fieldError.message : undefined}
             hint="Nhánh B thì ghi rõ là chính mình + ước lượng còn bao nhiêu người gặp đúng bài toán"
             value={targetUsers}
             onChange={(e) => setTargetUsers(e.target.value)}
@@ -243,7 +261,10 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
 
       <Card>
         <CardHeader title="Cam kết bắt buộc" subtitle="Thiếu một mục là không gửi được đăng ký" />
-        <div className="space-y-3">
+        {/* `space-y` KHÔNG tách được các ô này: `Checkbox` của DSVH render ra `<label>` mang
+            `inline-flex`, nên bốn cam kết trôi nối nhau thành một khối chữ liền rất khó đọc.
+            `flex flex-col` biến mỗi label thành một phần tử flex — mỗi cam kết một dòng. */}
+        <div className="flex flex-col items-start gap-3">
           <Checkbox
             checked={confirmFakeData}
             onChange={setConfirmFakeData}

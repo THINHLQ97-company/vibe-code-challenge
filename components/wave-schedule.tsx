@@ -75,17 +75,40 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
           </div>
 
           {open && (
-            <div className="text-right">
-              <div className="text-kpi font-bold tabular-nums text-cream">
-                {open.registered}
-                <span className="text-title text-cream/40">/{open.capacity}</span>
+            <div className="min-w-60 flex-1 sm:max-w-xs">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-caption text-cream/55">thí sinh đã đăng ký đợt này</p>
+                <div className="text-kpi font-bold tabular-nums leading-none text-cream">
+                  {open.registered}
+                  <span className="text-title text-cream/40">/{open.capacity}</span>
+                </div>
               </div>
-              <p className="text-caption text-cream/55">thí sinh đã đăng ký đợt này</p>
-              {open.bonusPoints > 0 && (
-                <p className="mt-1 text-meta text-orange-bright">
-                  Đăng ký đợt này được cộng {open.bonusPoints} điểm thưởng
+
+              {/* Thanh tiến độ: con số "18/40" phải đọc rồi mới so được, còn thanh thì liếc là
+                  thấy đợt sắp đầy tới đâu — thứ quyết định người ta đăng ký ngay hay để mai. */}
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-cream/10">
+                <div
+                  className={`h-full rounded-full transition-[width] ${
+                    open.registered >= open.capacity ? "bg-orange-bright" : "bg-orange/80"
+                  }`}
+                  style={{
+                    width: `${Math.min(100, (open.registered / open.capacity) * 100)}%`,
+                  }}
+                />
+              </div>
+
+              <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-meta text-cream/50">
+                  {open.registered >= open.capacity
+                    ? "Đợt này đã đầy — chờ đợt kế tiếp"
+                    : `Còn ${open.capacity - open.registered} suất`}
                 </p>
-              )}
+                {open.bonusPoints > 0 && (
+                  <p className="text-meta text-orange-bright">
+                    +{open.bonusPoints} điểm thưởng khi đăng ký đợt này
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>
