@@ -54,8 +54,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (auth.session.role !== "admin") {
     const slot = await judgeSlotFor(submissionId, parsed.data.phase, judgeId);
     if (!slot.canScore) {
+      /**
+       * Hai lý do rất khác nhau, và người đọc cần biết mình đang gặp cái nào: bài đã đủ phiếu (hết
+       * việc) hay bài được giao cho người khác (nhầm bài). Gộp thành một câu thì giám khảo bị chặn
+       * vì nhầm bài sẽ ngồi chờ một suất không bao giờ mở ra.
+       */
       return NextResponse.json(
-        { error: `Thí sinh đã được chấm đủ ${MAX_JUDGES_PER_PHASE} phiếu.` },
+        {
+          error: slot.taken < MAX_JUDGES_PER_PHASE
+            ? "Bài này được giao cho giám khảo khác. Nếu người đó vắng, ban tổ chức giao lại ở mục Phân công chấm."
+            : `Thí sinh đã được chấm đủ ${MAX_JUDGES_PER_PHASE} phiếu.`,
+        },
         { status: 409 }
       );
     }

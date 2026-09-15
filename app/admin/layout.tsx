@@ -32,6 +32,7 @@ const NAV_BASE: NavItem[] = [
 ];
 
 const NAV_ADMIN_ONLY: NavItem[] = [
+  { href: "/admin/assignments", label: "Phân công chấm", icon: <ScalesIcon size={17} /> },
   { href: "/admin/users", label: "Người dùng", icon: <UsersThreeIcon size={17} /> },
   { href: "/admin/waves", label: "Đợt thi", icon: <CalendarIcon size={17} /> },
   { href: "/admin/settings", label: "Cấu hình", icon: <GearIcon size={17} /> },

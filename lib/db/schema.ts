@@ -526,6 +526,47 @@ export const postingSlotsRelations = relations(postingSlots, ({ one, many }) => 
   submissions: many(submissions),
 }));
 
+/**
+ * PHÂN CÔNG CHẤM — ai chấm bài nào.
+ *
+ * Trước đây màn chấm mở toàn bộ bài cho mọi giám khảo và ai gửi phiếu trước thì được, tối đa hai
+ * phiếu một bài. Cách đó không sai nhưng để lại hai chỗ hở: bài dễ chấm bị giành hết trong mấy
+ * phút đầu còn bài khó nằm lại tới cuối buổi, và không ai biết mình phải chấm bao nhiêu bài cho
+ * tới khi hết buổi.
+ *
+ * KHÔNG có cột `phase`: ban tổ chức chốt ngày 15/09/2026 rằng ai chấm Phase 1 của một bài thì
+ * chấm luôn Phase 2 của bài đó — người đã đọc PRD rồi thì đọc sản phẩm nhanh hơn và hiểu thí sinh
+ * định làm gì. Một hàng ở đây vì vậy có hiệu lực cho cả hai phase.
+ */
+export const judgeAssignments = pgTable(
+  "judge_assignments",
+  {
+    id: serial("id").primaryKey(),
+    submissionId: integer("submission_id")
+      .notNull()
+      .references(() => submissions.id),
+    judgeId: integer("judge_id")
+      .notNull()
+      .references(() => users.id),
+    assignedAt: timestamp("assigned_at").defaultNow().notNull(),
+    /** Admin nào bấm phân công — để truy lại khi có khiếu nại về người chấm. */
+    assignedBy: integer("assigned_by").references(() => users.id),
+  },
+  (t) => ({
+    // Một giám khảo chỉ được giao một bài đúng một lần. Khoá này cũng là thứ khiến việc chạy lại
+    // phân công trở thành bổ sung phần còn thiếu chứ không đẻ ra bản sao.
+    submissionJudge: unique("judge_assignments_submission_judge").on(t.submissionId, t.judgeId),
+  })
+);
+
+export const judgeAssignmentsRelations = relations(judgeAssignments, ({ one }) => ({
+  submission: one(submissions, {
+    fields: [judgeAssignments.submissionId],
+    references: [submissions.id],
+  }),
+  judge: one(users, { fields: [judgeAssignments.judgeId], references: [users.id] }),
+}));
+
 export const submissionsRelations = relations(submissions, ({ one, many }) => ({
   user: one(users, { fields: [submissions.userId], references: [users.id] }),
   season: one(seasons, { fields: [submissions.seasonId], references: [seasons.id] }),
@@ -538,6 +579,7 @@ export const submissionsRelations = relations(submissions, ({ one, many }) => ({
   productScores: many(productScores),
   appeals: many(appeals),
   experienceSurvey: many(experienceSurveys),
+  assignments: many(judgeAssignments),
 }));
 
 export const ideaScoresRelations = relations(ideaScores, ({ one }) => ({
@@ -577,6 +619,7 @@ export type Season = typeof seasons.$inferSelect;
 export type Wave = typeof waves.$inferSelect;
 export type NewWave = typeof waves.$inferInsert;
 export type NewSeason = typeof seasons.$inferInsert;
+export type JudgeAssignment = typeof judgeAssignments.$inferSelect;
 export type PostingSlot = typeof postingSlots.$inferSelect;
 export type NewPostingSlot = typeof postingSlots.$inferInsert;
 export type Submission = typeof submissions.$inferSelect;

@@ -31,7 +31,8 @@ export type PostRowData = {
   finalScore: number | null;
   missing: string[];
   /** Khung giờ hệ thống xếp để ban tổ chức cho bài lên nhóm; `null` khi bài chưa được xếp. */
-  slotLabel: string | null;
+  slotPeriod: string | null;
+  slotDate: string | null;
   slotOrder: number;
 };
 
@@ -44,30 +45,49 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
   const [error, setError] = useState<string | null>(null);
   const [rejectNote, setRejectNote] = useState("");
 
-  const [slotFilter, setSlotFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [periodFilter, setPeriodFilter] = useState<string>("all");
 
-  // Danh sách khung có bài, giữ nguyên thứ tự thời gian đã sắp ở phía máy chủ.
-  const slotOptions = useMemo(() => {
+  /**
+   * Lọc theo NGÀY và theo KHUNG là hai việc khác nhau.
+   *
+   * Ngày trả lời "hôm nay tôi trực những bài nào"; khung trả lời "buổi sáng có những ai". Gộp một
+   * danh sách chín dòng ghép sẵn ngày-với-khung thì muốn xem cả ngày phải chọn ba lần.
+   *
+   * Ngày giữ nguyên thứ tự máy chủ đã sắp (theo giờ bắt đầu khung), không sắp lại theo chuỗi —
+   * chuỗi "01/11" sắp trước "08/10" nếu so theo chữ.
+   */
+  const dateOptions = useMemo(() => {
     const seen: string[] = [];
-    for (const r of rows) if (r.slotLabel && !seen.includes(r.slotLabel)) seen.push(r.slotLabel);
+    for (const r of rows) if (r.slotDate && !seen.includes(r.slotDate)) seen.push(r.slotDate);
+    return [
+      { value: "all", label: "Tất cả ngày đăng" },
+      ...seen.map((d) => ({ value: d, label: d })),
+      { value: "none", label: "Chưa xếp khung" },
+    ];
+  }, [rows]);
+
+  const periodOptions = useMemo(() => {
+    const seen: string[] = [];
+    for (const r of rows) if (r.slotPeriod && !seen.includes(r.slotPeriod)) seen.push(r.slotPeriod);
     return [
       { value: "all", label: "Tất cả khung giờ" },
-      ...seen.map((s) => ({ value: s, label: s })),
-      { value: "none", label: "Chưa xếp khung" },
+      ...seen.map((p) => ({ value: p, label: p })),
     ];
   }, [rows]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return rows.filter((r) => {
-      if (slotFilter === "none" && r.slotLabel) return false;
-      if (slotFilter !== "all" && slotFilter !== "none" && r.slotLabel !== slotFilter) return false;
+      if (dateFilter === "none" && r.slotDate) return false;
+      if (dateFilter !== "all" && dateFilter !== "none" && r.slotDate !== dateFilter) return false;
+      if (periodFilter !== "all" && r.slotPeriod !== periodFilter) return false;
       if (!needle) return true;
       return (
         r.productName.toLowerCase().includes(needle) || r.userName.toLowerCase().includes(needle)
       );
     });
-  }, [rows, q, slotFilter]);
+  }, [rows, q, dateFilter, periodFilter]);
 
   function open(row: PostRowData) {
     setActive(row);
@@ -129,14 +149,27 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
       ),
     },
     {
-      key: "slot",
-      header: "Khung giờ đăng",
+      key: "slotDate",
+      header: "Ngày đăng",
       align: "center",
       render: (r) =>
-        r.slotLabel ? (
-          <span className="text-caption tabular-nums text-ink-2">{r.slotLabel}</span>
+        r.slotDate ? (
+          <span className="whitespace-nowrap text-caption tabular-nums text-ink-2">
+            {r.slotDate}
+          </span>
         ) : (
           <span className="text-caption text-ink-3">chưa xếp</span>
+        ),
+    },
+    {
+      key: "slotPeriod",
+      header: "Khung giờ",
+      align: "center",
+      render: (r) =>
+        r.slotPeriod ? (
+          <span className="whitespace-nowrap text-caption text-ink-2">{r.slotPeriod}</span>
+        ) : (
+          <span className="text-caption text-ink-3">—</span>
         ),
     },
     {
@@ -201,13 +234,23 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
 
   return (
     <div className="space-y-3">
-      <div className="sm:max-w-xs">
-        <Select
-          value={slotFilter}
-          onChange={setSlotFilter}
-          options={slotOptions}
-          placeholder="Lọc theo khung giờ"
-        />
+      <div className="flex flex-wrap gap-3">
+        <div className="w-full sm:w-52">
+          <Select
+            value={dateFilter}
+            onChange={setDateFilter}
+            options={dateOptions}
+            placeholder="Lọc theo ngày đăng"
+          />
+        </div>
+        <div className="w-full sm:w-56">
+          <Select
+            value={periodFilter}
+            onChange={setPeriodFilter}
+            options={periodOptions}
+            placeholder="Lọc theo khung giờ"
+          />
+        </div>
       </div>
       <Input
         placeholder="Tìm theo tên sản phẩm hoặc thí sinh"

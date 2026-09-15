@@ -7,7 +7,7 @@ import { Button } from "@/components/dsvh/ui/Button";
 import { Input } from "@/components/dsvh/ui/Input";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Select } from "@/components/dsvh/ui/form/Select";
-import { SegmentedControl } from "@/components/dsvh/ui/SegmentedControl";
+import { WaveTabs, type WaveTab } from "./wave-tabs";
 
 export type BoardSlot = {
   id: number;
@@ -45,7 +45,7 @@ export function ScheduleBoard({
   slots,
   entries,
 }: {
-  waves: { id: number; name: string }[];
+  waves: WaveTab[];
   selectedWaveId: number;
   slots: BoardSlot[];
   entries: BoardEntry[];
@@ -111,13 +111,7 @@ export function ScheduleBoard({
 
   return (
     <div className="space-y-4">
-      {waves.length > 1 && (
-        <SegmentedControl
-          options={waves.map((w) => ({ value: String(w.id), label: w.name }))}
-          value={String(selectedWaveId)}
-          onChange={(v) => router.push(`/admin/posting-schedule?wave=${v}`)}
-        />
-      )}
+      <WaveTabs waves={waves} selectedWaveId={selectedWaveId} />
 
       {error && <Alert tone="error">{error}</Alert>}
 

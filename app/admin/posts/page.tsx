@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { ensureSlotAssignments } from "@/lib/db/queries/posting-slots";
 import { periodLabel, periodTimeLabel } from "@/lib/contest-schedule";
 import { missingCheckpoints } from "@/lib/checkpoints";
-import { formatDateTimeVN } from "@/lib/datetime";
+import { formatDateTimeVN, formatDateVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { StatCard } from "@/components/dsvh/ui/data/StatCard";
@@ -49,10 +49,20 @@ export default async function PostsPage() {
     // Cùng danh sách mốc mà API công bố dùng — trước đây màn này chỉ soi CP4/CP5/CP6
     // nên nút "Công bố" vẫn sáng cho bài thiếu CP2/CP3 rồi API mới trả lỗi.
     missing: missingCheckpoints(s),
-    slotLabel: (() => {
+    /**
+     * Khung giờ và ngày tách thành HAI trường.
+     *
+     * Gộp một chuỗi thì cột bị bó hẹp cắt mất đuôi, và ngày — thứ ban tổ chức lọc theo — nằm lọt
+     * giữa chuỗi nên không lọc được. (Bản trước còn cắt nhầm: `formatDateTimeVN` trả "08:30
+     * 08/10/2026" với giờ đứng trước, nên cắt 10 ký tự đầu ra "08:30 08/1".)
+     */
+    slotPeriod: (() => {
       const slot = s.postingSlotId ? slotById.get(s.postingSlotId) : null;
-      if (!slot) return null;
-      return `${periodLabel(slot.period)} ${formatDateTimeVN(slot.startsAt).slice(0, 10)} · ${periodTimeLabel(slot.period)}`;
+      return slot ? `${periodLabel(slot.period)} · ${periodTimeLabel(slot.period)}` : null;
+    })(),
+    slotDate: (() => {
+      const slot = s.postingSlotId ? slotById.get(s.postingSlotId) : null;
+      return slot ? formatDateVN(slot.startsAt) : null;
     })(),
     // Bài chưa xếp khung đẩy xuống CUỐI (không phải đầu): chúng không thuộc lượt duyệt nào, nên
     // để lẫn vào giữa hàng đợi sẽ cắt ngang mạch làm việc theo khung của người trực.

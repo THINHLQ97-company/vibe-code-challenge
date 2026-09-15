@@ -1,6 +1,6 @@
 import { and, eq, desc, inArray, isNotNull } from "drizzle-orm";
 import { db } from "../index";
-import { ideaScores, productScores, submissions } from "../schema";
+import { ideaScores, productScores, submissions, judgeAssignments } from "../schema";
 
 type Modules = Record<string, number>;
 
@@ -253,16 +253,43 @@ export async function judgeSlotFor(
   submissionId: number,
   phase: 1 | 2,
   judgeId: number
-): Promise<{ canScore: boolean; taken: number; mine: boolean }> {
+): Promise<{ canScore: boolean; taken: number; mine: boolean; assigned: boolean }> {
   const table = phase === 1 ? ideaScores : productScores;
-  const rows = await db
-    .select({ judgeId: table.judgeId })
-    .from(table)
-    .where(and(eq(table.submissionId, submissionId), isNotNull(table.judgeId)));
+  const [rows, assigned] = await Promise.all([
+    db
+      .select({ judgeId: table.judgeId })
+      .from(table)
+      .where(and(eq(table.submissionId, submissionId), isNotNull(table.judgeId))),
+    db
+      .select({ judgeId: judgeAssignments.judgeId })
+      .from(judgeAssignments)
+      .where(eq(judgeAssignments.submissionId, submissionId)),
+  ]);
 
   const ids = rows.map((r) => r.judgeId!);
   const mine = ids.includes(judgeId);
-  return { canScore: mine || ids.length < MAX_JUDGES_PER_PHASE, taken: ids.length, mine };
+
+  /**
+   * KHOÁ CỨNG theo phân công — nhưng chỉ khi bài đó ĐÃ ĐƯỢC PHÂN CÔNG.
+   *
+   * Khoá theo một cờ chung toàn hệ thống sẽ chặn luôn những đợt ban tổ chức chưa kịp chia bài, và
+   * lúc đó không ai chấm được gì mà nguyên nhân thì nằm ở một màn hình khác. Bài chưa chia thì giữ
+   * nguyên lệ cũ: ai gửi phiếu trước trong hai người đầu.
+   *
+   * Người ĐÃ CÓ PHIẾU trên bài này thì luôn sửa được phiếu của mình, kể cả khi sau đó ban tổ chức
+   * giao bài cho người khác — phiếu đã nằm trong điểm trung bình, chặn họ sửa nghĩa là giữ lại một
+   * con số họ không còn đồng ý.
+   */
+  const assignedIds = assigned.map((a) => a.judgeId);
+  const isAssigned = assignedIds.includes(judgeId);
+  const locked = assignedIds.length > 0 && !isAssigned && !mine;
+
+  return {
+    canScore: !locked && (mine || ids.length < MAX_JUDGES_PER_PHASE),
+    taken: ids.length,
+    mine,
+    assigned: isAssigned,
+  };
 }
 
 /** Số phiếu giám khảo theo phase cho NHIỀU bài — dùng cho bảng danh sách, tránh đếm trong vòng lặp. */

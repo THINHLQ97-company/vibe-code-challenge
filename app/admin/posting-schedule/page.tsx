@@ -7,6 +7,10 @@ import {
 } from "@/lib/db/queries/posting-slots";
 import { periodLabel, periodTimeLabel, TOTAL_SLOT_CAPACITY } from "@/lib/contest-schedule";
 import { formatDateVN, formatDateTimeVN } from "@/lib/datetime";
+import Link from "next/link";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { Button } from "@/components/dsvh/ui/Button";
+import { WaveTabs } from "./wave-tabs";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Empty } from "@/components/dsvh/ui/data/Empty";
@@ -51,31 +55,63 @@ export default async function PostingSchedulePage({
   }
 
   /**
-   * Đợt mặc định là đợt SẮP TỚI CỬA SỔ ĐĂNG BÀI GẦN NHẤT, không phải đợt đầu danh sách.
-   *
-   * Ban tổ chức mở màn này vì sắp phải trực duyệt, nên thứ họ cần thấy ngay là đợt sắp tới lượt.
-   * Mặc định về đợt 1 nghĩa là tới tháng 11 vẫn phải bấm chọn lại mỗi lần vào.
+   * Số bài đã tới Phase 3 của TỪNG đợt — cần cho cả việc chọn đợt mặc định lẫn nhãn trên thanh
+   * chọn đợt. Không có con số này thì ban tổ chức phải bấm thử từng đợt để tìm xem người đang chờ
+   * xếp lịch nằm ở đâu, đúng thứ vừa xảy ra với Đợt 0.
    */
+  const phase3Counts = new Map(
+    await Promise.all(
+      waves.map(async (w) => [w.id, (await listPhase3InWave(w.id)).length] as const)
+    )
+  );
+
+  /**
+   * Đợt mặc định: ưu tiên đợt ĐANG CÓ NGƯỜI chờ xếp lịch, sau đó mới tới đợt sắp vào cửa sổ đăng
+   * bài. Mở màn này lên mà thấy một đợt rỗng trong khi đợt bên cạnh có người đang chờ là cách chắc
+   * chắn để bỏ sót họ.
+   */
+  const waveTabs = waves.map((w) => ({
+    id: w.id,
+    name: w.name,
+    phase3: phase3Counts.get(w.id) ?? 0,
+    hasWindow: !!w.postingOpensAt,
+  }));
+
   const now = Date.now();
+  const withPeople = waves.filter((w) => (phase3Counts.get(w.id) ?? 0) > 0);
   const withWindow = waves.filter((w) => w.postingClosesAt);
   const upcoming =
     withWindow.find((w) => (w.postingClosesAt as Date).getTime() >= now) ??
     withWindow[withWindow.length - 1];
   const requested = (await searchParams).wave;
   const selected =
-    waves.find((w) => String(w.id) === requested) ?? upcoming ?? waves[0];
+    waves.find((w) => String(w.id) === requested) ?? withPeople[0] ?? upcoming ?? waves[0];
 
   if (!selected.postingOpensAt) {
+    const waiting = phase3Counts.get(selected.id) ?? 0;
     return (
       <PageShell
         title="Lịch đăng bài Phase 3"
         subtitle="Ai nộp Phase 2 trước thì được khung giờ sớm"
       >
         <Card>
+          <WaveTabs waves={waveTabs} selectedWaveId={selected.id} />
+          {waiting > 0 && (
+            <Alert tone="warning" title={`${waiting} bài đang chờ nhưng chưa xếp được`}>
+              {selected.name} chưa có cửa sổ đăng bài, nên hệ thống không có khung giờ nào để xếp
+              họ vào. Điền hai mốc mở và đóng cửa sổ đăng bài cho đợt này ở mục Đợt thi — chín
+              khung giờ sẽ tự dựng và thí sinh được xếp ngay theo thứ tự nộp Phase 2.
+            </Alert>
+          )}
           <Empty
             icon={<CalendarIcon size={40} />}
             title={`${selected.name} chưa có cửa sổ đăng bài`}
             description="Điền hai mốc mở và đóng cửa sổ đăng bài ở mục Đợt thi. Hệ thống sẽ dựng đủ 9 khung giờ và tự xếp thí sinh vào."
+            action={
+              <Link href="/admin/waves">
+                <Button variant="solid">Tới mục Đợt thi</Button>
+              </Link>
+            }
           />
         </Card>
       </PageShell>
@@ -124,7 +160,7 @@ export default async function PostingSchedulePage({
           subtitle={`${entries.length} bài đã tới Phase 3 · ${totalCapacity} suất trong ${slots.length} khung`}
         />
         <ScheduleBoard
-          waves={waves.map((w) => ({ id: w.id, name: w.name }))}
+          waves={waveTabs}
           selectedWaveId={selected.id}
           slots={slots}
           entries={entries}

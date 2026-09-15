@@ -14,6 +14,7 @@ import { getActiveSeason } from "@/lib/db/queries/seasons";
 import { listWaves } from "@/lib/db/queries/waves";
 import { countJudgeBallots } from "@/lib/db/queries/scores";
 import { getCurrentRole } from "@/lib/auth/current-user";
+import { assignedSubmissionIds } from "@/lib/db/queries/assignments";
 
 export const metadata = { title: "Chấm điểm" };
 
@@ -31,6 +32,13 @@ export default async function ScoringPage() {
    * đợt là 35 lượt đi database cho một lần mở trang, trong khi số đợt chỉ có vài cái.
    */
   const isAdmin = (await getCurrentRole()) === "admin";
+
+  /**
+   * Giám khảo CHỈ chấm bài được giao (ban tổ chức chốt 15/09/2026), nên danh sách phải nói ra bài
+   * nào là của họ. Vẫn hiện cả bài của người khác — giám khảo cần thấy tiến độ chung của đợt, và
+   * một danh sách rút gọn còn mười dòng làm người ta tưởng đợt chỉ có mười bài.
+   */
+  const myAssigned = session && !isAdmin ? await assignedSubmissionIds(session.userId) : null;
   const ballotCounts = await countJudgeBallots(approved.map((s) => s.id));
 
   const season = await getActiveSeason();
@@ -69,6 +77,7 @@ export default async function ScoringPage() {
       iScored: o.myIdea != null || o.myProduct != null,
       stageLabel: stage.label,
       stageTone: stage.tone,
+      assignedToMe: myAssigned ? myAssigned.has(s.id) : null,
     };
   });
 
@@ -117,7 +126,7 @@ export default async function ScoringPage() {
           title="Danh sách bài dự thi"
           subtitle="Bấm vào một bài để đọc tài liệu, xem điểm máy chấm và chấm phiếu của bạn"
         />
-        <ScoringTable rows={rows} canPublish={isAdmin} />
+        <ScoringTable rows={rows} canPublish={isAdmin} hasAssignments={myAssigned != null && myAssigned.size > 0} />
         {waitingJudge > 0 && (
           <Note tone="warning" className="mt-3">
             {waitingJudge} bài đang lấy nguyên điểm máy vì chưa giám khảo nào chấm. Thể lệ yêu cầu

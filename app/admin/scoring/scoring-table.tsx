@@ -46,6 +46,8 @@ export type ScoringRowData = {
   iScored: boolean;
   stageLabel: string;
   stageTone: "neutral" | "success" | "warning" | "danger";
+  /** Bài này có được giao cho người đang xem không; `null` khi người xem là admin. */
+  assignedToMe: boolean | null;
 };
 
 /** Một chấm cho một lần gửi điểm — sáng là đã gửi, mờ là chưa. Tên đầy đủ nằm ở thuộc tính title. */
@@ -85,14 +87,24 @@ function ScoreCell({
 export function ScoringTable({
   rows,
   canPublish,
+  hasAssignments,
 }: {
   rows: ScoringRowData[];
   /** Chỉ admin mới công bố được — giám khảo không thấy cả thanh công bố lẫn ô chọn. */
   canPublish: boolean;
+  /** Người đang xem có bài được giao không — quyết định có hiện bộ lọc "Bài của tôi" hay không. */
+  hasAssignments: boolean;
 }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [board, setBoard] = useState("all");
+  /**
+   * Mặc định là BÀI CỦA TÔI khi giám khảo có phân công.
+   *
+   * Họ chỉ chấm được bài được giao, nên mở ra thấy cả bốn mươi bài là bắt đi tìm mười bài của
+   * mình giữa ba mươi bài không bấm vào được. Vẫn đổi sang "Cả đợt" được để nhìn tiến độ chung.
+   */
+  const [scope, setScope] = useState<"mine" | "all">(hasAssignments ? "mine" : "all");
   const [selected, setSelected] = useState<(string | number)[]>([]);
   const [target, setTarget] = useState<"1" | "2" | "final">("1");
   const [undo, setUndo] = useState(false);
@@ -146,6 +158,7 @@ export function ScoringTable({
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return rows.filter((r) => {
+      if (scope === "mine" && r.assignedToMe === false) return false;
       if (board !== "all" && r.board !== board) return false;
       if (!needle) return true;
       return (
@@ -154,7 +167,7 @@ export function ScoringTable({
         r.department.toLowerCase().includes(needle)
       );
     });
-  }, [rows, q, board]);
+  }, [rows, q, board, scope]);
 
   const columns: ColumnDef<ScoringRowData>[] = [
     {
@@ -163,12 +176,17 @@ export function ScoringTable({
       maxWidth: 280,
       render: (r) => (
         <div className="min-w-0">
-          <Link
-            href={`/admin/scoring/${r.id}`}
-            className="block truncate font-medium text-link hover:text-link-hover"
-          >
-            {r.productName}
-          </Link>
+          <span className="flex items-center gap-1.5">
+            <Link
+              href={`/admin/scoring/${r.id}`}
+              className="truncate font-medium text-link hover:text-link-hover"
+            >
+              {r.productName}
+            </Link>
+            {/* Chỉ đánh dấu bài CỦA MÌNH, không đánh dấu bài của người khác: ở chế độ "Cả đợt"
+                thì ba mươi nhãn "của người khác" chỉ làm rối, còn mười nhãn "của bạn" thì nổi. */}
+            {r.assignedToMe && <Badge tone="accent">Của bạn</Badge>}
+          </span>
           <div className="truncate text-meta text-ink-3">
             {r.userName} · {r.department}
           {r.board ? ` · ${r.board === "ky_thuat" ? "Kỹ thuật" : "Văn phòng"}` : ""}
@@ -346,20 +364,6 @@ export function ScoringTable({
   return (
     <div className="space-y-3">
       {/* Lọc theo bảng thi: giải thưởng trao riêng từng bảng, nên giám khảo thường chấm gọn một
-          bảng một lượt thay vì nhảy qua lại. */}
-      <div className="flex flex-wrap items-center gap-3">
-        <SegmentedControl
-          options={[
-            { value: "all", label: "Cả hai bảng" },
-            { value: "ky_thuat", label: "Kỹ thuật" },
-            { value: "van_phong", label: "Văn phòng" },
-          ]}
-          value={board}
-          onChange={setBoard}
-          size="sm"
-        />
-      </div>
-      {/* Lọc theo bảng thi: giải thưởng trao riêng từng bảng, nên giám khảo thường chấm gọn một
           bảng một lượt thay vì nhảy qua lại giữa hai nhóm. */}
       <div className="flex flex-wrap items-center gap-3">
         <Input
@@ -379,6 +383,20 @@ export function ScoringTable({
           onChange={setBoard}
           size="sm"
         />
+        {hasAssignments && (
+          <SegmentedControl
+            options={[
+              {
+                value: "mine",
+                label: `Bài của tôi (${rows.filter((r) => r.assignedToMe).length})`,
+              },
+              { value: "all", label: "Cả đợt" },
+            ]}
+            value={scope}
+            onChange={(v) => setScope(v as "mine" | "all")}
+            size="sm"
+          />
+        )}
       </div>
       {report && (
         <Alert

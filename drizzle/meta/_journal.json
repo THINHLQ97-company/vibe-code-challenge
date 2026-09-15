@@ -155,6 +155,13 @@
       "when": 1789460858446,
       "tag": "0021_phase2_submitted_at",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1789466741656,
+      "tag": "0022_judge_assignments",
+      "breakpoints": true
     }
   ]
 }
