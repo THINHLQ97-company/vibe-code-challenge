@@ -108,6 +108,16 @@ export default async function DashboardOverviewPage() {
       subtitle={`Nhánh ${submission.branch} · ${submission.topicGroup}`}
       action={<Badge tone={stage.tone}>{stage.label}</Badge>}
     >
+      {/* Tiến độ 3 phase đặt ĐẦU TIÊN: nó là bản đồ của cả hành trình. Người vào đây cần biết
+          mình đang ở chặng nào trước đã, rồi mới tới chi tiết của chặng đó. */}
+      <Card>
+        <CardHeader
+          title="Tiến độ 3 phase"
+          subtitle="Phase hiện tại quyết định bước bạn được làm tiếp"
+        />
+        <Stepper steps={PHASE_STEPS} current={submission.currentPhase - 1} />
+      </Card>
+
       {/* Toàn bộ "bạn đang ở đâu" gom vào MỘT cụm: đợt thi, trạng thái, hạn nộp và điểm từng
           phase. Trước đây bốn thứ này nằm rời thành bốn khối cách nhau, mắt phải nhảy bốn lần để
           ghép lại một câu trả lời duy nhất mà thí sinh vào đây để hỏi. */}
@@ -201,16 +211,6 @@ export default async function DashboardOverviewPage() {
         </div>
       </Card>
 
-      {/* Tiến độ 3 phase đưa lên NGAY SAU cụm tình trạng: nó là bản đồ của cả hành trình, phải
-          đọc trước rồi mới tới việc cần làm hôm nay. Trước đây nó nằm dưới đáy, sau cả phần việc
-          tiếp theo — tức người đọc gặp chi tiết trước khi biết mình đang ở đâu. */}
-      <Card>
-        <CardHeader
-          title="Tiến độ 3 phase"
-          subtitle="Phase hiện tại quyết định bước bạn được làm tiếp"
-        />
-        <Stepper steps={PHASE_STEPS} current={submission.currentPhase - 1} />
-      </Card>
 
       {nextAction && (
         <Card>
