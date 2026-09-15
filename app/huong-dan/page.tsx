@@ -376,7 +376,7 @@ const STEPS = [
               <li>1. Có tài khoản GitHub — dùng tài khoản cá nhân cũng được</li>
               <li>2. Tạo một kho mã mới, đặt ở chế độ <b className="text-cream">Private</b></li>
               <li>3. Đẩy toàn bộ mã nguồn sản phẩm lên kho đó</li>
-              <li>4. Vào Settings → Collaborators, thêm ban tổ chức với quyền chỉ đọc</li>
+              <li>4. Vào Settings → Collaborators, thêm tài khoản ban tổ chức với quyền chỉ đọc</li>
             </ol>
             <DarkNote>
               Chưa thêm cộng tác viên thì bước xác minh báo lỗi, và bài chưa được tính là đã nộp.
@@ -433,10 +433,10 @@ const STEPS = [
           <GlassCard className="p-4">
             <h3 className="text-body font-semibold text-cream">Chuẩn bị kho mã nguồn</h3>
             <p className="mt-2 text-caption text-cream/65">
-              Đặt kho mã ở chế độ riêng tư, sau đó thêm tài khoản{" "}
-              <code className="rounded bg-cream/10 px-1.5 py-0.5 text-cream">matbao-vibe-bot</code>{" "}
-              làm cộng tác viên với quyền chỉ đọc. Hệ thống dùng tài khoản này để xác minh bạn thật
-              sự sở hữu kho mã, không dùng vào việc gì khác.
+              Đặt kho mã ở chế độ riêng tư, sau đó thêm tài khoản của ban tổ chức làm cộng tác viên
+              với quyền chỉ đọc. Hệ thống dùng tài khoản đó để xác minh bạn thật sự sở hữu kho mã,
+              không dùng vào việc gì khác. <b className="text-cream">Ban tổ chức sẽ công bố tài
+              khoản cần thêm</b> — chưa có thì cứ để kho riêng tư và chờ.
             </p>
             <DarkNote>
               Chưa thêm cộng tác viên thì bước xác minh sẽ báo lỗi, và bài chưa được tính là đã nộp.

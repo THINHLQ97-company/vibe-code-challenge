@@ -135,9 +135,9 @@ export default async function BuildPage() {
           </Note>
         )}
         <Note className="mt-4">
-          Repo để <b>private</b> và thêm tài khoản GitHub <code>matbao-vibe-bot</code> làm
-          collaborator (quyền Read) — hệ thống dùng tài khoản đó để xác minh, không đọc mã nguồn của
-          bạn cho việc gì khác.
+          Repo để <b>private</b> và thêm tài khoản GitHub của ban tổ chức làm collaborator (quyền
+          Read) — hệ thống dùng tài khoản đó để xác minh, không đọc mã nguồn của bạn cho việc gì
+          khác. Ban tổ chức sẽ công bố tài khoản cần thêm.
         </Note>
       </Card>
 

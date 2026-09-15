@@ -507,21 +507,10 @@ export default async function LandingPage() {
               trả kết quả theo lịch cố định — <b className="text-cream">chiều thứ Bảy hằng tuần</b>,
               không chấm lẻ từng bài.
             </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              {[
-                { n: "7 ngày đầu", t: "Làm và nộp sản phẩm", d: "Nộp trước thứ Bảy đầu tiên để kịp lượt chấm." },
-                { n: "Chiều thứ Bảy", t: "Ban giám khảo trả kết quả", d: "Đạt thì đi tiếp, chưa đạt thì có ghi rõ phải sửa gì." },
-                { n: "7 ngày sau", t: "Sửa và nộp lại", d: "Chỉ còn quãng này nếu bạn bị trả về." },
-              ].map((x) => (
-                <div key={x.n} className="rounded-lg border border-cream/12 bg-cream/5 p-3.5">
-                  <p className="text-meta font-semibold uppercase tracking-wide text-orange-bright">
-                    {x.n}
-                  </p>
-                  <p className="mt-1 text-caption font-medium text-cream/90">{x.t}</p>
-                  <p className="mt-1 text-meta text-cream/55">{x.d}</p>
-                </div>
-              ))}
-            </div>
+            <p className="mt-3 text-body leading-relaxed text-cream/70">
+              Nghĩa là bạn nên nhắm làm xong và nộp trong khoảng một tuần đầu, để kịp lượt chấm thứ
+              Bảy và vẫn còn nguyên quãng sau cho việc sửa nếu bị trả về.
+            </p>
             <div className="mt-4">
               <DarkNote>
                 Để tới ngày 13–14 mới bắt tay là tự bỏ mất lượt sửa: nộp ngày 15 mà bị trả về thì
