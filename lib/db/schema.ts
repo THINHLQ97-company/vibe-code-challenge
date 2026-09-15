@@ -369,6 +369,18 @@ export const submissions = pgTable("submissions", {
 
   // Phase 3 — lan tỏa
   /**
+   * XÁC NHẬN CHECKLIST trước khi đăng bài.
+   *
+   * Lưu ba thứ chứ không chỉ một dấu tick: AI nào cũng ghi được "đã đồng ý", nhưng khi loại một
+   * bài đăng thì ban tổ chức phải trả lời được "đồng ý với bản nào, gồm những điều gì, lúc mấy
+   * giờ". Thiếu số hiệu bản checklist thì mọi khiếu nại về sau đều thành cảnh hai bên nhớ hai bản
+   * khác nhau — mà bài đăng bị từ chối là mất toàn bộ điểm lan tỏa, không có vòng sửa.
+   */
+  phase3ChecklistAckedAt: timestamp("phase3_checklist_acked_at"),
+  phase3ChecklistVersion: text("phase3_checklist_version"),
+  /** Mã từng dòng đã tick — bằng chứng người đó đọc qua từng điều, không phải một ô gộp. */
+  phase3ChecklistItems: jsonb("phase3_checklist_items").$type<string[]>().notNull().default([]),
+  /**
    * Khung giờ thí sinh đã đặt để ban tổ chức duyệt cho bài lên nhóm.
    *
    * Đặt chỗ là việc TIÊU HAO: đặt rồi thì suất đó trừ khỏi hạn mức của khung, và bài bị từ chối

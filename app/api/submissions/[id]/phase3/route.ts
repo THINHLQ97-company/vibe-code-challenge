@@ -30,6 +30,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       { status: 409 }
     );
   }
+  /**
+   * Chưa xác nhận checklist thì chưa nhận link.
+   *
+   * Checklist là căn cứ để ban tổ chức loại một bài đăng không đạt mà không phải tranh cãi. Nhận
+   * link trước rồi hỏi sau thì căn cứ đó ra đời sau hành vi nó định ràng buộc — tức không ràng
+   * buộc được gì.
+   */
+  if (!submission.phase3ChecklistAckedAt) {
+    return NextResponse.json(
+      { error: "Cần đọc và tick đủ checklist trước khi gửi link bài đăng" },
+      { status: 409 }
+    );
+  }
   if (submission.facebookApprovedAt) {
     return NextResponse.json(
       { error: "Bài đăng đã được BTC duyệt, không đổi link được nữa" },

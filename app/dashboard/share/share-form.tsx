@@ -16,6 +16,7 @@ import {
 } from "@/components/dsvh/icons";
 import { ENGAGEMENT_TIERS } from "@/lib/scoring-rubric";
 import { SlotPicker, type PickerSlot } from "./slot-picker";
+import { ChecklistGate } from "./checklist-gate";
 
 // Bảng bậc lấy từ barem chung. Gõ lại ở đây là cách chắc chắn nhất để một ngày nào đó màn này
 // hứa với thí sinh một thang điểm khác thang mà hệ thống thật sự cộng.
@@ -41,6 +42,7 @@ export function ShareForm({
   slots,
   selectedSlotId,
   selectedSlotLabel,
+  checklistAckedAt,
 }: {
   submissionId: number;
   initialUrl: string;
@@ -51,6 +53,7 @@ export function ShareForm({
   slots: PickerSlot[];
   selectedSlotId: number | null;
   selectedSlotLabel: string | null;
+  checklistAckedAt: string | null;
 }) {
   const router = useRouter();
   const [url, setUrl] = useState(initialUrl);
@@ -91,7 +94,10 @@ export function ShareForm({
    */
   const hasSlots = slots.length > 0;
   const booked = selectedSlotId != null;
-  const steps = hasSlots ? [booked, posted, approved, scored] : [posted, approved, scored];
+  const acked = !!checklistAckedAt;
+  const steps = hasSlots
+    ? [booked, acked, posted, approved, scored]
+    : [acked, posted, approved, scored];
   const done = steps.filter(Boolean).length;
   const total = steps.length;
   let n = 0;
@@ -129,10 +135,22 @@ export function ShareForm({
         </Step>
       )}
 
+      {/* Checklist đứng TRƯỚC việc đăng, không phải trước việc dán link.
+          Gần hết các điều trong đó nói về cách viết bài và tài khoản dùng để đăng — đọc sau khi
+          đã đăng thì không sửa được gì nữa, mà bài bị từ chối lại không có vòng sửa. */}
+      <Step
+        index={++n}
+        title="Đọc checklist và xác nhận"
+        state={acked ? "done" : hasSlots && !booked ? "waiting" : "current"}
+        hint="Các điều cấm về bảo mật, nội quy nhóm và cách đăng để bài không bị bóp tương tác."
+      >
+        <ChecklistGate submissionId={submissionId} ackedAt={checklistAckedAt} />
+      </Step>
+
       <Step
         index={++n}
         title="Đăng bài rồi dán link vào đây"
-        state={posted ? "done" : hasSlots && !booked ? "waiting" : "current"}
+        state={posted ? "done" : !acked ? "waiting" : "current"}
         hint={
           hasSlots
             ? 'Đăng ẩn danh lên nhóm "Vibe Coding chưa?" — bài sẽ nằm chờ duyệt — rồi dán link vào đây.'
@@ -147,11 +165,17 @@ export function ShareForm({
             placeholder="https://facebook.com/groups/.../posts/..."
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            disabled={approved}
-            hint={approved ? "BGK đã duyệt bài này — không đổi link được nữa." : undefined}
+            disabled={approved || !acked}
+            hint={
+              approved
+                ? "BGK đã duyệt bài này — không đổi link được nữa."
+                : !acked
+                  ? "Xác nhận checklist ở bước trên rồi mới dán link được."
+                  : undefined
+            }
             required
           />
-          {!approved && (
+          {!approved && acked && (
             <Button type="submit" variant="solid" loading={loading}>
               {initialUrl ? "Cập nhật link" : "Gửi link bài"}
             </Button>

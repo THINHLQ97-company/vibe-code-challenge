@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
-import { formatDateVN } from "@/lib/datetime";
+import { formatDateVN, formatDateTimeVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Button } from "@/components/dsvh/ui/Button";
@@ -147,6 +147,11 @@ export default async function SharePage() {
           selectedSlotId={submission.postingSlotId}
           selectedSlotLabel={
             picked ? `${picked.periodLabel} ${picked.dateLabel} · ${picked.timeLabel}` : null
+          }
+          checklistAckedAt={
+            submission.phase3ChecklistAckedAt
+              ? formatDateTimeVN(submission.phase3ChecklistAckedAt)
+              : null
           }
         />
         <Note tone="warning" className="mt-4">
