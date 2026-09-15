@@ -42,6 +42,9 @@ thi**, ban tổ chức chốt bậc trên giao diện quản trị:
 | 2 | 70–119% trung vị | 10 |
 | 1 | Dưới 70% trung vị | 5 |
 
+Phase 3 là **tuỳ chọn** (BTC chốt 15/09/2026): thí sinh bỏ qua thì phần này 0 điểm nhưng bài vẫn
+được ghi nhận. Bài đăng bị ban tổ chức từ chối cũng tính 0 điểm phần này và không được đăng lại.
+
 Muốn tự động hoá phần này thì báo trước — app đã có sẵn cột `engagement_count` và
 `engagement_tier`, mở thêm endpoint là xong.
 
@@ -73,7 +76,7 @@ gây hậu quả không sửa được.
 
 ### Cổng an toàn CP4 — không phải điểm
 
-Rà bảy điều cấm, kết quả là **đạt / không đạt** (mục 5). Bài bị gắn cờ không được công bố cho tới
+Rà bảy điều cấm, kết quả là **đạt / không đạt** (mục 5). Bài bị trả về sửa thì rà lại qua mục 6. Bài bị gắn cờ không được công bố cho tới
 khi thí sinh sửa và ban tổ chức rà lại.
 
 ## 2. `GET /api/integrations/submissions` — lấy danh sách bài cần chấm
@@ -230,18 +233,71 @@ Bài `flagged` bị giữ lại không cho công bố cho tới khi thí sinh s�
 
 ---
 
-## 6. Mã lỗi
+## 6. `GET` / `POST /api/integrations/recheck` — rà lại bản sửa
+
+Khi ban tổ chức yêu cầu thí sinh chỉnh sửa ở Phase 2, bài đó cần được **rà lại** trước khi thí sinh
+được đi tiếp sang Phase 3.
+
+### Vì sao không dùng lại `/submissions?scored=false`
+
+Endpoint đó lọc theo *"đã có điểm từ công cụ ngoài chưa"*, nên một bài đã chấm **một lần** là biến
+mất khỏi hàng đợi vĩnh viễn. Thí sinh sửa xong nộp lại thì công cụ chạy bao nhiêu lượt cũng không
+thấy bản sửa. Đây là đường riêng cho đúng việc đó.
+
+### Đây KHÔNG phải chấm lại
+
+Vòng này chỉ trả lời một câu: bản sửa **đã đạt chuẩn để đi tiếp chưa**. Không nhận điểm. Điểm Phase
+2 đã chốt ở lần chấm đầu và không chấm lại — thí sinh sửa là để đi tiếp, không phải để nâng điểm.
+
+### `GET /api/integrations/recheck` — lấy danh sách chờ rà
+
+```json
+{
+  "count": 2,
+  "submissions": [
+    {
+      "id": 7,
+      "githubRepoUrl": "https://github.com/…",
+      "vibehostUrl": "https://…",
+      "returnedBecause": "Thiếu xử lý lỗi khi kết nối database thất bại.",
+      "updatedAt": "2026-09-15T04:13:29.613Z"
+    }
+  ]
+}
+```
+
+`returnedBecause` là lý do ban tổ chức trả bài — công cụ cần biết để soi lại đúng chỗ đó.
+
+### `POST /api/integrations/recheck` — trả kết quả
+
+```json
+{ "submissionId": 7, "result": "failed", "note": "Vẫn chưa bắt lỗi kết nối database." }
+```
+
+`result` là `passed` hoặc `failed`. **`failed` bắt buộc có `note` tối thiểu 10 ký tự** — thí sinh
+đọc đúng câu đó để biết còn phải sửa gì.
+
+`passed` sẽ **đóng luôn cổng an toàn** cho bài đó: vòng rà này chính là lần rà bảy điều cấm trên
+bản sửa, bắt thí sinh chờ thêm một lượt rà nữa cho cùng một bản mã là thừa. Nghĩa là công cụ phải
+rà đủ cả hai thứ trước khi trả `passed` — chuẩn kỹ thuật **và** bảy điều cấm.
+
+Gọi trên bài không ở trạng thái chờ rà → `409`.
+
+---
+
+## 7. Mã lỗi
 
 | Mã | Nghĩa |
 |---|---|
 | `401` | Thiếu hoặc sai `X-API-Key` |
 | `400` | Tham số hoặc thân request sai định dạng |
 | `404` | `submissionId` không tồn tại |
+| `409` | Trạng thái không cho phép thao tác (vd rà lại một bài không đang chờ rà) |
 | `422` | Bộ điểm không khớp barem (thiếu mục, thừa khoá, vượt trần) |
 
 ---
 
-## 7. Vòng làm việc đề xuất
+## 8. Vòng làm việc đề xuất
 
 ```
 1. GET  /api/integrations/submissions?phase=1&scored=false
@@ -251,13 +307,18 @@ Bài `flagged` bị giữ lại không cho công bố cho tới khi thí sinh s�
      POST /api/integrations/scores                → trả điểm Phase 1
 3. lặp lại với phase=2, đọc thêm repo và sản phẩm chạy thật
 4. tuỳ chọn: POST /api/integrations/security      → kết quả rà bảy điều cấm
+
+5. vòng rà lại — chạy CÙNG NHỊP với các bước trên:
+     GET  /api/integrations/recheck                → bài vừa bị trả về, chờ rà bản sửa
+     rà chuẩn kỹ thuật + bảy điều cấm (không chấm điểm)
+     POST /api/integrations/recheck                → passed | failed + lý do
 ```
 
 Chạy theo lịch (vd mỗi giờ) là đủ — app không gửi webhook khi có bài mới.
 
 ---
 
-## 8. Chưa chốt
+## 9. Chưa chốt
 
 - **Giới hạn tần suất gọi**: hiện chưa có. Cần thì báo để bổ sung trước khi vào thi thật.
 - **Webhook báo bài mới**: chưa có, công cụ tự hỏi theo lịch.
