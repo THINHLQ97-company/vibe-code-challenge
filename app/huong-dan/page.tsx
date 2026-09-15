@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark } from "@/components/brand";
+import { GithubRepoMockup } from "@/components/github-mockup";
 import { MicrosoftLoginButton } from "@/components/microsoft-login";
 import { HeroBackdrop } from "@/components/hero-backdrop";
 import { GlassCard, Pill, DarkNote, ImageSlot, BackToTop } from "@/components/landing-ui";
@@ -362,7 +363,57 @@ const STEPS = [
     ),
   },
   {
-    id: "buoc-5-vibe-host",
+    id: "buoc-5-github",
+    icon: <StepDeploy size={22} />,
+    title: "Đưa mã nguồn lên GitHub",
+    lead: "Ban tổ chức chấm cả mã nguồn, không chỉ sản phẩm chạy được — nên bài nộp bắt buộc có một kho mã trên GitHub. Phần này chỉ nói bạn cần làm gì; cách làm từng bước thì hỏi chính công cụ AI bạn đang dùng để thi.",
+    content: (
+      <div className="space-y-4">
+        <div className="grid gap-3 md:grid-cols-2">
+          <GlassCard className="p-4">
+            <h3 className="text-body font-semibold text-cream">Bốn việc cần xong</h3>
+            <ol className="mt-2.5 space-y-1.5 text-caption text-cream/65">
+              <li>1. Có tài khoản GitHub — dùng tài khoản cá nhân cũng được</li>
+              <li>2. Tạo một kho mã mới, đặt ở chế độ <b className="text-cream">Private</b></li>
+              <li>3. Đẩy toàn bộ mã nguồn sản phẩm lên kho đó</li>
+              <li>4. Vào Settings → Collaborators, thêm ban tổ chức với quyền chỉ đọc</li>
+            </ol>
+            <DarkNote>
+              Chưa thêm cộng tác viên thì bước xác minh báo lỗi, và bài chưa được tính là đã nộp.
+            </DarkNote>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <h3 className="text-body font-semibold text-cream">Không biết làm thì hỏi AI</h3>
+            <p className="mt-2 text-caption text-cream/65">
+              Chương trình cố ý không hướng dẫn từng cú bấm. Đây là cuộc thi vibe code — tự hỏi
+              được công cụ AI một câu như <i>&quot;hướng dẫn tôi đẩy thư mục dự án này lên một kho
+              GitHub riêng tư&quot;</i> chính là kỹ năng đang được rèn.
+            </p>
+            <p className="mt-2 text-caption text-cream/65">
+              Công cụ AI bạn dùng để dựng sản phẩm đều làm được việc này, và phần lớn còn chạy lệnh
+              giúp bạn. Tìm trên mạng cũng ra ngay.
+            </p>
+          </GlassCard>
+        </div>
+
+        {/* Vẽ tay thay vì chụp màn hình: ảnh chụp lạc hậu ngay khi GitHub đổi giao diện, và bản vẽ
+            cho phép nhấn đúng bốn chỗ cần tìm rồi bỏ hết phần còn lại. */}
+        <div className="overflow-hidden rounded-card border border-cream/12 bg-[#0d1117] p-3">
+          <GithubRepoMockup />
+          <p className="mt-2 text-center text-meta text-cream/45">
+            Minh hoạ — giao diện thật của GitHub có thể khác đôi chút.
+          </p>
+        </div>
+
+        <DarkNote>
+          Nhớ quy định dữ liệu giả: mã nguồn đẩy lên GitHub không được chứa chuỗi kết nối thật, khoá
+          API thật hay dữ liệu khách hàng. Đây là chỗ hay lộ nhất vì người ta đẩy cả tệp cấu hình.
+        </DarkNote>
+      </div>
+    ),
+  },
+  {
+    id: "buoc-6-vibe-host",
     icon: <StepDeploy size={22} />,
     title: "Đưa sản phẩm lên Vibe Host",
     lead: "Sản phẩm phải chạy được trên một đường dẫn công khai thì hội đồng mới chấm được. Bạn tự vào vibehost.matbao.ai đăng ký tài khoản — hệ thống chỉ nhận email công ty @matbao.com.",
@@ -401,7 +452,7 @@ const STEPS = [
     ),
   },
   {
-    id: "buoc-6-nop-bai",
+    id: "buoc-7-nop-bai",
     icon: <StepSecurity size={22} />,
     title: "Nộp bài và qua các vòng chấm",
     lead: "Chương trình chấm theo ba phase nối tiếp. Mỗi phase có đầu vào riêng và chỉ mở ra khi phase trước đã xong.",
@@ -446,7 +497,7 @@ const STEPS = [
     ),
   },
   {
-    id: "buoc-7-hoan-tat",
+    id: "buoc-8-hoan-tat",
     icon: <StepSurvey size={22} />,
     title: "Hoàn tất và nhận kết quả",
     lead: "Hai việc cuối cùng thường bị bỏ quên, và thiếu một trong hai là chưa được công nhận đậu dù điểm số cao.",

@@ -78,7 +78,7 @@ const FACTS = [
   // Hai dòng này từng ghi "thời gian làm bài bạn tự chọn" và "30–40 đề tài duyệt mỗi tuần" —
   // cả hai đều không còn đúng: hạn nộp nay cố định 15 ngày cho mọi người, và việc chia người theo
   // tuần lịch đã thay bằng đợt thi có lịch mở/đóng riêng.
-  { value: "15 ngày", label: "thời gian làm bài kể từ khi duyệt đề tài" },
+  { value: "15 ngày", label: "gồm cả làm bài, chấm và sửa lại" },
   { value: "Theo đợt", label: "đăng ký sớm được cộng điểm thưởng" },
 ];
 
@@ -492,6 +492,43 @@ export default async function LandingPage() {
           subtitle="Xong mốc 3 là bài của bạn đã có điểm và đã được ghi nhận vào KPI 5.2. Bước chia sẻ ở mốc 5 không bắt buộc — bỏ qua thì phần điểm lan tỏa là 0 và bài vẫn được ghi nhận, làm đầy đủ thì tổng điểm cao hơn. Bấm vào từng toa để xem chi tiết."
         >
           <JourneyTrain />
+
+          {/* Cảnh báo về cách CHIA 15 ngày.
+              Lỗi hay gặp nhất và tốn kém nhất: người ta đọc "15 ngày" rồi hiểu là 15 ngày để làm
+              bài, nên tới ngày 13–14 mới bắt tay, nộp ngày 15, bị trả về và lúc đó không còn ngày
+              nào để sửa. Nói con số thôi không đủ — phải nói luôn con số đó gồm những gì. */}
+          <GlassCard className="mt-5 p-5">
+            <h3 className="text-title font-semibold text-cream">
+              15 ngày gồm cả chấm và sửa — không phải 15 ngày để làm bài
+            </h3>
+            <p className="mt-2 text-body leading-relaxed text-cream/70">
+              Đồng hồ bắt đầu chạy từ lúc đề tài của bạn được duyệt. Trong 15 ngày đó có ba việc nối
+              nhau: bạn làm sản phẩm, ban giám khảo chấm, và bạn sửa nếu bị trả về. Ban giám khảo
+              trả kết quả theo lịch cố định — <b className="text-cream">chiều thứ Bảy hằng tuần</b>,
+              không chấm lẻ từng bài.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {[
+                { n: "7 ngày đầu", t: "Làm và nộp sản phẩm", d: "Nộp trước thứ Bảy đầu tiên để kịp lượt chấm." },
+                { n: "Chiều thứ Bảy", t: "Ban giám khảo trả kết quả", d: "Đạt thì đi tiếp, chưa đạt thì có ghi rõ phải sửa gì." },
+                { n: "7 ngày sau", t: "Sửa và nộp lại", d: "Chỉ còn quãng này nếu bạn bị trả về." },
+              ].map((x) => (
+                <div key={x.n} className="rounded-lg border border-cream/12 bg-cream/5 p-3.5">
+                  <p className="text-meta font-semibold uppercase tracking-wide text-orange-bright">
+                    {x.n}
+                  </p>
+                  <p className="mt-1 text-caption font-medium text-cream/90">{x.t}</p>
+                  <p className="mt-1 text-meta text-cream/55">{x.d}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4">
+              <DarkNote>
+                Để tới ngày 13–14 mới bắt tay là tự bỏ mất lượt sửa: nộp ngày 15 mà bị trả về thì
+                không còn ngày nào để nộp lại.
+              </DarkNote>
+            </div>
+          </GlassCard>
         </Band>
 
         {/* ── CHẤM ĐIỂM ──────────────────────────────────────────────────────────────────── */}
