@@ -3,7 +3,7 @@ import { getSession } from "@/lib/auth/session";
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { getScoreOverviews } from "@/lib/db/queries/scores";
 import { submissionStage } from "@/lib/stage-status";
-import { KPI_CATEGORY, KPI_SHORT } from "@/lib/kpi";
+import { KPI_SHORT } from "@/lib/kpi";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Note } from "@/components/dsvh/ui/data/Note";
@@ -81,10 +81,26 @@ export default async function ScoringPage() {
     };
   });
 
-  const waitingAi = rows.filter((r) => r.ideaValue == null).length;
+  /**
+   * Bốn ô thống kê tính theo PHẦN VIỆC CỦA NGƯỜI ĐANG XEM, không phải theo cả cuộc thi.
+   *
+   * Trước đây chúng đếm trên toàn bộ bài nên mọi giám khảo mở lên thấy y hệt nhau, và ô "Bạn chưa
+   * chấm" báo 5 trong khi người đó chỉ được giao 1 bài — một con số vừa sai vừa làm người ta tưởng
+   * mình đang nợ việc. Giám khảo chưa được giao bài nào thì vẫn đếm trên toàn đợt như cũ: lúc đó
+   * bốn số 0 không nói lên điều gì ngoài việc ban tổ chức chưa phân công.
+   */
+  const scoped = myAssigned && myAssigned.size > 0 ? rows.filter((r) => r.assignedToMe) : rows;
+  const scopedForMe = myAssigned != null && myAssigned.size > 0;
+
+  const waitingAi = scoped.filter((r) => r.ideaValue == null).length;
   const waitingJudge = rows.filter((r) => r.ideaValue != null && r.judgeCount === 0).length;
-  const notScoredByMe = rows.filter((r) => !r.iScored).length;
-  const approvedPhase2 = approved.filter((s) => s.feedbackStatus === "approved").length;
+  const notScoredByMe = scoped.filter((r) => !r.iScored).length;
+  // Đếm từ dữ liệu gốc chứ không so theo nhãn trạng thái hiển thị: nhãn là chữ để người đọc, đổi
+  // một câu chữ mà con số thống kê im lặng về 0 thì không ai truy ra được nguyên nhân.
+  const scopedIds = new Set(scoped.map((r) => r.id));
+  const approvedPhase2 = approved.filter(
+    (s) => scopedIds.has(s.id) && s.feedbackStatus === "approved"
+  ).length;
 
   return (
     <PageShell
@@ -94,29 +110,33 @@ export default async function ScoringPage() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           icon={ScalesIcon}
-          label="Bài đã duyệt đề tài"
-          value={rows.length}
-          desc="đang trong vòng chấm"
+          label={scopedForMe ? "Bài được giao cho bạn" : "Bài đã duyệt đề tài"}
+          value={scoped.length}
+          desc={scopedForMe ? `trên tổng ${rows.length} bài của đợt` : "đang trong vòng chấm"}
         />
         <StatCard
           icon={RobotIcon}
           label="Chờ máy chấm"
           value={waitingAi}
-          desc="chưa có điểm sơ bộ Phase 1"
+          desc={scopedForMe ? "trong phần của bạn, chưa có điểm sơ bộ" : "chưa có điểm sơ bộ Phase 1"}
           tone={waitingAi > 0 ? "danger" : "default"}
         />
         <StatCard
           icon={HourglassIcon}
           label="Bạn chưa chấm"
           value={notScoredByMe}
-          desc="chưa có phiếu của bạn"
+          desc={
+            scopedForMe
+              ? `còn lại trong ${scoped.length} bài được giao`
+              : "chưa có phiếu của bạn"
+          }
           tone={notScoredByMe > 0 ? "danger" : "success"}
         />
         <StatCard
           icon={CheckCircleIcon}
           label="Đã duyệt đạt Phase 2"
           value={approvedPhase2}
-          desc={`được tính ${KPI_SHORT}`}
+          desc={scopedForMe ? `trong phần của bạn · ${KPI_SHORT}` : `được tính ${KPI_SHORT}`}
           tone="success"
         />
       </div>
@@ -127,16 +147,15 @@ export default async function ScoringPage() {
           subtitle="Bấm vào một bài để đọc tài liệu, xem điểm máy chấm và chấm phiếu của bạn"
         />
         <ScoringTable rows={rows} canPublish={isAdmin} hasAssignments={myAssigned != null && myAssigned.size > 0} />
-        {waitingJudge > 0 && (
+        {/* Cảnh báo "còn bài chưa ai chấm" là việc ĐIỀU PHỐI, chỉ admin mới xử lý được.
+            Giám khảo đọc nó chỉ thấy một con số nói về phần việc của người khác — trong khi họ đã
+            bị khoá vào đúng mười bài của mình và không nhận thêm được bài nào. */}
+        {isAdmin && waitingJudge > 0 && (
           <Note tone="warning" className="mt-3">
             {waitingJudge} bài đang lấy nguyên điểm máy vì chưa giám khảo nào chấm. Thể lệ yêu cầu
             hội đồng xác nhận trước khi công bố.
           </Note>
         )}
-        <Note className="mt-3">
-          Duyệt đạt Phase 2 là mốc bài được tính vào {KPI_CATEGORY} — hệ HRM đọc dữ
-          liệu này, app không đẩy đi đâu.
-        </Note>
       </Card>
     </PageShell>
   );
