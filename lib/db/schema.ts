@@ -330,6 +330,14 @@ export const submissions = pgTable("submissions", {
 
   // Phase 2 — sản phẩm & mã nguồn
   vibehostUrl: text("vibehost_url"),
+  /**
+   * LẦN ĐẦU nộp sản phẩm Phase 2 — mốc quyết định thứ tự xếp lịch đăng bài ở Phase 3.
+   *
+   * Ghi một lần rồi thôi, nộp lại không đẩy mốc này về sau. Nếu mỗi lần sửa lại dời mốc thì người
+   * nộp sớm rồi hoàn thiện thêm sẽ bị xếp sau người nộp muộn mà không sửa gì — tức hệ thống phạt
+   * đúng hành vi nó muốn khuyến khích.
+   */
+  phase2SubmittedAt: timestamp("phase2_submitted_at"),
   githubRepoUrl: text("github_repo_url"),
   githubVerifiedAt: timestamp("github_verified_at"),
   // Lưu lại lý do lần verify gần nhất thất bại — tham khảo pattern "validation status
@@ -381,12 +389,14 @@ export const submissions = pgTable("submissions", {
   /** Mã từng dòng đã tick — bằng chứng người đó đọc qua từng điều, không phải một ô gộp. */
   phase3ChecklistItems: jsonb("phase3_checklist_items").$type<string[]>().notNull().default([]),
   /**
-   * Khung giờ thí sinh đã đặt để ban tổ chức duyệt cho bài lên nhóm.
+   * Khung giờ ban tổ chức duyệt cho bài lên nhóm — HỆ THỐNG TỰ XẾP, thí sinh không chọn.
    *
-   * Đặt chỗ là việc TIÊU HAO: đặt rồi thì suất đó trừ khỏi hạn mức của khung, và bài bị từ chối
-   * cũng không trả suất lại (ban tổ chức chốt 15/09/2026) — suất đó bỏ trống. Trả lại suất cho
-   * người khác nghĩa là phải xếp lại lịch duyệt giữa chừng, đúng vào lúc ban tổ chức đang bận
-   * nhất trong đợt.
+   * Thứ tự xếp theo `phase2SubmittedAt`: nộp sản phẩm sớm thì được khung sớm. Cho tự chọn thì
+   * khung đẹp bị lấy hết trong vài phút đầu bởi người rảnh nhất, không phải người nộp sớm nhất —
+   * và bốn mươi người đổi qua đổi lại giữa đợt thì ban tổ chức không chốt nổi lịch trực duyệt.
+   *
+   * Đã xếp rồi thì GIỮ NGUYÊN, kể cả khi thí sinh nộp lại bản sửa: khung đã báo cho họ và đã nằm
+   * trong lịch trực của ban tổ chức. Bài bị từ chối cũng không trả suất lại — suất đó bỏ trống.
    */
   postingSlotId: integer("posting_slot_id").references(() => postingSlots.id),
   postingSlotBookedAt: timestamp("posting_slot_booked_at"),

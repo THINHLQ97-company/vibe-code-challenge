@@ -85,7 +85,7 @@ export const CHECKLIST: ChecklistGroup[] = [
   {
     key: "C",
     title: "Cách đăng để bài không bị bóp tương tác",
-    note: "Điểm lan tỏa tính trên tương tác thật trong bảy ngày, nên những điều này ảnh hưởng thẳng tới điểm của chính bạn. Bài lên nhóm theo khung giờ bạn đã đặt ở bước trước.",
+    note: "Điểm lan tỏa tính trên tương tác thật trong bảy ngày, nên những điều này ảnh hưởng thẳng tới điểm của chính bạn. Lịch đăng bài do hệ thống tự xếp theo thời điểm bạn nộp bài ở Phase 2 — nộp sớm thì được xếp lịch sớm. Bạn không phải tự đăng ký khung giờ.",
     items: [
       {
         id: "c1",
@@ -148,7 +148,7 @@ export const CHECKLIST: ChecklistGroup[] = [
       },
       {
         id: "f2",
-        text: "Tôi hiểu rằng vì đã có checklist rõ ràng, **bài đăng bị từ chối duyệt sẽ bị loại khỏi Phase 3** và không có vòng sửa.",
+        text: "Tôi hiểu rằng vì đã có checklist rõ ràng, **bài đăng bị từ chối duyệt sẽ bị loại khỏi Phase 3** — không có vòng sửa, và tôi không đăng ký lại được ở đợt sau.",
       },
     ],
   },

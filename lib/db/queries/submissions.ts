@@ -124,9 +124,18 @@ export async function updatePhase2Info(
   id: number,
   data: { vibehostUrl: string; githubRepoUrl: string }
 ) {
+  const current = await getSubmissionById(id);
   const [row] = await db
     .update(submissions)
-    .set({ ...data, githubVerifiedAt: null, githubVerifyError: null, updatedAt: new Date() })
+    .set({
+      ...data,
+      githubVerifiedAt: null,
+      githubVerifyError: null,
+      // Mốc nộp lần đầu chỉ ghi khi còn trống: nó xếp thứ tự lịch đăng bài, nên nộp lại để sửa
+      // không được làm mất chỗ đứng của người đã nộp sớm.
+      ...(current?.phase2SubmittedAt ? {} : { phase2SubmittedAt: new Date() }),
+      updatedAt: new Date(),
+    })
     .where(eq(submissions.id, id))
     .returning();
   return row;

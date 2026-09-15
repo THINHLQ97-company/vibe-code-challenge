@@ -6,6 +6,7 @@ import { listWaves } from "@/lib/db/queries/waves";
 import { db } from "@/lib/db";
 import { postingSlots } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { ensureSlotAssignments } from "@/lib/db/queries/posting-slots";
 import { buildWaveTimeline } from "@/lib/wave-timeline";
 import { WaveCalendarButton, type CalendarWave } from "@/components/wave-calendar";
 import { periodLabel, periodTimeLabel } from "@/lib/contest-schedule";
@@ -33,15 +34,33 @@ export default async function SchedulePage() {
   const session = await getSession();
   const submission = session ? await getCurrentSubmissionForUser(session.userId) : null;
   const season = await getActiveSeason();
-  const allWaves = season ? await listWaves(season.id) : [];
+  /**
+   * Đợt NHÁP không hiện cho thí sinh — kể cả ở đây, không riêng trang chủ.
+   *
+   * Nháp là đợt ban tổ chức chưa công bố: đợt demo còn sót, đợt tạo trùng, đợt đang soạn lịch.
+   * Trang chủ đã lọc từ đầu, còn màn này thì chưa, nên thí sinh vẫn thấy "Đợt 0" và một đợt trùng
+   * tên — đúng thứ việc ẩn đợt sinh ra để dọn đi.
+   */
+  const allWaves = season
+    ? (await listWaves(season.id)).filter((w) => w.status !== "draft")
+    : [];
 
   const myWave = submission?.waveId
     ? (allWaves.find((w) => w.id === submission.waveId) ?? null)
     : null;
 
-  const mySlot = submission?.postingSlotId
+  // Thí sinh có thể mở trang lịch trước trang lan tỏa — xếp khung ở cả hai chỗ để khung giờ hiện
+  // ra ở nơi họ tới trước, không phải nơi hệ thống tiện xử lý.
+  if (submission?.waveId && submission.currentPhase >= 3) {
+    await ensureSlotAssignments(submission.waveId);
+  }
+  const mine = submission?.id
+    ? await getCurrentSubmissionForUser(session!.userId)
+    : null;
+
+  const mySlot = mine?.postingSlotId
     ? ((await db.query.postingSlots.findFirst({
-        where: eq(postingSlots.id, submission.postingSlotId),
+        where: eq(postingSlots.id, mine.postingSlotId),
       })) ?? null)
     : null;
 

@@ -72,7 +72,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
     ],
     gate: "Xác minh mã nguồn thành công và sản phẩm đạt đủ sáu tiêu chí ngưỡng sàn.",
     fallback:
-      "Bị trả về thì vẫn sửa và nộp lại được trong thời hạn Phase 2. Nộp muộn tới mức không còn lượt chấm nào trước khi đợt đóng thì bài dừng ở Phase 2, không vào được phần thi lan tỏa. Bài đã trượt một lần thì bản sửa chỉ được rà thêm một vòng duy nhất.",
+      "Bị trả về thì vẫn sửa và nộp lại được trong thời hạn Phase 2. Bài đã trượt một lần thì bản sửa chỉ được rà thêm một vòng duy nhất. Hết thời hạn mà vẫn chưa đạt — hoặc nộp muộn tới mức không còn lượt chấm nào — thì bài dừng ở Phase 2: không vào phần thi lan tỏa, và không đăng ký lại được ở đợt sau.",
   },
   {
     code: "CP4",
@@ -96,12 +96,13 @@ export const JOURNEY_STEPS: JourneyStep[] = [
     icon: <MarkBroadcast size={20} />,
     carriage: "middle",
     you: [
-      'Đăng bài lên nhóm "Vibe Coding chưa?" theo lịch được cấp.',
+      "Tick đủ checklist trước khi đăng — bảo mật, nội quy nhóm, cách đăng, tài khoản dùng để đăng.",
+      'Đăng bài lên nhóm "Vibe Coding chưa?" đúng khung giờ hệ thống xếp cho bạn — nộp Phase 2 sớm thì được khung sớm.',
       "Được đăng ẩn danh: dùng chế độ ẩn danh của nhóm hoặc một tài khoản phụ.",
       "Bài phải kể được quá trình làm — chỗ vấp và cách xử lý — không phải một dòng khoe kèm link.",
       "Dán đường dẫn bài đăng vào hệ thống.",
     ],
-    gate: "Mốc TUỲ CHỌN — bỏ qua thì mất 20 điểm lan tỏa, bài vẫn được ghi nhận. Nhưng đã đăng thì bài phải đạt ràng buộc nội dung: bài bị ban tổ chức từ chối duyệt là mất toàn bộ điểm lan tỏa và không được đăng lại, vì các điều cấm đã nêu sẵn trước khi bạn đăng.",
+    gate: "Mốc TUỲ CHỌN — bỏ qua thì mất 20 điểm lan tỏa, bài vẫn được ghi nhận. Nhưng đã đăng thì bài phải đạt ràng buộc nội dung: bài bị ban tổ chức từ chối duyệt là mất toàn bộ điểm lan tỏa, không được đăng lại, và không đăng ký lại được ở đợt sau — vì các điều cấm đã nêu sẵn trong checklist bạn tick trước khi đăng.",
   },
   {
     code: "CP6",

@@ -38,9 +38,9 @@ export function buildWaveTimeline(
   /**
    * Khung giờ đăng bài thí sinh ĐÃ đặt, nếu có.
    *
-   * Chỉ truyền vào khi đã đặt thật. Việc đặt khung nằm ở bước lan tỏa, không phải ở trang lịch —
-   * trang lịch chỉ nói ngày giờ, còn mời người ta đi đặt chỗ cho một phần thi họ chưa tới là làm
-   * họ tưởng mình đang chậm một việc nào đó.
+   * Hệ thống tự xếp theo thứ tự nộp bài Phase 2; thí sinh không chọn. Chỉ truyền vào khi đã xếp
+   * thật — chưa xếp mà hiện một dòng trống ở đây chỉ làm người ta tưởng mình đang thiếu một việc
+   * nào đó cần làm.
    */
   bookedSlot: { at: Date; label: string } | null = null
 ): Milestone[] {
@@ -103,7 +103,7 @@ export function buildWaveTimeline(
       at: wave.postingOpensAt,
       title: "Cửa sổ đăng bài lan tỏa",
       detail: wave.postingClosesAt
-        ? `${formatDateVN(wave.postingOpensAt)} – ${formatDateVN(wave.postingClosesAt)}, chia theo khung giờ đã đặt`
+        ? `${formatDateVN(wave.postingOpensAt)} – ${formatDateVN(wave.postingClosesAt)}, chia theo khung giờ hệ thống xếp`
         : `Từ ${formatDateVN(wave.postingOpensAt)}`,
       actor: "thi-sinh",
     });

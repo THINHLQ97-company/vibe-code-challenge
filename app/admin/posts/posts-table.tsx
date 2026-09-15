@@ -30,7 +30,7 @@ export type PostRowData = {
   published: boolean;
   finalScore: number | null;
   missing: string[];
-  /** Khung giờ thí sinh đã đặt để ban tổ chức cho bài lên nhóm; `null` khi họ chưa đặt. */
+  /** Khung giờ hệ thống xếp để ban tổ chức cho bài lên nhóm; `null` khi bài chưa được xếp. */
   slotLabel: string | null;
   slotOrder: number;
 };
@@ -53,7 +53,7 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
     return [
       { value: "all", label: "Tất cả khung giờ" },
       ...seen.map((s) => ({ value: s, label: s })),
-      { value: "none", label: "Chưa đặt khung" },
+      { value: "none", label: "Chưa xếp khung" },
     ];
   }, [rows]);
 
@@ -136,7 +136,7 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
         r.slotLabel ? (
           <span className="text-caption tabular-nums text-ink-2">{r.slotLabel}</span>
         ) : (
-          <span className="text-caption text-ink-3">chưa đặt</span>
+          <span className="text-caption text-ink-3">chưa xếp</span>
         ),
     },
     {

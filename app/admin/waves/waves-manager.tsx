@@ -9,7 +9,8 @@ import { Badge } from "@/components/dsvh/ui/Badge";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { Progress } from "@/components/dsvh/ui/Progress";
-import { PlusIcon } from "@/components/dsvh/icons";
+import { PlusIcon, TrashIcon } from "@/components/dsvh/icons";
+import { ConfirmDialog } from "@/components/dsvh/ui/overlay/ConfirmDialog";
 import { MAX_WAVE_BONUS } from "@/lib/wave-bonus";
 import { WaveMembers, type Member } from "./wave-members";
 
@@ -89,6 +90,24 @@ export function WavesManager({ initial }: { initial: WaveRow[] }) {
     } catch {
       setError("Không kết nối được máy chủ, thử lại sau");
       return false;
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function remove(waveId: number) {
+    setError(null);
+    setBusy(waveId);
+    try {
+      const res = await fetch(`/api/admin/waves/${waveId}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error ?? "Không xoá được đợt thi");
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ, thử lại sau");
     } finally {
       setBusy(null);
     }
@@ -198,6 +217,7 @@ export function WavesManager({ initial }: { initial: WaveRow[] }) {
                 waveOptions={waveOptions}
                 busy={busy === w.id}
                 onPatch={(body) => void call(`/api/admin/waves/${w.id}`, body, w.id)}
+                onDelete={() => void remove(w.id)}
               />
             ))}
           </div>
@@ -212,12 +232,15 @@ function WaveCard({
   waveOptions,
   busy,
   onPatch,
+  onDelete,
 }: {
   wave: WaveRow;
   waveOptions: Array<{ value: string; label: string }>;
   busy: boolean;
   onPatch: (body: Record<string, unknown>) => void;
+  onDelete: () => void;
 }) {
+  const [confirming, setConfirming] = useState(false);
   const [opens, setOpens] = useState(toLocalInput(wave.registrationOpensAt));
   const [closes, setCloses] = useState(toLocalInput(wave.registrationClosesAt));
   const [capKT, setCapKT] = useState(String(wave.capacityKyThuat));
@@ -365,7 +388,41 @@ function WaveCard({
             Ẩn khỏi trang chủ
           </Button>
         )}
+
+        {/* Nút XOÁ chỉ sáng khi đợt đã trống.
+            Đợt còn bài thì nút mờ kèm câu giải thích, thay vì bấm được rồi mới báo lỗi: chuyển
+            bài sang đợt khác là việc phải làm trước, và nói ra trước thì ban tổ chức biết ngay
+            phải làm gì chứ không phải thử rồi đoán. */}
+        <Button
+          variant="ghost"
+          size="sm"
+          loading={busy}
+          disabled={wave.registered > 0}
+          leftIcon={<TrashIcon size={15} />}
+          onClick={() => setConfirming(true)}
+        >
+          Xoá đợt
+        </Button>
+        {wave.registered > 0 && (
+          <span className="self-center text-meta text-ink-3">
+            Còn {wave.registered} bài — chuyển sang đợt khác ở danh sách bên dưới rồi mới xoá được
+          </span>
+        )}
       </div>
+
+      <ConfirmDialog
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        onConfirm={() => {
+          setConfirming(false);
+          onDelete();
+        }}
+        tone="danger"
+        title={`Xoá ${wave.name}?`}
+        description="Đợt này đang trống nên không bài dự thi nào bị ảnh hưởng. Khung giờ đăng bài của đợt sẽ bị xoá theo. Thao tác không hoàn tác được."
+        confirmLabel="Xoá đợt thi"
+        confirmText={wave.name}
+      />
 
       <WaveMembers members={wave.members} waveOptions={waveOptions} currentWaveId={wave.id} />
     </div>

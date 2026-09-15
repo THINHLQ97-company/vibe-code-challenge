@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireSession } from "@/lib/api-auth";
-import { getWave, updateWave } from "@/lib/db/queries/waves";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { postingSlots, waves } from "@/lib/db/schema";
+import { countInWave, getWave, updateWave } from "@/lib/db/queries/waves";
 import { ensurePostingSlots } from "@/lib/db/queries/posting-slots";
 
 export const dynamic = "force-dynamic";
@@ -112,4 +115,39 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (postOpen || postClose) await ensurePostingSlots(id);
 
   return NextResponse.json({ wave: row });
+}
+
+
+/**
+ * XOÁ một đợt thi — chỉ khi đợt đã TRỐNG.
+ *
+ * Không xoá kèm bài dự thi, và không tự chuyển chúng sang đợt khác. Chuyển đợt là đổi hạn nộp,
+ * đổi lịch chấm và đổi khung giờ đăng bài của người đó; quyết định ấy thuộc về ban tổ chức, không
+ * phải hệ quả phụ của một nút xoá. Nên cổng này từ chối thẳng và nói rõ còn bao nhiêu bài phải
+ * chuyển đi trước.
+ */
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireSession(["admin"]);
+  if ("error" in auth) return auth.error;
+
+  const id = Number((await params).id);
+  const wave = await getWave(id);
+  if (!wave) return NextResponse.json({ error: "Không tìm thấy đợt thi" }, { status: 404 });
+
+  const inWave = await countInWave(id);
+  if (inWave > 0) {
+    return NextResponse.json(
+      {
+        error: `Đợt này còn ${inWave} bài dự thi. Chuyển hết sang đợt khác ở mục "Thí sinh trong đợt" rồi mới xoá được.`,
+      },
+      { status: 409 }
+    );
+  }
+
+  // Khung giờ đăng bài của đợt trỏ ngược về nó, phải dọn trước. Đợt đã trống thì không khung nào
+  // còn người, nên đây chỉ là dọn hàng thừa.
+  await db.delete(postingSlots).where(eq(postingSlots.waveId, id));
+  await db.delete(waves).where(eq(waves.id, id));
+
+  return NextResponse.json({ deleted: id });
 }

@@ -236,7 +236,7 @@ const FAQ = [
   },
   {
     q: "Bài bị trả về ở vòng kiểm tra thì có bị loại không?",
-    a: "Không bị loại ngay. Ở cả hai cổng kiểm tra — ngưỡng sàn kỹ thuật và rà soát an toàn — ban giám khảo chỉ rõ chỗ chưa đạt để bạn sửa và nộp lại. Điều cần để ý là thời hạn, vì nó có thật: hết Phase 1 mà đề tài chưa hoàn thiện theo góp ý thì bạn dự lại ở đợt sau; hết Phase 2 mà bản sửa vẫn chưa đạt, hoặc nộp muộn tới mức không còn lượt chấm nào, thì bài dừng lại ở Phase 2 và không vào được phần thi lan tỏa. Nộp sớm là cách duy nhất để chắc chắn còn thời gian sửa. Một lưu ý nữa: điểm được ghi nhận tại thời điểm bạn nộp — sửa để qua cổng thì đi tiếp được, nhưng ban giám khảo không chấm lại điểm.",
+    a: "Không bị loại ngay. Ở cả hai cổng kiểm tra — ngưỡng sàn kỹ thuật và rà soát an toàn — ban giám khảo chỉ rõ chỗ chưa đạt để bạn sửa và nộp lại. Điều cần để ý là thời hạn, và hai mốc có hậu quả khác hẳn nhau. Hết Phase 1 mà đề tài chưa hoàn thiện theo góp ý: bạn lỡ đợt này và đăng ký lại ở đợt sau. Hết Phase 2 mà bản sửa vẫn chưa đạt, hoặc nộp muộn tới mức không còn lượt chấm nào: bài dừng lại ở Phase 2, không vào được phần thi lan tỏa, và không đăng ký lại được ở đợt sau. Nộp sớm là cách duy nhất để chắc chắn còn thời gian sửa. Một lưu ý nữa: điểm được ghi nhận tại thời điểm bạn nộp — sửa để qua cổng thì đi tiếp được, nhưng ban giám khảo không chấm lại điểm.",
   },
   {
     q: "Không đăng bài chia sẻ thì có bị trượt không?",

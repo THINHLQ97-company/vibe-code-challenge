@@ -15,7 +15,6 @@ import {
   MegaphoneIcon,
 } from "@/components/dsvh/icons";
 import { ENGAGEMENT_TIERS } from "@/lib/scoring-rubric";
-import { SlotPicker, type PickerSlot } from "./slot-picker";
 import { ChecklistGate } from "./checklist-gate";
 
 // Bảng bậc lấy từ barem chung. Gõ lại ở đây là cách chắc chắn nhất để một ngày nào đó màn này
@@ -25,8 +24,8 @@ const TIERS = ENGAGEMENT_TIERS;
 type StepState = "done" | "current" | "waiting";
 
 /**
- * Bước lan tỏa là một CHUỖI nối nhau: đặt khung giờ → đăng bài và dán link → ban tổ chức duyệt cho
- * bài lên nhóm đúng khung đã đặt → đếm 7 ngày ra bậc điểm.
+ * Bước lan tỏa là một CHUỖI nối nhau: xác nhận checklist → đăng bài và dán link → ban tổ chức
+ * duyệt cho bài lên nhóm đúng khung giờ hệ thống đã xếp → đếm 7 ngày ra bậc điểm.
  *
  * Bản trước đổ cả ba thành một form cộng ba hàng nhãn↔giá trị phẳng, nên nhìn vào không biết mình
  * đang ở đâu trong chuỗi, việc nào đang chờ mình và việc nào đang chờ BTC. Nay mỗi bước là một
@@ -39,9 +38,7 @@ export function ShareForm({
   approvedAt,
   engagementCount,
   engagementTier,
-  slots,
-  selectedSlotId,
-  selectedSlotLabel,
+  assignedSlotLabel,
   checklistAckedAt,
 }: {
   submissionId: number;
@@ -50,9 +47,7 @@ export function ShareForm({
   approvedAt: string | null;
   engagementCount: number | null;
   engagementTier: number | null;
-  slots: PickerSlot[];
-  selectedSlotId: number | null;
-  selectedSlotLabel: string | null;
+  assignedSlotLabel: string | null;
   checklistAckedAt: string | null;
 }) {
   const router = useRouter();
@@ -86,18 +81,8 @@ export function ShareForm({
   const posted = !!initialUrl;
   const scored = engagementTier != null;
 
-  /**
-   * Đợt chưa có cửa sổ đăng bài thì KHÔNG hiện bước đặt khung giờ.
-   *
-   * Hiện một bước rỗng nói "chưa có khung nào" chỉ làm thí sinh tưởng mình đang bị chặn, trong khi
-   * thứ còn thiếu nằm ở phía ban tổ chức.
-   */
-  const hasSlots = slots.length > 0;
-  const booked = selectedSlotId != null;
   const acked = !!checklistAckedAt;
-  const steps = hasSlots
-    ? [booked, acked, posted, approved, scored]
-    : [acked, posted, approved, scored];
+  const steps = [acked, posted, approved, scored];
   const done = steps.filter(Boolean).length;
   const total = steps.length;
   let n = 0;
@@ -114,34 +99,13 @@ export function ShareForm({
         <Progress value={(done / total) * 100} tone="teal" className="mt-1.5" />
       </div>
 
-      {hasSlots && (
-        <Step
-          index={++n}
-          title="Đặt khung giờ đăng bài"
-          state={booked ? "done" : "current"}
-          hint="Ban tổ chức duyệt bài lên nhóm theo từng khung giờ. Đặt trước một khung để bài của bạn có chỗ."
-        >
-          {booked && selectedSlotLabel && (
-            <p className="mb-2.5 text-caption text-ink-2">
-              Khung đã đặt: <b className="text-ink">{selectedSlotLabel}</b>
-            </p>
-          )}
-          <SlotPicker
-            submissionId={submissionId}
-            slots={slots}
-            selectedSlotId={selectedSlotId}
-            locked={posted && booked}
-          />
-        </Step>
-      )}
-
       {/* Checklist đứng TRƯỚC việc đăng, không phải trước việc dán link.
           Gần hết các điều trong đó nói về cách viết bài và tài khoản dùng để đăng — đọc sau khi
           đã đăng thì không sửa được gì nữa, mà bài bị từ chối lại không có vòng sửa. */}
       <Step
         index={++n}
         title="Đọc checklist và xác nhận"
-        state={acked ? "done" : hasSlots && !booked ? "waiting" : "current"}
+        state={acked ? "done" : "current"}
         hint="Các điều cấm về bảo mật, nội quy nhóm và cách đăng để bài không bị bóp tương tác."
       >
         <ChecklistGate submissionId={submissionId} ackedAt={checklistAckedAt} />
@@ -151,11 +115,7 @@ export function ShareForm({
         index={++n}
         title="Đăng bài rồi dán link vào đây"
         state={posted ? "done" : !acked ? "waiting" : "current"}
-        hint={
-          hasSlots
-            ? 'Đăng ẩn danh lên nhóm "Vibe Coding chưa?" — bài sẽ nằm chờ duyệt — rồi dán link vào đây.'
-            : 'Đăng ẩn danh lên nhóm "Vibe Coding chưa?" rồi dán link vào đây.'
-        }
+        hint='Đăng ẩn danh lên nhóm "Vibe Coding chưa?" — bài sẽ nằm chờ duyệt — rồi dán link vào đây.' 
       >
         <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <Input
@@ -202,8 +162,14 @@ export function ShareForm({
         index={++n}
         title="Ban tổ chức duyệt cho bài lên nhóm"
         state={approved ? "done" : posted ? "current" : "waiting"}
-        hint="Ban tổ chức kiểm tra bài có đúng ràng buộc nội dung không, rồi cho lên nhóm trong khung giờ bạn đã đặt. Từ lúc đó mới bắt đầu đếm 7 ngày."
+        hint="Ban tổ chức kiểm tra bài có đúng ràng buộc nội dung không, rồi cho lên nhóm đúng khung giờ đã xếp cho bạn. Từ lúc đó mới bắt đầu đếm 7 ngày."
       >
+        {assignedSlotLabel && (
+          <p className="mb-2 text-caption text-ink-2">
+            Khung giờ của bạn: <b className="text-ink">{assignedSlotLabel}</b>{" "}
+            <span className="text-ink-3">— hệ thống xếp theo thứ tự nộp bài Phase 2</span>
+          </p>
+        )}
         {approved ? (
           <span className="flex flex-wrap items-center gap-2 text-caption text-ink-2">
             <Badge tone="success">Đã duyệt</Badge>

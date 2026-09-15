@@ -1,5 +1,6 @@
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { db } from "@/lib/db";
+import { ensureSlotAssignments } from "@/lib/db/queries/posting-slots";
 import { periodLabel, periodTimeLabel } from "@/lib/contest-schedule";
 import { missingCheckpoints } from "@/lib/checkpoints";
 import { formatDateTimeVN } from "@/lib/datetime";
@@ -22,6 +23,11 @@ export default async function PostsPage() {
    * Ban tổ chức duyệt bài THEO KHUNG GIỜ, nên nếu bảng này không nói bài nào thuộc khung nào thì
    * người trực phải mở từng bài ra xem — đúng việc mà bảng danh sách sinh ra để khỏi phải làm.
    */
+  // Xếp khung cho mọi đợt trước khi dựng bảng: màn này là nơi ban tổ chức trực duyệt theo khung,
+  // nên nó không được hiện "chưa đặt" chỉ vì chưa ai trong đợt đó mở trang lan tỏa.
+  const waveIds = [...new Set(all.filter((s) => s.currentPhase >= 3).map((s) => s.waveId).filter((id): id is number => id != null))];
+  for (const id of waveIds) await ensureSlotAssignments(id);
+
   const slots = await db.query.postingSlots.findMany();
   const slotById = new Map(slots.map((s) => [s.id, s]));
 
@@ -48,7 +54,7 @@ export default async function PostsPage() {
       if (!slot) return null;
       return `${periodLabel(slot.period)} ${formatDateTimeVN(slot.startsAt).slice(0, 10)} · ${periodTimeLabel(slot.period)}`;
     })(),
-    // Bài chưa đặt khung xếp xuống CUỐI (không phải đầu): chúng không thuộc lượt duyệt nào, nên
+    // Bài chưa xếp khung đẩy xuống CUỐI (không phải đầu): chúng không thuộc lượt duyệt nào, nên
     // để lẫn vào giữa hàng đợi sẽ cắt ngang mạch làm việc theo khung của người trực.
     slotOrder: (() => {
       const slot = s.postingSlotId ? slotById.get(s.postingSlotId) : null;

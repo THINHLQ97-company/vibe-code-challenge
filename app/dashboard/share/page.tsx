@@ -9,10 +9,9 @@ import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { NotepadIcon, HourglassIcon } from "@/components/dsvh/icons";
-import { listSlotsForWave } from "@/lib/db/queries/posting-slots";
+import { ensureSlotAssignments, listSlotsForWave } from "@/lib/db/queries/posting-slots";
 import { periodLabel, periodTimeLabel } from "@/lib/contest-schedule";
 import { ShareForm } from "./share-form";
-import type { PickerSlot } from "./slot-picker";
 
 export const metadata = { title: "Chia sẻ & lan tỏa" };
 
@@ -107,22 +106,17 @@ export default async function SharePage() {
   }
 
   /**
-   * Khung giờ chỉ có nghĩa khi bài thuộc một đợt CÓ lịch đăng bài. Bài của dữ liệu cũ không thuộc
-   * đợt nào thì luồng lan tỏa vẫn chạy như trước, chỉ thiếu bước đặt chỗ.
+   * Xếp khung giờ cho cả đợt ngay tại đây, rồi mới đọc khung của người này.
+   *
+   * Thí sinh vào tới màn lan tỏa là lúc chắc chắn có người cần biết khung của mình, nên đó cũng là
+   * lúc hợp lý để xếp. Xếp cho CẢ ĐỢT chứ không riêng người đang mở trang: thứ tự phải tính theo
+   * mốc nộp Phase 2 của mọi người, xếp lẻ từng người theo thứ tự ai mở trang trước là ra một thứ
+   * tự khác hẳn.
    */
-  const slotRows = submission.waveId ? await listSlotsForWave(submission.waveId) : [];
-  const slots: PickerSlot[] = slotRows.map((s) => ({
-    id: s.id,
-    dayIndex: s.dayIndex,
-    period: s.period,
-    periodLabel: periodLabel(s.period),
-    timeLabel: periodTimeLabel(s.period),
-    dateLabel: formatDateVN(s.startsAt),
-    capacity: s.capacity,
-    booked: s.booked,
-    remaining: s.remaining,
-  }));
-  const picked = slots.find((s) => s.id === submission.postingSlotId) ?? null;
+  if (submission.waveId) await ensureSlotAssignments(submission.waveId);
+  const fresh = await getCurrentSubmissionForUser(session!.userId);
+  const slots = submission.waveId ? await listSlotsForWave(submission.waveId) : [];
+  const assigned = slots.find((s) => s.id === fresh?.postingSlotId) ?? null;
 
   return (
     <PageShell
@@ -143,10 +137,10 @@ export default async function SharePage() {
           }
           engagementCount={submission.engagementCount}
           engagementTier={submission.engagementTier}
-          slots={slots}
-          selectedSlotId={submission.postingSlotId}
-          selectedSlotLabel={
-            picked ? `${picked.periodLabel} ${picked.dateLabel} · ${picked.timeLabel}` : null
+          assignedSlotLabel={
+            assigned
+              ? `${periodLabel(assigned.period)} ${formatDateVN(assigned.startsAt)}, ${periodTimeLabel(assigned.period)}`
+              : null
           }
           checklistAckedAt={
             submission.phase3ChecklistAckedAt
