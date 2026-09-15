@@ -228,3 +228,105 @@ export async function listJudgeScores(submissionId: number) {
   ]);
   return { ideas, products };
 }
+
+/** Tối đa 2 giám khảo chấm một bài ở một phase (thể lệ). Admin KHÔNG bị giới hạn này. */
+export const MAX_JUDGES_PER_PHASE = 2;
+
+/**
+ * Giám khảo này có được chấm bài đó ở phase đó không.
+ *
+ * Trả `full` khi đã đủ 2 phiếu mà người hỏi không phải một trong hai. Người đã có phiếu thì luôn
+ * được sửa phiếu của chính mình — sửa không làm tăng số phiếu.
+ */
+export async function judgeSlotFor(
+  submissionId: number,
+  phase: 1 | 2,
+  judgeId: number
+): Promise<{ canScore: boolean; taken: number; mine: boolean }> {
+  const table = phase === 1 ? ideaScores : productScores;
+  const rows = await db
+    .select({ judgeId: table.judgeId })
+    .from(table)
+    .where(and(eq(table.submissionId, submissionId), isNotNull(table.judgeId)));
+
+  const ids = rows.map((r) => r.judgeId!);
+  const mine = ids.includes(judgeId);
+  return { canScore: mine || ids.length < MAX_JUDGES_PER_PHASE, taken: ids.length, mine };
+}
+
+/** Số phiếu giám khảo theo phase cho NHIỀU bài — dùng cho bảng danh sách, tránh đếm trong vòng lặp. */
+export async function countJudgeBallots(
+  submissionIds: number[]
+): Promise<Map<number, { phase1: number; phase2: number }>> {
+  const out = new Map<number, { phase1: number; phase2: number }>();
+  if (submissionIds.length === 0) return out;
+  const ensure = (id: number) => {
+    if (!out.has(id)) out.set(id, { phase1: 0, phase2: 0 });
+    return out.get(id)!;
+  };
+
+  const [ideas, products] = await Promise.all([
+    db
+      .select({ submissionId: ideaScores.submissionId })
+      .from(ideaScores)
+      .where(and(inArray(ideaScores.submissionId, submissionIds), isNotNull(ideaScores.judgeId))),
+    db
+      .select({ submissionId: productScores.submissionId })
+      .from(productScores)
+      .where(
+        and(inArray(productScores.submissionId, submissionIds), isNotNull(productScores.judgeId))
+      ),
+  ]);
+  for (const r of ideas) ensure(r.submissionId).phase1 += 1;
+  for (const r of products) ensure(r.submissionId).phase2 += 1;
+  return out;
+}
+
+/**
+ * Admin sửa phiếu của người khác → phiếu ĐỔI CHỦ sang admin (BTC chốt 15/09/2026).
+ *
+ * Giữ nguyên tên giám khảo cũ trên một phiếu đã bị sửa nghĩa là gán cho họ một điểm họ không cho.
+ * Đổi chủ là cách rẻ nhất để bảng điểm luôn nói đúng ai chịu trách nhiệm cho con số đang hiện.
+ *
+ * Nếu admin ĐÃ có phiếu của chính mình ở bài/phase đó thì gộp vào phiếu ấy rồi xoá phiếu cũ —
+ * ràng buộc duy nhất (bài, người chấm) không cho một người giữ hai phiếu.
+ */
+export async function reassignBallotToAdmin(
+  phase: 1 | 2,
+  ballotId: number,
+  adminId: number,
+  moduleScores: Modules,
+  summary?: string
+) {
+  const table = phase === 1 ? ideaScores : productScores;
+
+  const [ballot] = await db
+    .select({ id: table.id, submissionId: table.submissionId })
+    .from(table)
+    .where(eq(table.id, ballotId));
+  if (!ballot) return null;
+
+  const [mine] = await db
+    .select({ id: table.id })
+    .from(table)
+    .where(and(eq(table.submissionId, ballot.submissionId), eq(table.judgeId, adminId)));
+
+  // Admin đã có phiếu riêng ở bài này → gộp nội dung vào phiếu đó rồi xoá phiếu cũ. Ràng buộc
+  // duy nhất (bài, người chấm) không cho một người giữ hai phiếu.
+  if (mine && mine.id !== ballotId) {
+    await db.delete(table).where(eq(table.id, ballotId));
+    const [row] = await db
+      .update(table)
+      .set({ moduleScores, summary, source: "judge" })
+      .where(eq(table.id, mine.id))
+      .returning();
+    return row;
+  }
+
+  const [row] = await db
+    .update(table)
+    .set({ moduleScores, summary, source: "judge", judgeId: adminId })
+    .where(eq(table.id, ballotId))
+    .returning();
+  return row;
+}

@@ -44,6 +44,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Sai email hoặc mật khẩu" }, { status: 401 });
   }
 
+  // Ghi mốc đăng nhập để trang quản lý người dùng biết ai đã thật sự vào hệ thống. Không chặn
+  // luồng nếu ghi hỏng — đăng nhập được hay không quan trọng hơn một cột thống kê.
+  await db
+    .update(users)
+    .set({ lastLoginAt: new Date() })
+    .where(eq(users.id, user.id))
+    .catch(() => undefined);
+
   const token = await signSession(toSessionPayload(user));
   const res = NextResponse.json({
     user: { id: user.id, name: user.name, email: user.email, role: user.role, board: user.board },

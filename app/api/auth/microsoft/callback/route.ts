@@ -120,6 +120,7 @@ export async function GET(req: NextRequest) {
       .set({
         oauthProvider: "microsoft",
         oauthSubject: subject,
+        lastLoginAt: new Date(),
         email,
         name: displayName ?? existing.name,
         departmentRaw: departmentRaw ?? existing.departmentRaw,
@@ -138,6 +139,7 @@ export async function GET(req: NextRequest) {
         // Không đặt `passwordHash`: tài khoản này không có đường đăng nhập bằng mật khẩu.
         oauthProvider: "microsoft",
         oauthSubject: subject,
+        lastLoginAt: new Date(),
         department: deptCode,
         board,
         departmentRaw,

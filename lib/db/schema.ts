@@ -97,6 +97,11 @@ export const users = pgTable("users", {
   avatarUrl: text("avatar_url"),
   oauthProvider: text("oauth_provider"),
   oauthSubject: text("oauth_subject"),
+  /**
+   * Lần đăng nhập gần nhất. `null` = chưa đăng nhập lần nào — chính là cách phân biệt một giám
+   * khảo được MỜI TRƯỚC (đã tạo bản ghi, chờ họ vào) với người đã thật sự dùng hệ thống.
+   */
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/dsvh/ui/Button";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Table, type ColumnDef } from "@/components/dsvh/ui/Table";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { Input } from "@/components/dsvh/ui/Input";
@@ -32,6 +35,9 @@ export type ScoringRowData = {
   /** Điểm thưởng đăng ký sớm của đợt mà bài thuộc về. */
   waveBonus: number;
   waveName: string | null;
+  published: boolean;
+  /** Số phiếu giám khảo đã có ở từng phase — để biết bài nào còn suất chấm. */
+  ballots: { phase1: number; phase2: number };
   iScored: boolean;
   stageLabel: string;
   stageTone: "neutral" | "success" | "warning" | "danger";
@@ -59,8 +65,52 @@ function ScoreCell({
   );
 }
 
-export function ScoringTable({ rows }: { rows: ScoringRowData[] }) {
+export function ScoringTable({
+  rows,
+  canPublish,
+}: {
+  rows: ScoringRowData[];
+  /** Chỉ admin mới công bố được — giám khảo không thấy cả thanh công bố lẫn ô chọn. */
+  canPublish: boolean;
+}) {
+  const router = useRouter();
   const [q, setQ] = useState("");
+  const [selected, setSelected] = useState<(string | number)[]>([]);
+  const [publishing, setPublishing] = useState(false);
+  const [report, setReport] = useState<{ published: number; failed: number; lines: string[] } | null>(
+    null
+  );
+
+  async function publishSelected() {
+    setReport(null);
+    setPublishing(true);
+    try {
+      const res = await fetch("/api/admin/submissions/publish-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selected.map(Number) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setReport({ published: 0, failed: selected.length, lines: [data.error ?? "Không công bố được"] });
+        return;
+      }
+      // Liệt kê TỪNG bài không công bố được kèm lý do. Một lô mấy chục bài mà chỉ báo "xong" thì
+      // người bấm không bao giờ biết bài nào chưa ra.
+      const byId = new Map(rows.map((r) => [r.id, r.productName]));
+      const lines = (data.results as Array<{ id: number; ok: boolean; error?: string }>)
+        .filter((r) => !r.ok)
+        .map((r) => `${byId.get(r.id) ?? `Bài #${r.id}`}: ${r.error}`);
+      setReport({ published: data.published, failed: data.failed, lines });
+      setSelected([]);
+      router.refresh();
+    } catch {
+      setReport({ published: 0, failed: selected.length, lines: ["Không kết nối được máy chủ"] });
+    } finally {
+      setPublishing(false);
+    }
+  }
+
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -250,10 +300,49 @@ export function ScoringTable({ rows }: { rows: ScoringRowData[] }) {
         onChange={(e) => setQ(e.target.value)}
         leftIcon={<MagnifyingGlassIcon size={16} />}
       />
+      {report && (
+        <Alert
+          tone={report.failed > 0 ? "warning" : "success"}
+          title={`Công bố ${report.published} bài${report.failed > 0 ? `, ${report.failed} bài chưa ra` : ""}`}
+        >
+          {report.lines.length > 0 && (
+            <ul className="mt-1 space-y-0.5">
+              {report.lines.map((l) => (
+                <li key={l} className="text-caption">
+                  · {l}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Alert>
+      )}
+
+      {canPublish && selected.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-stroke bg-surface-2 px-3 py-2">
+          <span className="text-caption text-ink-2">Đã chọn {selected.length} bài</span>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setSelected([])}>
+              Bỏ chọn
+            </Button>
+            <Button
+              variant="solid"
+              size="sm"
+              loading={publishing}
+              onClick={() => void publishSelected()}
+            >
+              Công bố {selected.length} bài
+            </Button>
+          </div>
+        </div>
+      )}
+
       <Table
         data={filtered}
         columns={columns}
         getRowId={(r) => r.id}
+        selectable={canPublish}
+        selectedRowIds={selected}
+        onSelectionChange={setSelected}
         variant="zebra"
         density="comfortable"
         stickyHeader={false}

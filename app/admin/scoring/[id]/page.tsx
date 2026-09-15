@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { getSubmissionWithUser } from "@/lib/db/queries/submissions";
-import { getScoreOverviews, listJudgeScores } from "@/lib/db/queries/scores";
+import { getScoreOverviews, listJudgeScores, judgeSlotFor } from "@/lib/db/queries/scores";
 import { formatDateVN } from "@/lib/datetime";
 import { KPI_CATEGORY } from "@/lib/kpi";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
@@ -46,6 +46,20 @@ export default async function ScoringDetailPage({
     listJudgeScores(id),
   ]);
   const o = overviews.get(id)!;
+
+  const isAdmin = session?.role === "admin";
+  /**
+   * Phase chỉ CÓ GÌ ĐỂ CHẤM khi thí sinh đã nộp thứ tương ứng. Không chặn vào trang (BTC chốt
+   * 15/09) — chỉ nói rõ thí sinh chưa tới bước này, để giám khảo khỏi ngồi chấm một ô trống rồi
+   * tưởng thí sinh làm ẩu.
+   */
+  const phase1Ready = submission.registrationStatus === "approved" && !!submission.prdContent;
+  const phase2Ready = !!submission.vibehostUrl && !!submission.githubRepoUrl;
+
+  // Trần 2 giám khảo mỗi phase; admin không bị giới hạn.
+  const [slot1, slot2] = session
+    ? await Promise.all([judgeSlotFor(id, 1, session.userId), judgeSlotFor(id, 2, session.userId)])
+    : [null, null];
 
   return (
     <PageShell
@@ -162,6 +176,10 @@ export default async function ScoringDetailPage({
         phase={1}
         title="Phase 1 · Điểm ý tưởng"
         subtitle="Máy chấm dựa trên PRD — bạn chỉ cần chấm tay khi muốn điều chỉnh"
+        ready={phase1Ready}
+        notReadyNote="Thí sinh chưa được duyệt đề tài hoặc chưa nộp tài liệu PRD nên chưa có gì để chấm."
+        canScore={isAdmin || !!slot1?.canScore}
+        ballotsTaken={slot1?.taken ?? 0}
         modules={modulesForPhase(1)}
         aggregate={{ giaTriUngDung: o.giaTriUngDung }}
         myScore={o.myIdea}
@@ -177,6 +195,10 @@ export default async function ScoringDetailPage({
         phase={2}
         title="Phase 2 · Điểm sản phẩm"
         subtitle="Máy chấm dựa trên sản phẩm và mã nguồn — bạn chỉ cần chấm tay khi muốn điều chỉnh"
+        ready={phase2Ready}
+        notReadyNote="Thí sinh chưa nộp link sản phẩm và mã nguồn nên chưa tới bước chấm này."
+        canScore={isAdmin || !!slot2?.canScore}
+        ballotsTaken={slot2?.taken ?? 0}
         modules={modulesForPhase(2)}
         aggregate={{
           chatLuongKyThuat: o.chatLuongKyThuat,

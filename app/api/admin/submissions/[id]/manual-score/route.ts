@@ -8,6 +8,8 @@ import {
   findJudgeProductScore,
   updateIdeaScore,
   updateProductScore,
+  judgeSlotFor,
+  MAX_JUDGES_PER_PHASE,
 } from "@/lib/db/queries/scores";
 
 // BTC/BGK tự nhập điểm khi CHƯA có hệ chấm điểm ngoài kết nối
@@ -19,6 +21,9 @@ const schema = z.object({
   moduleScores: z.record(z.string(), z.number().min(0).max(100)),
   summary: z.string().max(2000).optional(),
 });
+
+/** Kiểu hàm tra phiếu cũ của chính người đang chấm — hai phase khác bảng nhưng cùng dạng. */
+
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireSession(["admin", "judge"]);
@@ -35,6 +40,26 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
   const judgeId = auth.session.userId;
   const { moduleScores, summary } = parsed.data;
+
+  /**
+   * Trần 2 giám khảo mỗi bài mỗi phase.
+   *
+   * Chặn Ở ĐÂY chứ không chỉ ẩn nút: ẩn nút chỉ là ẩn, ai gọi thẳng route này vẫn chấm được. Đây
+   * cũng là chỗ xử lý hai giám khảo bấm cùng lúc khi còn một suất — người gửi tới trước được
+   * nhận, người sau ăn lỗi rõ ràng thay vì cả hai cùng lọt.
+   *
+   * ADMIN không bị trần này: vai trò của admin là trọng tài, phải vào sửa được mọi lúc. Sửa phiếu
+   * của người khác thì phiếu đổi chủ sang admin — xem `reassignBallotToAdmin`.
+   */
+  if (auth.session.role !== "admin") {
+    const slot = await judgeSlotFor(submissionId, parsed.data.phase, judgeId);
+    if (!slot.canScore) {
+      return NextResponse.json(
+        { error: `Thí sinh đã được chấm đủ ${MAX_JUDGES_PER_PHASE} phiếu.` },
+        { status: 409 }
+      );
+    }
+  }
 
   // Một giám khảo = một phiếu. Chấm lại thì SỬA phiếu cũ, không đẻ thêm phiếu —
   // nếu không, người chấm đi chấm lại sẽ tự kéo lệch điểm trung bình của cả hội đồng.

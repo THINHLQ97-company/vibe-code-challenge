@@ -32,6 +32,10 @@ export function PhaseScoring({
   aggregate,
   myScore,
   judges,
+  ready,
+  notReadyNote,
+  canScore,
+  ballotsTaken,
 }: {
   submissionId: number;
   phase: 1 | 2;
@@ -41,6 +45,12 @@ export function PhaseScoring({
   aggregate: Record<string, Agg>;
   myScore: Record<string, number> | null;
   judges: { name: string; scores: Record<string, number>; summary: string | null }[];
+  /** Thí sinh đã nộp thứ cần để chấm ở phase này chưa. */
+  ready: boolean;
+  notReadyNote: string;
+  /** Người đang xem còn được thêm/sửa phiếu không — hết suất thì chỉ xem. */
+  canScore: boolean;
+  ballotsTaken: number;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -100,6 +110,19 @@ export function PhaseScoring({
     void submit(parsed, summary);
   }
 
+  /**
+   * Thí sinh chưa tới bước này → chỉ báo, không mở ô chấm. Vào trang vẫn được (BTC chốt không
+   * chặn), nhưng bày ô nhập ra cho một thứ chưa tồn tại là mời người ta chấm nhầm.
+   */
+  if (!ready) {
+    return (
+      <Card>
+        <CardHeader title={title} subtitle={subtitle} action={<Badge tone="neutral">Chưa tới lượt</Badge>} />
+        <Note tone="warning">{notReadyNote}</Note>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader
@@ -108,11 +131,22 @@ export function PhaseScoring({
         action={
           myScore ? (
             <Badge tone="success">Bạn đã chấm</Badge>
-          ) : (
+          ) : canScore ? (
             <Badge tone="warning">Bạn chưa chấm</Badge>
+          ) : (
+            <Badge tone="neutral">Đã đủ phiếu</Badge>
           )
         }
       />
+
+      {/* Hết suất mà mình không phải một trong hai người đã chấm → chỉ xem. Nói rõ lý do thay vì
+          lặng lẽ giấu nút, để giám khảo không tưởng hệ thống hỏng. */}
+      {!canScore && (
+        <Note className="mb-3">
+          Bài này đã có đủ {ballotsTaken} phiếu giám khảo nên bạn không cần chấm nữa. Bạn vẫn xem
+          được điểm và nhận xét của hội đồng bên dưới.
+        </Note>
+      )}
 
       {!anyScore ? (
         <Empty
@@ -121,7 +155,7 @@ export function PhaseScoring({
           title="Chưa có điểm sơ bộ"
           description="Hệ chấm điểm chưa đẩy điểm về cho bài này. Bạn vẫn có thể chấm tay để không chặn tiến độ."
           action={
-            <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+            <Button variant="ghost" size="sm" disabled={!canScore} onClick={() => setEditing(true)}>
               Chấm tay
             </Button>
           }
@@ -167,7 +201,7 @@ export function PhaseScoring({
             </Note>
           )}
 
-          {!editing && (
+          {!editing && canScore && (
             <div className="mt-3 flex flex-wrap gap-2">
               {!myScore && (
                 <Button
