@@ -84,10 +84,13 @@ export default async function DashboardOverviewPage() {
       subtitle={`Nhánh ${submission.branch} · ${submission.topicGroup}`}
       action={<Badge tone={stage.tone}>{stage.label}</Badge>}
     >
-      {/* Đợt thi đặt ngay đầu trang: nó quyết định bạn so điểm với ai và được cộng bao nhiêu điểm
-          thưởng — hai thứ thí sinh hay hỏi nhất mà trước đây không hiện ở đâu cả. */}
+      {/* Toàn bộ "bạn đang ở đâu" gom vào MỘT cụm: đợt thi, trạng thái, hạn nộp và điểm từng
+          phase. Trước đây bốn thứ này nằm rời thành bốn khối cách nhau, mắt phải nhảy bốn lần để
+          ghép lại một câu trả lời duy nhất mà thí sinh vào đây để hỏi. */}
+      <Card>
+        <CardHeader title="Tình trạng bài của bạn" subtitle={stage.detail} />
       {myWave && (
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="mb-3 grid gap-3 sm:grid-cols-3">
           <InfoTile icon={CalendarIcon} label="Đợt thi của bạn" value={myWave.name} />
           <InfoTile
             icon={UsersThreeIcon}
@@ -102,11 +105,8 @@ export default async function DashboardOverviewPage() {
         </div>
       )}
 
-      <Note tone={stage.state === "blocked" ? "danger" : stage.state === "waiting" ? "warning" : "neutral"}>
-        {stage.detail}
-      </Note>
 
-      {submission.registrationStatus === "returned" && (
+        {submission.registrationStatus === "returned" && (
         <Alert tone="warning" title="Đề tài bị trả về — sửa và nộp lại">
           {submission.registrationNote}{" "}
           <Link href="/dashboard/register" className="text-link hover:text-link-hover">
@@ -115,7 +115,7 @@ export default async function DashboardOverviewPage() {
         </Alert>
       )}
 
-      {submission.securityStatus === "flagged" && (
+        {submission.securityStatus === "flagged" && (
         <Alert tone="error" title="Bài bị gắn cờ ở cổng rà soát an toàn (CP4)">
           {submission.securityNote ?? "BTC chưa ghi rõ lý do — liên hệ ban tổ chức."}{" "}
           Bài chưa qua cổng này thì không được công bố kết quả. Sửa xong nộp lại ở{" "}
@@ -126,7 +126,7 @@ export default async function DashboardOverviewPage() {
         </Alert>
       )}
 
-      {submission.feedbackStatus === "needs_fix" && (
+        {submission.feedbackStatus === "needs_fix" && (
         <Alert tone="warning" title="BTC yêu cầu chỉnh sửa sản phẩm">
           {submission.btcFeedback}{" "}
           <Link href="/dashboard/build" className="text-link hover:text-link-hover">
@@ -135,48 +135,62 @@ export default async function DashboardOverviewPage() {
         </Alert>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Card className="p-4">
-          <InfoTile
-            layout="stack"
-            label="Hạn nộp của bạn"
-            value={
-              submission.submissionDeadline
-                ? formatDateVN(submission.submissionDeadline)
-                : "Chưa có — chờ duyệt đề tài"
-            }
-          />
-          {submission.submissionDeadline && (
-            <p className="mt-1 text-caption text-ink-2">
-              {formatDeadlineDistance(submission.submissionDeadline)}
+        {/* Ba ô này KHÔNG bọc `Card` nữa — chúng đã nằm trong thẻ cụm ở trên, bọc thêm một lớp
+            là khung trong khung. `InfoTile` tự mang viền nên đủ tách bạch. */}
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <InfoTile
+              layout="stack"
+              label="Hạn nộp"
+              value={
+                submission.submissionDeadline
+                  ? formatDateVN(submission.submissionDeadline)
+                  : "Chưa có — chờ duyệt đề tài"
+              }
+            />
+            {submission.submissionDeadline && (
+              <p className="mt-1 px-1 text-caption text-ink-2">
+                {formatDeadlineDistance(submission.submissionDeadline)}
+              </p>
+            )}
+          </div>
+          <div>
+            <InfoTile
+              layout="stack"
+              label="Giá trị ứng dụng · Phase 1"
+              value={ideaView.visible ? `${ideaView.value}/25` : ideaView.label}
+            />
+            <p className="mt-1 px-1 text-caption text-ink-2">
+              {ideaView.visible
+                ? `Hội đồng đã chốt · trung bình ${ideaView.judgeCount} giám khảo`
+                : ideaView.hint}
             </p>
-          )}
-        </Card>
-        <Card className="p-4">
-          <InfoTile
-            layout="stack"
-            label="Giá trị ứng dụng · Phase 1"
-            value={ideaView.visible ? `${ideaView.value}/25` : ideaView.label}
-          />
-          <p className="mt-1 text-caption text-ink-2">
-            {ideaView.visible
-              ? `Hội đồng đã chốt · trung bình ${ideaView.judgeCount} giám khảo`
-              : ideaView.hint}
-          </p>
-        </Card>
-        <Card className="p-4">
-          <InfoTile
-            layout="stack"
-            label="Kỹ thuật & hoàn thiện · Phase 2"
-            value={productView.visible ? `${productView.value}/55` : productView.label}
-          />
-          <p className="mt-1 text-caption text-ink-2">
-            {productView.visible
-              ? `Hội đồng đã chốt · trung bình ${productView.judgeCount} giám khảo`
-              : productView.hint}
-          </p>
-        </Card>
-      </div>
+          </div>
+          <div>
+            <InfoTile
+              layout="stack"
+              label="Kỹ thuật & hoàn thiện · Phase 2"
+              value={productView.visible ? `${productView.value}/55` : productView.label}
+            />
+            <p className="mt-1 px-1 text-caption text-ink-2">
+              {productView.visible
+                ? `Hội đồng đã chốt · trung bình ${productView.judgeCount} giám khảo`
+                : productView.hint}
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Tiến độ 3 phase đưa lên NGAY SAU cụm tình trạng: nó là bản đồ của cả hành trình, phải
+          đọc trước rồi mới tới việc cần làm hôm nay. Trước đây nó nằm dưới đáy, sau cả phần việc
+          tiếp theo — tức người đọc gặp chi tiết trước khi biết mình đang ở đâu. */}
+      <Card>
+        <CardHeader
+          title="Tiến độ 3 phase"
+          subtitle="Phase hiện tại quyết định bước bạn được làm tiếp"
+        />
+        <Stepper steps={PHASE_STEPS} current={submission.currentPhase - 1} />
+      </Card>
 
       {nextAction && (
         <Card>
@@ -195,11 +209,6 @@ export default async function DashboardOverviewPage() {
           />
         </Card>
       )}
-
-      <Card>
-        <CardHeader title="Tiến độ 3 phase" subtitle="Phase hiện tại quyết định bước bạn được làm tiếp" />
-        <Stepper steps={PHASE_STEPS} current={submission.currentPhase - 1} />
-      </Card>
 
       <Card>
         <CardHeader

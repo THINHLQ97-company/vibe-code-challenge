@@ -8,6 +8,7 @@ import { Textarea } from "@/components/dsvh/ui/form/Textarea";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { InfoRow } from "@/components/dsvh/ui/data/InfoRow";
+import { Checkbox } from "@/components/dsvh/ui/form/Checkbox";
 import { PrdViewer } from "@/components/prd-viewer";
 
 export type PendingTopic = {
@@ -24,7 +25,17 @@ export type PendingTopic = {
   department: string;
 };
 
-export function TopicRow({ submission, capLeft }: { submission: PendingTopic; capLeft: number }) {
+export function TopicRow({
+  submission,
+  capLeft,
+  selected,
+  onToggle,
+}: {
+  submission: PendingTopic;
+  capLeft: number;
+  selected?: boolean;
+  onToggle?: () => void;
+}) {
   const router = useRouter();
   const [showReject, setShowReject] = useState(false);
   const [note, setNote] = useState("");
@@ -56,10 +67,17 @@ export function TopicRow({ submission, capLeft }: { submission: PendingTopic; ca
   return (
     <div className="rounded-card border border-stroke bg-surface-2 p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <div className="text-body font-semibold text-ink">{submission.productName}</div>
-          <div className="mt-0.5 text-caption text-ink-2">
-            {submission.userName} · {submission.department} · nộp {submission.createdAt}
+        <div className="flex items-start gap-2.5">
+          {onToggle && (
+            <span className="pt-0.5">
+              <Checkbox checked={!!selected} onChange={onToggle} />
+            </span>
+          )}
+          <div>
+            <div className="text-body font-semibold text-ink">{submission.productName}</div>
+            <div className="mt-0.5 text-caption text-ink-2">
+              {submission.userName} · {submission.department} · nộp {submission.createdAt}
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5">

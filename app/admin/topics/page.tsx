@@ -1,4 +1,5 @@
-import { listPendingApprovals, countApprovedThisWeek } from "@/lib/db/queries/submissions";
+import { listPendingApprovals } from "@/lib/db/queries/submissions";
+import { listWaves, countByWave } from "@/lib/db/queries/waves";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
 import { formatDateVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
@@ -7,24 +8,42 @@ import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { CheckCircleIcon } from "@/components/dsvh/icons";
-import { TopicRow } from "./topic-row";
+import { TopicsList } from "./topics-list";
 
 export const metadata = { title: "Duyệt đề tài" };
 
 export default async function TopicsPage() {
   const [pending, season] = await Promise.all([listPendingApprovals(), getActiveSeason()]);
-  const approvedThisWeek = season ? await countApprovedThisWeek(season.id) : 0;
-  const capLeft = season ? Math.max(0, season.capPerWeek - approvedThisWeek) : 0;
+
+  /**
+   * Số suất tính theo ĐỢT THI, không theo tuần lịch.
+   *
+   * Nhãn cũ ghi "Còn 35/35 suất tuần này" là tàn dư của cơ chế trần-theo-tuần đã được thay bằng
+   * wave — và nó nói SAI: cổng duyệt giờ chặn theo trần của đợt, nên con số hiện ra không liên
+   * quan gì tới thứ thật sự chặn BTC.
+   */
+  const waves = season ? await listWaves(season.id) : [];
+  const counts = season ? await countByWave(season.id) : new Map<number, number>();
+  const openWave = waves.find(
+    (w) =>
+      w.status === "open" &&
+      w.registrationOpensAt <= new Date() &&
+      w.registrationClosesAt >= new Date()
+  );
+  const waveUsed = openWave ? (counts.get(openWave.id) ?? 0) : 0;
+  const waveLeft = openWave ? Math.max(0, openWave.capacity - waveUsed) : 0;
 
   return (
     <PageShell
       title="Duyệt đề tài"
       subtitle="Duyệt cuốn chiếu — duyệt xong là mốc bắt đầu tính hạn nộp của thí sinh"
       action={
-        season ? (
-          <Badge tone={capLeft > 0 ? "accent" : "danger"}>
-            Còn {capLeft}/{season.capPerWeek} suất tuần này
+        openWave ? (
+          <Badge tone={waveLeft > 0 ? "accent" : "danger"}>
+            {openWave.name} · còn {waveLeft}/{openWave.capacity} suất
           </Badge>
+        ) : waves.length > 0 ? (
+          <Badge tone="neutral">Không có đợt nào đang mở đăng ký</Badge>
         ) : undefined
       }
     >
@@ -40,27 +59,22 @@ export default async function TopicsPage() {
             description="Mọi đăng ký gần nhất đã được xử lý. Đợt đăng ký tuần sau sẽ hiện ở đây."
           />
         ) : (
-          <div className="space-y-3">
-            {pending.map((s) => (
-              <TopicRow
-                key={s.id}
-                submission={{
-                  id: s.id,
-                  productName: s.productName,
-                  topicGroup: s.topicGroup,
-                  branch: s.branch,
-                  problemDesc: s.problemDesc,
-                  targetUsers: s.targetUsers,
-                  prdContent: s.prdContent,
-                  prdFileName: s.prdFileName,
-                  createdAt: formatDateVN(s.createdAt),
-                  userName: s.user.name ?? "",
-                  department: s.user.department ?? "",
-                }}
-                capLeft={capLeft}
-              />
-            ))}
-          </div>
+          <TopicsList
+            capLeft={waveLeft}
+            topics={pending.map((s) => ({
+              id: s.id,
+              productName: s.productName,
+              topicGroup: s.topicGroup,
+              branch: s.branch,
+              problemDesc: s.problemDesc,
+              targetUsers: s.targetUsers,
+              prdContent: s.prdContent,
+              prdFileName: s.prdFileName,
+              createdAt: formatDateVN(s.createdAt),
+              userName: s.user.name ?? "",
+              department: s.user.department ?? "",
+            }))}
+          />
         )}
         <Note className="mt-3">
           Đề tài trùng nhau vẫn được duyệt — thể lệ không cấm. Trả về chỉ khi thiếu bài toán thật,

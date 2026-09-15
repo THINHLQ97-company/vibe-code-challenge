@@ -10,7 +10,29 @@ import { Checkbox } from "@/components/dsvh/ui/form/Checkbox";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
-import { UploadSimpleIcon, FileTextIcon } from "@/components/dsvh/icons";
+import {
+  UploadSimpleIcon,
+  FileTextIcon,
+  NotepadIcon,
+  RobotIcon,
+  ShieldCheckIcon,
+} from "@/components/dsvh/icons";
+import { RadioGroup } from "@/components/dsvh/ui/form/RadioGroup";
+
+/**
+ * Nhãn có icon cho đầu mỗi nhóm nội dung. Biểu mẫu này dài hơn ba màn hình và bốn thẻ trông hệt
+ * nhau — một icon ở đầu mỗi thẻ là mốc để mắt bám khi cuộn, rẻ hơn nhiều so với đọc lại tiêu đề.
+ */
+function SectionTitle({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <span className="flex items-center gap-2">
+      <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-accent-soft text-accent">
+        {icon}
+      </span>
+      {children}
+    </span>
+  );
+}
 
 const TOPIC_GROUPS = [
   "Tài chính cá nhân & DN",
@@ -151,7 +173,10 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <Card>
-        <CardHeader title="Đề tài" subtitle="Phần này là căn cứ để BTC duyệt và để chấm điểm ý tưởng" />
+        <CardHeader
+          title={<SectionTitle icon={<NotepadIcon size={16} />}>Đề tài</SectionTitle>}
+          subtitle="Phần này là căn cứ để BTC duyệt và để chấm điểm ý tưởng"
+        />
         <div className="space-y-4">
           <Input
             data-field="productName"
@@ -162,16 +187,20 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
             onChange={(e) => setProductName(e.target.value)}
             required
           />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Select label="Nhánh đề tài" options={BRANCHES} value={branch} onChange={setBranch} />
-            <Select
-              label="Nhóm chủ đề"
-              placeholder="— Chọn nhóm —"
-              options={TOPIC_GROUPS}
-              value={topicGroup}
-              onChange={setTopicGroup}
-            />
+          {/* Hai lựa chọn thì bày cả hai ra. Dropdown chỉ đáng dùng khi danh sách dài tới mức
+              chiếm chỗ — với đúng hai mục, nó bắt người dùng bấm thêm một lần chỉ để đọc được
+              thứ lẽ ra nhìn là thấy, và giấu mất chính điều họ cần so sánh để chọn. */}
+          <div>
+            <p className="mb-1.5 text-caption font-medium text-ink-2">Nhánh đề tài</p>
+            <RadioGroup options={BRANCHES} value={branch ?? "A"} onChange={setBranch} />
           </div>
+          <Select
+            label="Nhóm chủ đề"
+            placeholder="— Chọn nhóm —"
+            options={TOPIC_GROUPS}
+            value={topicGroup}
+            onChange={setTopicGroup}
+          />
           <Textarea
             data-field="problemDesc"
             label="Bài toán đang giải là gì"
@@ -195,7 +224,7 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
 
       <Card>
         <CardHeader
-          title="Tài liệu PRD"
+          title={<SectionTitle icon={<FileTextIcon size={16} />}>Tài liệu PRD</SectionTitle>}
           subtitle="Phase 1 chấm điểm ý tưởng dựa trên tài liệu này — bắt buộc có"
         />
         <div className="space-y-3">
@@ -237,7 +266,7 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
 
       <Card>
         <CardHeader
-          title="Thông tin thi"
+          title={<SectionTitle icon={<RobotIcon size={16} />}>Thông tin thi</SectionTitle>}
           subtitle="Hạn nộp cố định 15 ngày kể từ khi BTC duyệt đề tài — nộp sớm hơn lúc nào cũng được"
         />
         <div className="space-y-4">
@@ -260,7 +289,10 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
       </Card>
 
       <Card>
-        <CardHeader title="Cam kết bắt buộc" subtitle="Thiếu một mục là không gửi được đăng ký" />
+        <CardHeader
+          title={<SectionTitle icon={<ShieldCheckIcon size={16} />}>Cam kết bắt buộc</SectionTitle>}
+          subtitle="Thiếu một mục là không gửi được đăng ký"
+        />
         {/* `space-y` KHÔNG tách được các ô này: `Checkbox` của DSVH render ra `<label>` mang
             `inline-flex`, nên bốn cam kết trôi nối nhau thành một khối chữ liền rất khó đọc.
             `flex flex-col` biến mỗi label thành một phần tử flex — mỗi cam kết một dòng. */}
