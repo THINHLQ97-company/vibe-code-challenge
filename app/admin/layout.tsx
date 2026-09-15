@@ -10,6 +10,7 @@ import {
   RobotIcon,
   ShieldCheckIcon,
   MegaphoneIcon,
+  HourglassIcon,
   ScalesIcon,
   GearIcon,
   CalendarIcon,
@@ -25,6 +26,7 @@ const NAV_BASE: NavItem[] = [
   { href: "/admin/topics", label: "Duyệt đề tài", icon: <CheckCircleIcon size={17} /> },
   { href: "/admin/scoring", label: "Chấm điểm", icon: <RobotIcon size={17} /> },
   { href: "/admin/security", label: "Cổng an toàn", icon: <ShieldCheckIcon size={17} /> },
+  { href: "/admin/posting-schedule", label: "Lịch đăng bài", icon: <HourglassIcon size={17} /> },
   { href: "/admin/posts", label: "Bài đăng & lan tỏa", icon: <MegaphoneIcon size={17} /> },
   { href: "/admin/appeals", label: "Phản biện", icon: <ScalesIcon size={17} /> },
 ];

@@ -156,12 +156,54 @@ export async function ensureSlotAssignments(waveId: number): Promise<void> {
   });
 }
 
-/** Danh sách bài đã được xếp khung — màn ban tổ chức duyệt bài theo từng khung giờ. */
-export async function listBookingsForWave(waveId: number) {
-  return db.query.submissions.findMany({
-    where: and(eq(submissions.waveId, waveId), eq(submissions.currentPhase, 3)),
+/**
+ * Bài trong một đợt ĐÃ TỚI Phase 3 — nguồn của màn quản lý lịch đăng bài.
+ *
+ * Lấy cả bài chưa được xếp khung: chúng phải hiện ra ở đâu đó thì ban tổ chức mới biết còn ai
+ * chưa có chỗ. Xếp theo mốc nộp Phase 2, cùng thứ tự mà hệ thống dùng để xếp khung, nên người đọc
+ * đối chiếu được ngay vì sao ai đứng đâu.
+ */
+export async function listPhase3InWave(waveId: number) {
+  const rows = await db.query.submissions.findMany({
+    where: and(eq(submissions.waveId, waveId), gte(submissions.currentPhase, 3)),
     with: { user: true, postingSlot: true },
   });
+  return rows.sort((a, b) => {
+    const ta = a.phase2SubmittedAt?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    const tb = b.phase2SubmittedAt?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    return ta !== tb ? ta - tb : a.createdAt.getTime() - b.createdAt.getTime();
+  });
+}
+
+/**
+ * Ban tổ chức CHUYỂN TAY một bài sang khung khác (hoặc gỡ khỏi khung khi truyền `null`).
+ *
+ * Cố ý KHÔNG chặn khi khung đích đã đầy. Ban tổ chức chuyển tay là vì có tình huống hệ thống
+ * không biết — thí sinh báo bận, một bài cần lên sớm hơn — và lúc đó cái họ cần là làm được việc
+ * kèm một con số nói rõ khung đang vượt hạn mức, chứ không phải một lời từ chối. Màn quản lý hiện
+ * số vượt bằng màu đỏ.
+ */
+export async function moveSubmissionToSlot(submissionId: number, slotId: number | null) {
+  const [row] = await db
+    .update(submissions)
+    .set({
+      postingSlotId: slotId,
+      postingSlotBookedAt: slotId ? new Date() : null,
+      updatedAt: new Date(),
+    })
+    .where(eq(submissions.id, submissionId))
+    .returning();
+  return row;
+}
+
+/** Ban tổ chức nới hoặc siết hạn mức của một khung. */
+export async function updateSlotCapacity(slotId: number, capacity: number) {
+  const [row] = await db
+    .update(postingSlots)
+    .set({ capacity })
+    .where(eq(postingSlots.id, slotId))
+    .returning();
+  return row;
 }
 
 export type { PostingPeriod };

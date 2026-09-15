@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { postingSlots } from "@/lib/db/schema";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
+import { ensureSlotAssignments } from "@/lib/db/queries/posting-slots";
+import { periodLabel, periodTimeLabel } from "@/lib/contest-schedule";
 import { getAggregatedScores } from "@/lib/db/queries/scores";
 import { candidateScoreView } from "@/lib/score-visibility";
 import { getCheckpoints } from "@/lib/checkpoints";
@@ -52,6 +57,23 @@ export const metadata = { title: { absolute: "Tổng quan · Khu thí sinh" } };
 export default async function DashboardOverviewPage() {
   const session = await getSession();
   const submission = session ? await getCurrentSubmissionForUser(session.userId) : null;
+
+  /**
+   * Khung giờ đăng bài của thí sinh, hiện ngay ở tổng quan khi đã tới Phase 3.
+   *
+   * Hệ thống tự xếp khung, nên thí sinh không có hành động nào tạo ra nó — họ chỉ biết nếu mình
+   * chủ động đi tìm. Một khung giờ mà người ta không biết là một khung giờ bị lỡ, và lỡ khung thì
+   * bài không được duyệt lên nhóm đúng lúc.
+   */
+  if (submission?.waveId && submission.currentPhase >= 3) {
+    await ensureSlotAssignments(submission.waveId);
+  }
+  const current = submission ? await getCurrentSubmissionForUser(session!.userId) : null;
+  const mySlot = current?.postingSlotId
+    ? ((await db.query.postingSlots.findFirst({
+        where: eq(postingSlots.id, current.postingSlotId),
+      })) ?? null)
+    : null;
 
   if (!submission) {
     return (
@@ -222,6 +244,28 @@ export default async function DashboardOverviewPage() {
         </div>
       </Card>
 
+
+      {mySlot && (
+        <Card>
+          <CardHeader
+            title="Khung giờ đăng bài của bạn"
+            subtitle="Ban tổ chức duyệt cho bài lên nhóm trong khung này. Hệ thống xếp theo thứ tự nộp bài Phase 2 — nộp sớm thì được khung sớm."
+            action={
+              <Link href="/dashboard/share">
+                <Button variant="ghost" size="sm">
+                  Tới bước lan tỏa
+                </Button>
+              </Link>
+            }
+          />
+          <p className="flex flex-wrap items-baseline gap-2">
+            <span className="text-title font-semibold text-ink">
+              {periodLabel(mySlot.period)} {formatDateVN(mySlot.startsAt)}
+            </span>
+            <span className="text-body text-ink-2">{periodTimeLabel(mySlot.period)}</span>
+          </p>
+        </Card>
+      )}
 
       {nextAction && (
         <Card>
