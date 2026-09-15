@@ -23,6 +23,7 @@ import { PhaseScoring } from "./phase-scoring";
 import { FeedbackPanel } from "./feedback-panel";
 import { PrebuiltPanel } from "./prebuilt-panel";
 import { modulesForPhase } from "@/lib/scoring-rubric";
+import { getCurrentRole } from "@/lib/auth/current-user";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const s = await getSubmissionWithUser(Number((await params).id));
@@ -47,7 +48,7 @@ export default async function ScoringDetailPage({
   ]);
   const o = overviews.get(id)!;
 
-  const isAdmin = session?.role === "admin";
+  const isAdmin = (await getCurrentRole()) === "admin";
   /**
    * Phase chỉ CÓ GÌ ĐỂ CHẤM khi thí sinh đã nộp thứ tương ứng. Không chặn vào trang (BTC chốt
    * 15/09) — chỉ nói rõ thí sinh chưa tới bước này, để giám khảo khỏi ngồi chấm một ô trống rồi

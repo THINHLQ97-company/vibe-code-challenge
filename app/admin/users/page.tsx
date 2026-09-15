@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth/session";
 import { listManagedUsers } from "@/lib/db/queries/users";
 import { formatDateTimeVN } from "@/lib/datetime";
 import { UsersManager, type UserRow } from "./users-manager";
+import { getCurrentRole } from "@/lib/auth/current-user";
 
 export const metadata = { title: "Người dùng" };
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminUsersPage() {
   const session = await getSession();
   // Lớp chặn thật nằm ở các route API; đây chỉ để giám khảo lỡ gõ địa chỉ không thấy trang trống.
-  if (!session || session.role !== "admin") redirect("/admin");
+  if (!session || (await getCurrentRole()) !== "admin") redirect("/admin");
 
   const users = await listManagedUsers();
   const rows: UserRow[] = users.map((u) => ({

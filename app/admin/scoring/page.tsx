@@ -13,6 +13,7 @@ import { ScoringTable, type ScoringRowData } from "./scoring-table";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
 import { listWaves } from "@/lib/db/queries/waves";
 import { countJudgeBallots } from "@/lib/db/queries/scores";
+import { getCurrentRole } from "@/lib/auth/current-user";
 
 export const metadata = { title: "Chấm điểm" };
 
@@ -29,6 +30,7 @@ export default async function ScoringPage() {
    * Nạp TẤT CẢ các đợt một lần rồi tra theo map, không gọi `getWave` trong vòng lặp: 35 bài mỗi
    * đợt là 35 lượt đi database cho một lần mở trang, trong khi số đợt chỉ có vài cái.
    */
+  const isAdmin = (await getCurrentRole()) === "admin";
   const ballotCounts = await countJudgeBallots(approved.map((s) => s.id));
 
   const season = await getActiveSeason();
@@ -112,7 +114,7 @@ export default async function ScoringPage() {
           title="Danh sách bài dự thi"
           subtitle="Bấm vào một bài để đọc tài liệu, xem điểm máy chấm và chấm phiếu của bạn"
         />
-        <ScoringTable rows={rows} canPublish={session?.role === "admin"} />
+        <ScoringTable rows={rows} canPublish={isAdmin} />
         {waitingJudge > 0 && (
           <Note tone="warning" className="mt-3">
             {waitingJudge} bài đang lấy nguyên điểm máy vì chưa giám khảo nào chấm. Thể lệ yêu cầu

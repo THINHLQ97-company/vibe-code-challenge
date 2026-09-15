@@ -1,6 +1,6 @@
 import { asc, eq, sql } from "drizzle-orm";
 import { db } from "../index";
-import { users, submissions, ideaScores, productScores } from "../schema";
+import { users, submissions, ideaScores, productScores, appeals } from "../schema";
 
 export type ManagedUser = {
   id: number;
@@ -111,17 +111,41 @@ export async function deleteUserCascade(id: number): Promise<{ ok: true; ballots
     return { ok: false, error: "Tài khoản này đang có bài dự thi — hạ vai trò thay vì xoá" };
   }
 
-  const removed = await db.transaction(async (tx) => {
-    const a = await tx.delete(ideaScores).where(eq(ideaScores.judgeId, id)).returning({ id: ideaScores.id });
-    const b = await tx
-      .delete(productScores)
-      .where(eq(productScores.judgeId, id))
-      .returning({ id: productScores.id });
-    await tx.delete(users).where(eq(users.id, id));
-    return a.length + b.length;
-  });
+  try {
+    const removed = await db.transaction(async (tx) => {
+      const a = await tx
+        .delete(ideaScores)
+        .where(eq(ideaScores.judgeId, id))
+        .returning({ id: ideaScores.id });
+      const b = await tx
+        .delete(productScores)
+        .where(eq(productScores.judgeId, id))
+        .returning({ id: productScores.id });
 
-  return { ok: true, ballots: removed };
+      /**
+       * Phản biện thì GỠ TÊN người xử lý, KHÔNG xoá bản phản biện.
+       *
+       * Khác hẳn phiếu chấm: phiếu là ý kiến của riêng người đó, mất người thì mất luôn ý kiến.
+       * Còn phản biện là của THÍ SINH — nội dung khiếu nại và kết luận vẫn phải còn, chỉ là không
+       * còn biết ai đã xử lý. Xoá cả bản phản biện là xoá mất tiếng nói của thí sinh chỉ vì một
+       * giám khảo rời đi.
+       */
+      await tx.update(appeals).set({ resolvedBy: null }).where(eq(appeals.resolvedBy, id));
+
+      await tx.delete(users).where(eq(users.id, id));
+      return a.length + b.length;
+    });
+
+    return { ok: true, ballots: removed };
+  } catch (err) {
+    // Còn bảng nào khác trỏ tới tài khoản này thì báo rõ thay vì ném 500 rỗng — lần trước chính
+    // kiểu lỗi này khiến một lượt xoá "thất bại im lặng" và tưởng là đã xong.
+    console.error("[deleteUserCascade] thất bại:", err);
+    return {
+      ok: false,
+      error: "Không xoá được — tài khoản này còn dữ liệu liên quan. Hạ vai trò thay vì xoá.",
+    };
+  }
 }
 
 /** Đếm phiếu chấm của một người — để giao diện nói trước sẽ mất bao nhiêu phiếu khi xoá. */

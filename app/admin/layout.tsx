@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -43,6 +44,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const user = session
     ? await db.query.users.findFirst({ where: eq(users.id, session.userId) })
     : null;
+
+  /**
+   * Phân quyền THẬT nằm ở đây, không ở middleware — đây là chỗ đầu tiên trong chuỗi render đọc
+   * được database, nên vai trò lấy ra luôn là vai trò hiện tại chứ không phải bản chụp trong
+   * cookie. Thí sinh lạc vào thì đưa về khu của họ.
+   */
+  if (!user || user.role === "candidate") redirect("/dashboard");
 
   return (
     <AppShell
