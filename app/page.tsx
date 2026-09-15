@@ -240,7 +240,7 @@ const FAQ = [
   },
   {
     q: "Không đăng bài chia sẻ thì có bị trượt không?",
-    a: "Không trượt. Bài của bạn vẫn được chấm và vẫn có điểm — điểm ý tưởng và điểm sản phẩm ghi nhận ngay khi bạn nộp, không phụ thuộc bước đăng bài. Nhưng bài chia sẻ là một trong sáu mốc của chương trình, và chỉ những thí sinh đủ cả sáu mốc mới vào diện xét giải thưởng. Nói ngắn gọn: thiếu bước này bạn mất cơ hội nhận giải, không mất điểm. Bạn được đăng ẩn danh nên không phải cân nhắc chuyện lộ danh tính.",
+    a: "Không trượt, và bài của bạn vẫn được ghi nhận vào KPI 5.2 — Đề xuất cải tiến / sáng kiến. Bạn chỉ mất 20 điểm của phần lan tỏa, nên tổng điểm thấp hơn người làm đủ. Điểm cuối cùng được gửi về Trưởng bộ phận của bạn để xem xét mức ghi nhận, và làm đủ thì mức đó cao hơn. Bạn được đăng ẩn danh nên không phải cân nhắc chuyện lộ danh tính.",
   },
   {
     q: "Nếu tôi không đồng tình với kết quả chấm?",
@@ -441,7 +441,7 @@ export default async function LandingPage() {
           id="quyen-loi"
           eyebrow="Quyền lợi"
           title="Đậu thì được gì"
-          subtitle="Một thí sinh được công nhận đậu khi hoàn thành đủ sáu mốc bắt buộc, vượt qua cổng rà soát an toàn và được hội đồng giám khảo duyệt đạt."
+          subtitle="Một thí sinh được công nhận khi sản phẩm vượt qua cổng rà soát an toàn và được hội đồng giám khảo duyệt đạt ở Phase 2. Bước chia sẻ làm thêm để cộng điểm, không làm thì vẫn được ghi nhận."
         >
           <div className="grid gap-3 md:grid-cols-3">
             {BENEFITS.map((b) => (
@@ -489,7 +489,7 @@ export default async function LandingPage() {
           id="hanh-trinh"
           eyebrow="Sáu mốc của chương trình"
           title="Hành trình của bạn"
-          subtitle="Hoàn thành tới mốc 3 là bài của bạn đã có điểm. Đủ cả sáu mốc mới vào diện xét giải thưởng. Bấm vào từng toa hoặc dùng mũi tên để xem chi tiết: bạn phải làm gì, và điều gì quyết định bạn được đi tiếp."
+          subtitle="Xong mốc 3 là bài của bạn đã có điểm và đã được ghi nhận vào KPI 5.2. Bước chia sẻ ở mốc 5 không bắt buộc — bỏ qua thì phần điểm lan tỏa là 0 và bài vẫn được ghi nhận, làm đầy đủ thì tổng điểm cao hơn. Bấm vào từng toa để xem chi tiết."
         >
           <JourneyTrain />
         </Band>

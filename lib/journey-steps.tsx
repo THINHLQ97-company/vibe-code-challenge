@@ -101,18 +101,18 @@ export const JOURNEY_STEPS: JourneyStep[] = [
       "Bài phải kể được quá trình làm — chỗ vấp và cách xử lý — không phải một dòng khoe kèm link.",
       "Dán đường dẫn bài đăng vào hệ thống.",
     ],
-    gate: "Bài đăng được ban giám khảo duyệt.",
+    gate: "Mốc TUỲ CHỌN — bỏ qua thì mất 20 điểm lan tỏa, bài vẫn được ghi nhận. Bài đăng bị ban giám khảo từ chối cũng tính 0 điểm phần này và không được đăng lại.",
   },
   {
     code: "CP6",
     title: "Phiếu trải nghiệm",
-    lead: "Mốc cuối, thường bị bỏ quên nhất. Thiếu phiếu là chưa được công nhận đậu dù điểm cao.",
+    lead: "Mốc cuối, thường bị bỏ quên nhất. Thiếu phiếu là hồ sơ của bạn chưa khép lại dù điểm cao.",
     icon: <StepSurvey size={20} />,
     carriage: "last",
     you: [
       "Nộp phiếu trải nghiệm sản phẩm — bắt buộc với mọi thí sinh.",
       "Nên nộp ngay khi vừa làm xong, lúc bạn còn nhớ rõ chỗ nào của Vibe Host làm mình mất thời gian.",
     ],
-    gate: "Đủ cả sáu mốc — bạn được công nhận đậu và vào bảng xếp hạng.",
+    gate: "Xong mốc này là hoàn tất — điểm của bạn được gửi về Trưởng bộ phận để xem xét mức ghi nhận KPI.",
   },
 ];
