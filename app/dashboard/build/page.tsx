@@ -45,7 +45,7 @@ export default async function BuildPage() {
           <Empty
             icon={<HourglassIcon size={40} />}
             title="Đề tài chưa được duyệt"
-            description="BTC duyệt cuốn chiếu theo tuần. Duyệt xong bạn mới nộp được sản phẩm — và đó cũng là mốc bắt đầu tính hạn nộp."
+            description="Ban tổ chức duyệt đề tài theo từng đợt thi. Duyệt xong bạn mới nộp được sản phẩm, và đó cũng là mốc bắt đầu tính hạn nộp 15 ngày."
             action={
               <Link href="/dashboard">
                 <Button variant="ghost">Về tổng quan</Button>
@@ -146,7 +146,7 @@ export default async function BuildPage() {
       <Card>
         <CardHeader
           title="Phiếu trải nghiệm sản phẩm (CP6)"
-          subtitle="Bắt buộc với mọi thí sinh — thiếu phiếu là chưa được công nhận đậu"
+          subtitle="Bắt buộc với mọi thí sinh — thiếu phiếu thì hồ sơ dự thi của bạn chưa khép lại"
           action={
             <Link href="/dashboard/survey">
               <Button

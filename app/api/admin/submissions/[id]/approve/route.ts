@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/api-auth";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
 import { approveSubmission, countApprovedThisWeek, getSubmissionById } from "@/lib/db/queries/submissions";
-import { getWave, countInWave } from "@/lib/db/queries/waves";
+import { getWave, countInWaveByBoard, capacityForBoard } from "@/lib/db/queries/waves";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireSession(["admin"]);
@@ -29,11 +32,16 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   if (submission.waveId != null) {
     const wave = await getWave(submission.waveId);
     if (wave) {
-      const approvedInWave = await countInWave(wave.id);
-      if (approvedInWave > wave.capacity) {
+      const owner = await db.query.users.findFirst({ where: eq(users.id, submission.userId) });
+      const board = owner?.board ?? null;
+      const counts = await countInWaveByBoard(wave.id);
+      const used = board === "ky_thuat" ? counts.ky_thuat : counts.van_phong;
+      const cap = capacityForBoard(wave, board);
+      if (used > cap) {
+        const label = board === "ky_thuat" ? "Bảng Kỹ thuật" : "Bảng Văn phòng";
         return NextResponse.json(
           {
-            error: `${wave.name} đã đủ ${wave.capacity} thí sinh — chuyển bài này sang đợt sau hoặc nâng trần của đợt`,
+            error: `${wave.name} đã vượt ${cap} suất của ${label} — chuyển bài sang đợt sau hoặc nâng trần`,
           },
           { status: 409 }
         );

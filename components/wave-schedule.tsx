@@ -9,8 +9,12 @@ export type PublicWave = {
   registrationOpensAt: string;
   registrationClosesAt: string;
   capacity: number;
+  capacityKyThuat: number;
+  capacityVanPhong: number;
   bonusPoints: number;
   registered: number;
+  registeredKyThuat: number;
+  registeredVanPhong: number;
   state: "open" | "upcoming" | "closed";
 };
 
@@ -95,6 +99,23 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
                     width: `${Math.min(100, (open.registered / open.capacity) * 100)}%`,
                   }}
                 />
+              </div>
+
+              {/* Tách theo bảng: giải thưởng tuần trao theo từng bảng, nên con số thật sự quan
+                  trọng với người đang cân nhắc đăng ký là bảng CỦA HỌ còn bao nhiêu suất. */}
+              <div className="mt-2.5 grid grid-cols-2 gap-2">
+                {[
+                  { t: "Kỹ thuật", n: open.registeredKyThuat, c: open.capacityKyThuat },
+                  { t: "Văn phòng", n: open.registeredVanPhong, c: open.capacityVanPhong },
+                ].map((b) => (
+                  <div key={b.t} className="rounded-lg border border-cream/12 bg-cream/5 px-2.5 py-2">
+                    <p className="text-meta text-cream/50">Bảng {b.t}</p>
+                    <p className="text-caption font-semibold tabular-nums text-cream/90">
+                      {b.n}
+                      <span className="font-normal text-cream/45">/{b.c}</span>
+                    </p>
+                  </div>
+                ))}
               </div>
 
               <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-2">

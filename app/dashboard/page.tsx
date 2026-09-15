@@ -23,7 +23,7 @@ import {
   UsersThreeIcon,
   StarIcon,
 } from "@/components/dsvh/icons";
-import { getWave, countInWave } from "@/lib/db/queries/waves";
+import { getWave, countInWaveByBoard } from "@/lib/db/queries/waves";
 
 const PHASE_STEPS = [
   { label: "Ý tưởng", description: "Đăng ký & chấm điểm đề tài" },
@@ -75,7 +75,7 @@ export default async function DashboardOverviewPage() {
 
   // Đợt thi của thí sinh — quyết định điểm thưởng đăng ký sớm và nhóm so bảng điểm.
   const myWave = submission.waveId != null ? await getWave(submission.waveId) : null;
-  const waveMates = myWave ? await countInWave(myWave.id) : 0;
+  const waveMates = myWave ? await countInWaveByBoard(myWave.id) : null;
 
   // Cùng nguồn tổng hợp với màn chấm điểm bên BTC — hai bên không được nói hai con số khác nhau.
   const scores = await getAggregatedScores(submission.id);
@@ -123,13 +123,23 @@ export default async function DashboardOverviewPage() {
           ghép lại một câu trả lời duy nhất mà thí sinh vào đây để hỏi. */}
       <Card>
         <CardHeader title="Tình trạng bài của bạn" subtitle={stage.detail} />
+      {myWave && waveMates && (
+        <Note className="mb-3">
+          <b>{myWave.name}</b> đang có <b>{waveMates.ky_thuat}</b> thí sinh Bảng Kỹ thuật và{" "}
+          <b>{waveMates.van_phong}</b> thí sinh Bảng Văn phòng. Thứ hạng và giải thưởng xét riêng
+          theo từng bảng, nên bạn chỉ so với những người cùng bảng với mình. Riêng{" "}
+          <b>điểm lan tỏa</b> thì so với trung vị của cả đợt, không tách bảng — vì trên nhóm cộng
+          đồng, hai bảng có cùng điều kiện như nhau.
+        </Note>
+      )}
+
       {myWave && (
         <div className="mb-3 grid gap-3 sm:grid-cols-3">
           <InfoTile icon={CalendarIcon} label="Đợt thi của bạn" value={myWave.name} />
           <InfoTile
             icon={UsersThreeIcon}
             label="Thí sinh cùng đợt"
-            value={`${waveMates} người`}
+            value={`${waveMates?.total ?? 0} người`}
           />
           <InfoTile
             icon={StarIcon}
@@ -233,7 +243,7 @@ export default async function DashboardOverviewPage() {
       <Card>
         <CardHeader
           title="Mốc bắt buộc"
-          subtitle="Sáu mốc phải xong đủ mới được công nhận đậu. Ô đỏ là việc đang chờ bạn xử lý, ô cam là việc kế tiếp."
+          subtitle="Mốc 5 — chia sẻ cộng đồng — là tuỳ chọn; các mốc còn lại cần hoàn thành đủ. Ô đỏ là việc đang chờ bạn xử lý, ô cam là việc kế tiếp."
         />
         <CheckpointTrail checkpoints={checklist} />
         <Note className="mt-4">
@@ -294,7 +304,7 @@ function getNextAction(s: {
   if (!s.facebookApprovedAt)
     return { desc: "BGK đang kiểm tra bài đăng của bạn trên nhóm.", cta: "Xem trạng thái", href: "/dashboard/share" };
   if (!s.surveySubmittedAt)
-    return { desc: "Nộp phiếu trải nghiệm (CP6) — bắt buộc để được công nhận đậu.", cta: "Nộp phiếu", href: "/dashboard/survey" };
+    return { desc: "Nộp phiếu trải nghiệm (CP6) — bắt buộc để khép lại hồ sơ dự thi.", cta: "Nộp phiếu", href: "/dashboard/survey" };
   if (!s.publishedAt)
     return { desc: "Đã xong hết phần của bạn — chờ BTC chốt điểm và công bố.", cta: "Xem kết quả", href: "/dashboard/results" };
   return null;

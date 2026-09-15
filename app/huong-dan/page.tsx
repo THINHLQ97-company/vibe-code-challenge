@@ -500,7 +500,7 @@ const STEPS = [
     id: "buoc-8-hoan-tat",
     icon: <StepSurvey size={22} />,
     title: "Hoàn tất và nhận kết quả",
-    lead: "Hai việc cuối cùng thường bị bỏ quên, và thiếu một trong hai là chưa được công nhận đậu dù điểm số cao.",
+    lead: "Hai việc cuối cùng thường bị bỏ quên. Bước chia sẻ là tuỳ chọn, nhưng phiếu trải nghiệm thì bắt buộc — thiếu phiếu thì hồ sơ dự thi của bạn chưa khép lại.",
     content: (
       <div className="space-y-4">
         <div className="grid gap-3 md:grid-cols-2">

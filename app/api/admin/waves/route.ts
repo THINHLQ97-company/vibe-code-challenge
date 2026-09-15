@@ -11,7 +11,8 @@ const createSchema = z.object({
   name: z.string().min(1, "Đặt tên cho đợt thi").max(80),
   registrationOpensAt: z.string().datetime({ offset: true }),
   registrationClosesAt: z.string().datetime({ offset: true }),
-  capacity: z.number().int().min(1).max(500),
+  capacityKyThuat: z.number().int().min(0).max(500),
+  capacityVanPhong: z.number().int().min(0).max(500),
   /** Bỏ trống thì lấy mức mặc định theo thứ tự đợt. */
   bonusPoints: z.number().int().min(0).max(20).optional(),
 });
@@ -60,7 +61,9 @@ export async function POST(req: NextRequest) {
     orderIndex,
     registrationOpensAt: opens,
     registrationClosesAt: closes,
-    capacity: parsed.data.capacity,
+    capacity: parsed.data.capacityKyThuat + parsed.data.capacityVanPhong,
+    capacityKyThuat: parsed.data.capacityKyThuat,
+    capacityVanPhong: parsed.data.capacityVanPhong,
     bonusPoints: parsed.data.bonusPoints ?? defaultBonusForWave(orderIndex),
     status: "draft",
   });

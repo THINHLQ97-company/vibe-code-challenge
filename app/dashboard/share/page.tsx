@@ -106,7 +106,7 @@ export default async function SharePage() {
   return (
     <PageShell
       title="Chia sẻ & lan tỏa"
-      subtitle="Phase 3: điểm lan tỏa tính theo tương tác 7 ngày, so trung vị các bài cùng tuần"
+      subtitle="Phase 3: điểm lan tỏa tính theo tương tác 7 ngày, so với trung vị các bài cùng đợt thi"
     >
       <Card>
         <CardHeader

@@ -155,8 +155,19 @@ export const waves = pgTable("waves", {
   orderIndex: integer("order_index").notNull(),
   registrationOpensAt: timestamp("registration_opens_at").notNull(),
   registrationClosesAt: timestamp("registration_closes_at").notNull(),
-  /** Trần số thí sinh của wave này — thay cho `seasons.capPerWeek`. */
+  /**
+   * Trần số thí sinh, TÁCH RIÊNG hai bảng thi.
+   *
+   * Một con số chung thì một bảng có thể lấp gần hết đợt và bảng kia phải chờ đợt sau — mà giải
+   * thưởng tuần trao theo từng bảng, nên một đợt lệch hẳn về một phía là một bảng gần như không
+   * có ai để so. Hai con số cho phép BTC đặt đúng tỉ lệ nhân sự thật của công ty.
+   *
+   * `capacity` giữ lại làm TỔNG để không phải sửa mọi nơi đang đọc nó; hai cột dưới mới là thứ
+   * cổng đăng ký thật sự kiểm.
+   */
   capacity: integer("capacity").notNull().default(35),
+  capacityKyThuat: integer("capacity_ky_thuat").notNull().default(15),
+  capacityVanPhong: integer("capacity_van_phong").notNull().default(20),
   /**
    * Điểm thưởng cộng thêm cho người đăng ký ở wave này.
    *

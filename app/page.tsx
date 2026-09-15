@@ -6,7 +6,7 @@ import { WaveSchedule, type PublicWave } from "@/components/wave-schedule";
 import { MAX_WAVE_BONUS } from "@/lib/wave-bonus";
 import { MicrosoftLoginButton } from "@/components/microsoft-login";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
-import { listWaves, countByWave } from "@/lib/db/queries/waves";
+import { listWaves, countInWaveByBoard } from "@/lib/db/queries/waves";
 import { KPI_CATEGORY } from "@/lib/kpi";
 import {
   MarkSpark,
@@ -265,9 +265,13 @@ export const dynamic = "force-dynamic";
 
 export default async function LandingPage() {
   const season = await getActiveSeason();
-  const [waveRows, waveCounts] = season
-    ? await Promise.all([listWaves(season.id), countByWave(season.id)])
-    : [[], new Map<number, number>()];
+  const waveRows = season ? await listWaves(season.id) : [];
+  // Đếm theo bảng thi cho từng đợt — số tổng không trả lời được câu "bảng của tôi còn mấy suất".
+  const boardCounts = new Map(
+    await Promise.all(
+      waveRows.map(async (w) => [w.id, await countInWaveByBoard(w.id)] as const)
+    )
+  );
 
   const now = Date.now();
   const waves: PublicWave[] = waveRows
@@ -280,8 +284,12 @@ export default async function LandingPage() {
       registrationOpensAt: w.registrationOpensAt.toISOString(),
       registrationClosesAt: w.registrationClosesAt.toISOString(),
       capacity: w.capacity,
+      capacityKyThuat: w.capacityKyThuat,
+      capacityVanPhong: w.capacityVanPhong,
       bonusPoints: w.bonusPoints,
-      registered: waveCounts.get(w.id) ?? 0,
+      registered: boardCounts.get(w.id)?.total ?? 0,
+      registeredKyThuat: boardCounts.get(w.id)?.ky_thuat ?? 0,
+      registeredVanPhong: boardCounts.get(w.id)?.van_phong ?? 0,
       state:
         w.status === "open" &&
         w.registrationOpensAt.getTime() <= now &&
@@ -510,6 +518,12 @@ export default async function LandingPage() {
             <p className="mt-3 text-body leading-relaxed text-cream/70">
               Vì vậy, bạn nên hoàn thành và nộp bài trong khoảng một tuần đầu để kịp lượt chấm gần
               nhất, đồng thời giữ lại quỹ thời gian cho việc chỉnh sửa nếu cần.
+            </p>
+            <p className="mt-3 text-body leading-relaxed text-cream/70">
+              Mỗi đợt có số suất riêng cho Bảng Kỹ thuật và Bảng Văn phòng, và giải thưởng theo
+              tuần cũng trao riêng từng bảng — bạn chỉ so hạng với người cùng bảng. Riêng{" "}
+              <b className="text-cream">điểm lan tỏa</b> so với trung vị của cả đợt, không tách
+              bảng, vì trên nhóm cộng đồng hai bảng có cùng điều kiện như nhau.
             </p>
             <div className="mt-4">
               <DarkNote>

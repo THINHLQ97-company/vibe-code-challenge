@@ -1,6 +1,6 @@
 import { and, asc, eq, count } from "drizzle-orm";
 import { db } from "../index";
-import { waves, submissions, type NewWave } from "../schema";
+import { waves, submissions, users, type NewWave } from "../schema";
 
 export async function listWaves(seasonId: number) {
   return db.query.waves.findMany({
@@ -87,4 +87,38 @@ export async function countInWave(waveId: number): Promise<number> {
     .from(submissions)
     .where(and(eq(submissions.waveId, waveId)));
   return Number(row?.n ?? 0);
+}
+
+export type BoardCounts = { ky_thuat: number; van_phong: number; total: number };
+
+/**
+ * Đếm thí sinh trong một đợt, TÁCH THEO BẢNG THI.
+ *
+ * Cần vì trần số lượng nay là hai con số riêng, và vì cả thí sinh lẫn BTC đều cần biết mỗi bảng
+ * đang có bao nhiêu người — một con số tổng không trả lời được câu "tôi đang so với mấy người".
+ */
+export async function countInWaveByBoard(waveId: number): Promise<BoardCounts> {
+  const rows = await db
+    .select({ board: users.board, n: count() })
+    .from(submissions)
+    .innerJoin(users, eq(submissions.userId, users.id))
+    .where(eq(submissions.waveId, waveId))
+    .groupBy(users.board);
+
+  const out: BoardCounts = { ky_thuat: 0, van_phong: 0, total: 0 };
+  for (const r of rows) {
+    const n = Number(r.n);
+    if (r.board === "ky_thuat") out.ky_thuat = n;
+    else if (r.board === "van_phong") out.van_phong = n;
+    out.total += n;
+  }
+  return out;
+}
+
+/** Trần của một bảng trong đợt. */
+export function capacityForBoard(
+  wave: { capacityKyThuat: number; capacityVanPhong: number },
+  board: "ky_thuat" | "van_phong" | null
+): number {
+  return board === "ky_thuat" ? wave.capacityKyThuat : wave.capacityVanPhong;
 }

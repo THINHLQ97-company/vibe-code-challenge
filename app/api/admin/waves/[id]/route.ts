@@ -9,7 +9,8 @@ const patchSchema = z.object({
   name: z.string().min(1).max(80).optional(),
   registrationOpensAt: z.string().datetime({ offset: true }).optional(),
   registrationClosesAt: z.string().datetime({ offset: true }).optional(),
-  capacity: z.number().int().min(1).max(500).optional(),
+  capacityKyThuat: z.number().int().min(0).max(500).optional(),
+  capacityVanPhong: z.number().int().min(0).max(500).optional(),
   bonusPoints: z.number().int().min(0).max(20).optional(),
   status: z.enum(["draft", "open", "closed"]).optional(),
 });
@@ -40,7 +41,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const row = await updateWave(id, {
     ...(d.name !== undefined ? { name: d.name } : {}),
-    ...(d.capacity !== undefined ? { capacity: d.capacity } : {}),
+    ...(d.capacityKyThuat !== undefined ? { capacityKyThuat: d.capacityKyThuat } : {}),
+    ...(d.capacityVanPhong !== undefined ? { capacityVanPhong: d.capacityVanPhong } : {}),
+    // `capacity` là TỔNG, giữ đồng bộ để mọi nơi đang đọc nó không lệch.
+    ...(d.capacityKyThuat !== undefined || d.capacityVanPhong !== undefined
+      ? {
+          capacity:
+            (d.capacityKyThuat ?? wave.capacityKyThuat) +
+            (d.capacityVanPhong ?? wave.capacityVanPhong),
+        }
+      : {}),
     ...(d.bonusPoints !== undefined ? { bonusPoints: d.bonusPoints } : {}),
     ...(d.status !== undefined ? { status: d.status } : {}),
     registrationOpensAt: opens,

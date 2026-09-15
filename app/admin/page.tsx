@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listSubmissionsWithUser, countApprovedThisWeek } from "@/lib/db/queries/submissions";
+import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
@@ -24,7 +24,7 @@ import {
   ShieldWarningIcon,
   ArrowRightIcon,
 } from "@/components/dsvh/icons";
-import { listWaves } from "@/lib/db/queries/waves";
+import { listWaves, countInWaveByBoard } from "@/lib/db/queries/waves";
 
 const BOARD_LABEL: Record<string, string> = {
   ky_thuat: "Kỹ thuật",
@@ -35,7 +35,7 @@ export const metadata = { title: { absolute: "Tổng quan · Ban tổ chức" } 
 
 export default async function AdminDashboardPage() {
   const [submissions, season] = await Promise.all([listSubmissionsWithUser(), getActiveSeason()]);
-  const approvedThisWeek = season ? await countApprovedThisWeek(season.id) : 0;
+
 
   const pending = submissions.filter((s) => s.registrationStatus === "pending");
   const inProgress = submissions.filter((s) => s.currentPhase >= 2 && !s.publishedAt);
@@ -70,13 +70,30 @@ export default async function AdminDashboardPage() {
     )
   ).sort((a, b) => b.value - a.value);
 
-  const capLeft = season ? Math.max(0, season.capPerWeek - approvedThisWeek) : 0;
+  /**
+   * Suất còn lại tính theo ĐỢT ĐANG MỞ, không theo trần tuần cũ.
+   *
+   * Dòng cũ đọc `season.capPerWeek` — con số của cơ chế đã bị thay bằng đợt thi, nên nó nói một
+   * đằng còn cổng duyệt chặn một nẻo.
+   */
+  const waves = season ? await listWaves(season.id) : [];
+  const openWave = waves.find(
+    (w) =>
+      w.status === "open" &&
+      w.registrationOpensAt <= new Date() &&
+      w.registrationClosesAt >= new Date()
+  );
+  const openWaveCounts = openWave ? await countInWaveByBoard(openWave.id) : null;
+  const capLeft = openWave
+    ? Math.max(0, openWave.capacityKyThuat - (openWaveCounts?.ky_thuat ?? 0)) +
+      Math.max(0, openWave.capacityVanPhong - (openWaveCounts?.van_phong ?? 0))
+    : 0;
 
   // Danh sách thí sinh nằm NGAY TRÊN dashboard chứ không phải một menu riêng: nó là cùng một tập
   // dữ liệu với các ô thống kê phía trên, tách ra thành trang riêng chỉ bắt BTC bấm thêm một lần
   // để xem chi tiết của con số họ vừa đọc.
   // Nạp các đợt một lần rồi tra map — không gọi trong vòng lặp qua từng bài.
-  const waveById = new Map((season ? await listWaves(season.id) : []).map((w) => [w.id, w]));
+  const waveById = new Map(waves.map((w) => [w.id, w]));
 
   const candidateRows: CandidateRow[] = submissions.map((s) => {
     const stage = submissionStage(s);
@@ -108,7 +125,13 @@ export default async function AdminDashboardPage() {
   return (
     <PageShell
       title="Dashboard BTC"
-      subtitle={season ? `${season.name} · trần ${season.capPerWeek} đề tài duyệt/tuần` : "Chưa mở mùa thi"}
+      subtitle={
+        season
+          ? openWave
+            ? `${season.name} · ${openWave.name} đang mở · Kỹ thuật ${openWaveCounts?.ky_thuat ?? 0}/${openWave.capacityKyThuat} · Văn phòng ${openWaveCounts?.van_phong ?? 0}/${openWave.capacityVanPhong}`
+            : `${season.name} · không có đợt nào đang mở đăng ký`
+          : "Chưa mở mùa thi"
+      }
     >
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={NotepadIcon} label="Tổng đăng ký" value={submissions.length} desc="toàn mùa thi" />
@@ -116,7 +139,7 @@ export default async function AdminDashboardPage() {
           icon={HourglassIcon}
           label="Chờ duyệt đề tài"
           value={pending.length}
-          desc={season ? `còn ${capLeft} suất tuần này` : "—"}
+          desc={season ? `còn ${capLeft} suất trong đợt đang mở` : "—"}
           tone={pending.length > 0 ? "danger" : "default"}
         />
         <StatCard icon={RocketIcon} label="Đang làm bài" value={inProgress.length} desc="đã duyệt, chưa công bố" />
@@ -155,9 +178,9 @@ export default async function AdminDashboardPage() {
         </Card>
       )}
 
-      {season && capLeft === 0 && (
-        <Alert tone="warning" title="Đã dùng hết trần duyệt của tuần này">
-          Tuần này đã duyệt đủ {season.capPerWeek} đề tài. Duyệt thêm sẽ bị hệ thống chặn — để sang
+      {openWave && capLeft === 0 && (
+        <Alert tone="warning" title="Đợt đang mở đã hết suất duyệt">
+          {openWave.name} đã đầy cả hai bảng. Duyệt thêm sẽ bị hệ thống chặn — để sang
           tuần sau hoặc điều chỉnh trần của mùa thi.
         </Alert>
       )}

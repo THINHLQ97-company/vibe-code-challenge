@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
 import { requireSession } from "@/lib/api-auth";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
 import { createSubmission, getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
-import { listWaves, getOpenWave, countInWave } from "@/lib/db/queries/waves";
+import {
+  listWaves,
+  getOpenWave,
+  countInWaveByBoard,
+  capacityForBoard,
+} from "@/lib/db/queries/waves";
 
 const registerSchema = z.object({
   productName: z.string().min(3, "Tên sản phẩm tối thiểu 3 ký tự"),
@@ -102,9 +110,21 @@ export async function POST(req: NextRequest) {
         { status: 409 }
       );
     }
-    if ((await countInWave(openWave.id)) >= openWave.capacity) {
+    /**
+     * Trần kiểm theo BẢNG THI của chính thí sinh, không phải tổng cả đợt.
+     *
+     * Giải thưởng tuần trao theo từng bảng, nên một đợt bị một bảng lấp gần hết nghĩa là bảng kia
+     * gần như không có ai để so — mà họ vẫn phải chờ đợt sau như thường.
+     */
+    const me = await db.query.users.findFirst({ where: eq(users.id, auth.session.userId) });
+    const board = me?.board ?? null;
+    const counts = await countInWaveByBoard(openWave.id);
+    const used = board === "ky_thuat" ? counts.ky_thuat : counts.van_phong;
+    const cap = capacityForBoard(openWave, board);
+    if (used >= cap) {
+      const label = board === "ky_thuat" ? "Bảng Kỹ thuật" : "Bảng Văn phòng";
       return NextResponse.json(
-        { error: `${openWave.name} đã đủ ${openWave.capacity} thí sinh — chờ đợt kế tiếp` },
+        { error: `${openWave.name} đã đủ ${cap} suất cho ${label} — chờ đợt kế tiếp` },
         { status: 409 }
       );
     }

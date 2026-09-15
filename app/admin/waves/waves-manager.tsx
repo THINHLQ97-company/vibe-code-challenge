@@ -20,9 +20,13 @@ export type WaveRow = {
   registrationOpensAt: string;
   registrationClosesAt: string;
   capacity: number;
+  capacityKyThuat: number;
+  capacityVanPhong: number;
   bonusPoints: number;
   status: "draft" | "open" | "closed";
   registered: number;
+  registeredKyThuat: number;
+  registeredVanPhong: number;
   members: Member[];
 };
 
@@ -45,7 +49,7 @@ export function WavesManager({ initial }: { initial: WaveRow[] }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<number | "new" | null>(null);
   const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ name: "", opens: "", closes: "", capacity: "35" });
+  const [form, setForm] = useState({ name: "", opens: "", closes: "", capKT: "15", capVP: "20" });
 
   async function call(url: string, body: unknown, key: number | "new") {
     setError(null);
@@ -83,13 +87,14 @@ export function WavesManager({ initial }: { initial: WaveRow[] }) {
         // `datetime-local` trả giờ máy không kèm múi — `toISOString` gắn đúng múi của người tạo.
         registrationOpensAt: new Date(form.opens).toISOString(),
         registrationClosesAt: new Date(form.closes).toISOString(),
-        capacity: Number(form.capacity),
+        capacityKyThuat: Number(form.capKT),
+        capacityVanPhong: Number(form.capVP),
       },
       "new"
     );
     if (ok) {
       setCreating(false);
-      setForm({ name: "", opens: "", closes: "", capacity: "35" });
+      setForm({ name: "", opens: "", closes: "", capKT: "15", capVP: "20" });
     }
   }
 
@@ -123,11 +128,18 @@ export function WavesManager({ initial }: { initial: WaveRow[] }) {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <Input
-                label="Trần số thí sinh"
+                label="Trần Bảng Kỹ thuật"
                 type="number"
-                min={1}
-                value={form.capacity}
-                onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                min={0}
+                value={form.capKT}
+                onChange={(e) => setForm({ ...form, capKT: e.target.value })}
+              />
+              <Input
+                label="Trần Bảng Văn phòng"
+                type="number"
+                min={0}
+                value={form.capVP}
+                onChange={(e) => setForm({ ...form, capVP: e.target.value })}
               />
               <Input
                 label="Mở đăng ký lúc"
@@ -189,10 +201,13 @@ function WaveCard({
 }) {
   const [opens, setOpens] = useState(toLocalInput(wave.registrationOpensAt));
   const [closes, setCloses] = useState(toLocalInput(wave.registrationClosesAt));
-  const [capacity, setCapacity] = useState(String(wave.capacity));
+  const [capKT, setCapKT] = useState(String(wave.capacityKyThuat));
+  const [capVP, setCapVP] = useState(String(wave.capacityVanPhong));
   const [bonus, setBonus] = useState(String(wave.bonusPoints));
   const st = STATUS[wave.status];
-  const full = wave.registered >= wave.capacity;
+  const fullKT = wave.registeredKyThuat >= wave.capacityKyThuat;
+  const fullVP = wave.registeredVanPhong >= wave.capacityVanPhong;
+  const full = fullKT && fullVP;
 
   return (
     <div className="rounded-lg border border-stroke bg-surface-2 p-3">
@@ -203,23 +218,31 @@ function WaveCard({
             <span className="text-caption font-normal text-ink-3">· đợt {wave.orderIndex}</span>
           </div>
           <div className="mt-0.5 text-caption text-ink-2">
-            {wave.registered}/{wave.capacity} thí sinh · thưởng +{wave.bonusPoints} điểm
+            Kỹ thuật {wave.registeredKyThuat}/{wave.capacityKyThuat} · Văn phòng{" "}
+            {wave.registeredVanPhong}/{wave.capacityVanPhong} · thưởng +{wave.bonusPoints} điểm
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          {full && <Badge tone="danger">Đã đầy</Badge>}
+          {full ? (
+          <Badge tone="danger">Đã đầy cả hai bảng</Badge>
+        ) : fullKT ? (
+          <Badge tone="warning">Đầy Bảng Kỹ thuật</Badge>
+        ) : fullVP ? (
+          <Badge tone="warning">Đầy Bảng Văn phòng</Badge>
+        ) : null}
           <Badge tone={st.tone}>{st.label}</Badge>
         </div>
       </div>
 
       <div className="mt-2">
-        <Progress value={Math.min(100, (wave.registered / wave.capacity) * 100)} />
+        <Progress value={Math.min(100, (wave.registered / Math.max(1, wave.capacity)) * 100)} />
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Input label="Mở đăng ký" type="datetime-local" value={opens} onChange={(e) => setOpens(e.target.value)} />
         <Input label="Đóng đăng ký" type="datetime-local" value={closes} onChange={(e) => setCloses(e.target.value)} />
-        <Input label="Trần thí sinh" type="number" min={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+        <Input label="Trần Kỹ thuật" type="number" min={0} value={capKT} onChange={(e) => setCapKT(e.target.value)} />
+        <Input label="Trần Văn phòng" type="number" min={0} value={capVP} onChange={(e) => setCapVP(e.target.value)} />
         <Input label="Điểm thưởng" type="number" min={0} value={bonus} onChange={(e) => setBonus(e.target.value)} />
       </div>
 
@@ -232,7 +255,8 @@ function WaveCard({
             onPatch({
               registrationOpensAt: new Date(opens).toISOString(),
               registrationClosesAt: new Date(closes).toISOString(),
-              capacity: Number(capacity),
+              capacityKyThuat: Number(capKT),
+              capacityVanPhong: Number(capVP),
               bonusPoints: Number(bonus),
             })
           }
