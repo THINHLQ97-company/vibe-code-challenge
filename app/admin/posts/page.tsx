@@ -1,4 +1,6 @@
 import { listSubmissionsWithUser } from "@/lib/db/queries/submissions";
+import { db } from "@/lib/db";
+import { periodLabel, periodTimeLabel } from "@/lib/contest-schedule";
 import { missingCheckpoints } from "@/lib/checkpoints";
 import { formatDateTimeVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
@@ -13,6 +15,15 @@ export const metadata = { title: "Bài đăng & lan tỏa" };
 export default async function PostsPage() {
   const all = await listSubmissionsWithUser();
   const relevant = all.filter((s) => !!s.facebookPostUrl);
+
+  /**
+   * Khung giờ của từng bài, tra một lượt rồi dựng map.
+   *
+   * Ban tổ chức duyệt bài THEO KHUNG GIỜ, nên nếu bảng này không nói bài nào thuộc khung nào thì
+   * người trực phải mở từng bài ra xem — đúng việc mà bảng danh sách sinh ra để khỏi phải làm.
+   */
+  const slots = await db.query.postingSlots.findMany();
+  const slotById = new Map(slots.map((s) => [s.id, s]));
 
   const rows: PostRowData[] = relevant.map((s) => ({
     id: s.id,
@@ -32,7 +43,20 @@ export default async function PostsPage() {
     // Cùng danh sách mốc mà API công bố dùng — trước đây màn này chỉ soi CP4/CP5/CP6
     // nên nút "Công bố" vẫn sáng cho bài thiếu CP2/CP3 rồi API mới trả lỗi.
     missing: missingCheckpoints(s),
+    slotLabel: (() => {
+      const slot = s.postingSlotId ? slotById.get(s.postingSlotId) : null;
+      if (!slot) return null;
+      return `${periodLabel(slot.period)} ${formatDateTimeVN(slot.startsAt).slice(0, 10)} · ${periodTimeLabel(slot.period)}`;
+    })(),
+    // Bài chưa đặt khung xếp xuống CUỐI (không phải đầu): chúng không thuộc lượt duyệt nào, nên
+    // để lẫn vào giữa hàng đợi sẽ cắt ngang mạch làm việc theo khung của người trực.
+    slotOrder: (() => {
+      const slot = s.postingSlotId ? slotById.get(s.postingSlotId) : null;
+      return slot ? slot.startsAt.getTime() : Number.MAX_SAFE_INTEGER;
+    })(),
   }));
+
+  rows.sort((a, b) => a.slotOrder - b.slotOrder);
 
   const waitingApproval = rows.filter((r) => !r.approvedAt).length;
   const waitingCount = rows.filter((r) => r.approvedAt && r.engagementTier == null).length;

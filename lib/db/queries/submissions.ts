@@ -1,6 +1,6 @@
 import { eq, desc, asc, and, gte, gt, lte, lt, isNotNull } from "drizzle-orm";
 import { db } from "../index";
-import { submissions, users, type NewSubmission } from "../schema";
+import { submissions, users, waves, type NewSubmission } from "../schema";
 
 export async function getCurrentSubmissionForUser(userId: number) {
   return db.query.submissions.findFirst({
@@ -69,12 +69,34 @@ export async function countApprovedThisWeek(seasonId: number, at: Date = new Dat
   return rows.length;
 }
 
+/**
+ * Hạn nộp của một bài = hạn CHUNG của đợt, nếu đợt đã có lịch.
+ *
+ * Cách cũ cộng số ngày kể từ lúc duyệt, nên bốn mươi người cùng đợt có bốn mươi hạn nộp lệch
+ * nhau — trong khi ban giám khảo chỉ chấm vào ba mốc cố định của đợt. Ai được duyệt muộn thì hạn
+ * nộp rơi ra sau lượt chấm cuối và không còn ai chấm kịp bài của họ.
+ *
+ * Vẫn giữ đường lùi cộng ngày cho đợt chưa điền lịch và cho bài không thuộc đợt nào (dữ liệu cũ) —
+ * thà một hạn nộp ước lượng còn hơn một ô trống không ai biết phải nộp lúc nào.
+ */
+async function deadlineFor(submission: {
+  waveId: number | null;
+  requestedDeadlineDays: number;
+}, approvedAt: Date): Promise<Date> {
+  if (submission.waveId != null) {
+    const wave = await db.query.waves.findFirst({ where: eq(waves.id, submission.waveId) });
+    if (wave?.phase2ClosesAt) return wave.phase2ClosesAt;
+  }
+  const fallback = new Date(approvedAt);
+  fallback.setDate(fallback.getDate() + submission.requestedDeadlineDays);
+  return fallback;
+}
+
 export async function approveSubmission(id: number) {
   const submission = await getSubmissionById(id);
   if (!submission) throw new Error("Không tìm thấy bài đăng ký");
   const approvedAt = new Date();
-  const deadline = new Date(approvedAt);
-  deadline.setDate(deadline.getDate() + submission.requestedDeadlineDays);
+  const deadline = await deadlineFor(submission, approvedAt);
 
   const [row] = await db
     .update(submissions)

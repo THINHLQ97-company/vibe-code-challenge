@@ -9,7 +9,10 @@ import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { NotepadIcon, HourglassIcon } from "@/components/dsvh/icons";
+import { listSlotsForWave } from "@/lib/db/queries/posting-slots";
+import { periodLabel, periodTimeLabel } from "@/lib/contest-schedule";
 import { ShareForm } from "./share-form";
+import type { PickerSlot } from "./slot-picker";
 
 export const metadata = { title: "Chia sẻ & lan tỏa" };
 
@@ -103,6 +106,24 @@ export default async function SharePage() {
     );
   }
 
+  /**
+   * Khung giờ chỉ có nghĩa khi bài thuộc một đợt CÓ lịch đăng bài. Bài của dữ liệu cũ không thuộc
+   * đợt nào thì luồng lan tỏa vẫn chạy như trước, chỉ thiếu bước đặt chỗ.
+   */
+  const slotRows = submission.waveId ? await listSlotsForWave(submission.waveId) : [];
+  const slots: PickerSlot[] = slotRows.map((s) => ({
+    id: s.id,
+    dayIndex: s.dayIndex,
+    period: s.period,
+    periodLabel: periodLabel(s.period),
+    timeLabel: periodTimeLabel(s.period),
+    dateLabel: formatDateVN(s.startsAt),
+    capacity: s.capacity,
+    booked: s.booked,
+    remaining: s.remaining,
+  }));
+  const picked = slots.find((s) => s.id === submission.postingSlotId) ?? null;
+
   return (
     <PageShell
       title="Chia sẻ & lan tỏa"
@@ -110,7 +131,7 @@ export default async function SharePage() {
     >
       <Card>
         <CardHeader
-          title="Ba bước của vòng lan tỏa"
+          title="Các bước của vòng lan tỏa"
           subtitle="Bước nào đang chờ bạn, bước nào đang chờ BTC — nhìn màu và số thứ tự là biết"
         />
         <ShareForm
@@ -122,6 +143,11 @@ export default async function SharePage() {
           }
           engagementCount={submission.engagementCount}
           engagementTier={submission.engagementTier}
+          slots={slots}
+          selectedSlotId={submission.postingSlotId}
+          selectedSlotLabel={
+            picked ? `${picked.periodLabel} ${picked.dateLabel} · ${picked.timeLabel}` : null
+          }
         />
         <Note tone="warning" className="mt-4">
           Ràng buộc nội dung bài đăng: không nhắc Mắt Bão, không để lộ bạn đang làm ở Mắt Bão, không

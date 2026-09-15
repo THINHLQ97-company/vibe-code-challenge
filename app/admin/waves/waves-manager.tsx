@@ -19,6 +19,12 @@ export type WaveRow = {
   orderIndex: number;
   registrationOpensAt: string;
   registrationClosesAt: string;
+  phase2OpensAt: string | null;
+  phase2ClosesAt: string | null;
+  judgingDates: string[];
+  postingOpensAt: string | null;
+  postingClosesAt: string | null;
+  completedAt: string | null;
   capacity: number;
   capacityKyThuat: number;
   capacityVanPhong: number;
@@ -41,6 +47,19 @@ function toLocalInput(iso: string): string {
   const d = new Date(iso);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Như trên nhưng chịu được mốc còn trống — ô để trống nghĩa là ban tổ chức chưa chốt ngày đó. */
+function toLocalInputOrEmpty(iso: string | null): string {
+  return iso ? toLocalInput(iso) : "";
+}
+
+/** Ô nhập ngày rỗng = xoá mốc (`null`); có chữ = đặt mốc. */
+function fromLocalInput(value: string): string | null {
+  const t = value.trim();
+  if (!t) return null;
+  const d = new Date(t);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
 export function WavesManager({ initial }: { initial: WaveRow[] }) {
@@ -204,6 +223,12 @@ function WaveCard({
   const [capKT, setCapKT] = useState(String(wave.capacityKyThuat));
   const [capVP, setCapVP] = useState(String(wave.capacityVanPhong));
   const [bonus, setBonus] = useState(String(wave.bonusPoints));
+  const [p2Open, setP2Open] = useState(toLocalInputOrEmpty(wave.phase2OpensAt));
+  const [p2Close, setP2Close] = useState(toLocalInputOrEmpty(wave.phase2ClosesAt));
+  const [judging, setJudging] = useState(wave.judgingDates.join(", "));
+  const [postOpen, setPostOpen] = useState(toLocalInputOrEmpty(wave.postingOpensAt));
+  const [postClose, setPostClose] = useState(toLocalInputOrEmpty(wave.postingClosesAt));
+  const [doneAt, setDoneAt] = useState(toLocalInputOrEmpty(wave.completedAt));
   const st = STATUS[wave.status];
   const fullKT = wave.registeredKyThuat >= wave.capacityKyThuat;
   const fullVP = wave.registeredVanPhong >= wave.capacityVanPhong;
@@ -246,6 +271,56 @@ function WaveCard({
         <Input label="Điểm thưởng" type="number" min={0} value={bonus} onChange={(e) => setBonus(e.target.value)} />
       </div>
 
+      {/* Lịch phía sau đăng ký tách thành khối riêng: đây là phần ban tổ chức điền MỘT LẦN đầu đợt
+          rồi hầu như không đụng tới, khác hẳn trần số lượng và trạng thái vốn chỉnh luôn trong đợt.
+          Trộn chung một hàng mười ô thì mỗi lần sửa một con số phải dò qua chín ô không liên quan. */}
+      <div className="mt-4 rounded-lg border border-stroke-soft bg-surface p-3">
+        <p className="text-caption font-semibold text-ink">Lịch của đợt</p>
+        <p className="mt-0.5 text-meta text-ink-3">
+          Để trống mốc nào thì mốc đó không hiện trên lịch của thí sinh. Hạn nộp là hạn CHUNG cho
+          mọi bài trong đợt. Cửa sổ đăng bài sinh ra 9 khung giờ (3 ngày × sáng/chiều/tối).
+        </p>
+        <div className="mt-2.5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Input
+            label="Bắt đầu làm bài"
+            type="datetime-local"
+            value={p2Open}
+            onChange={(e) => setP2Open(e.target.value)}
+          />
+          <Input
+            label="Hạn nộp sản phẩm"
+            type="datetime-local"
+            value={p2Close}
+            onChange={(e) => setP2Close(e.target.value)}
+          />
+          <Input
+            label="Các lượt chấm"
+            hint="Ngày dạng 2026-09-26, cách nhau bằng dấu phẩy"
+            placeholder="2026-09-26, 2026-10-03, 2026-10-07"
+            value={judging}
+            onChange={(e) => setJudging(e.target.value)}
+          />
+          <Input
+            label="Mở cửa sổ đăng bài"
+            type="datetime-local"
+            value={postOpen}
+            onChange={(e) => setPostOpen(e.target.value)}
+          />
+          <Input
+            label="Đóng cửa sổ đăng bài"
+            type="datetime-local"
+            value={postClose}
+            onChange={(e) => setPostClose(e.target.value)}
+          />
+          <Input
+            label="Đợt khép lại"
+            type="datetime-local"
+            value={doneAt}
+            onChange={(e) => setDoneAt(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="mt-3 flex flex-wrap gap-2">
         <Button
           variant="ghost"
@@ -258,6 +333,15 @@ function WaveCard({
               capacityKyThuat: Number(capKT),
               capacityVanPhong: Number(capVP),
               bonusPoints: Number(bonus),
+              phase2OpensAt: fromLocalInput(p2Open),
+              phase2ClosesAt: fromLocalInput(p2Close),
+              postingOpensAt: fromLocalInput(postOpen),
+              postingClosesAt: fromLocalInput(postClose),
+              completedAt: fromLocalInput(doneAt),
+              judgingDates: judging
+                .split(",")
+                .map((x) => x.trim())
+                .filter(Boolean),
             })
           }
         >

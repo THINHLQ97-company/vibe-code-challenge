@@ -288,7 +288,7 @@ const STEPS = [
               <li>· Tên sản phẩm, nhánh đề tài và nhóm chủ đề</li>
               <li>· Bài toán đang giải và người dùng của sản phẩm</li>
               <li>· Tài liệu PRD — tải file .md hoặc dán thẳng nội dung</li>
-              <li>· Thời gian làm bài bạn xin, tối đa 15 ngày</li>
+              <li>· Công cụ AI dự định dùng và cam kết dự thi</li>
               <li>· Công cụ AI dự định dùng (liệt kê, không bắt buộc)</li>
               <li>· Bốn cam kết bắt buộc, thiếu một mục là không gửi được</li>
             </ul>

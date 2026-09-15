@@ -267,12 +267,12 @@ export function RegisterForm({ initial }: { initial?: Initial }) {
       <Card>
         <CardHeader
           title={<SectionTitle icon={<RobotIcon size={16} />}>Thông tin thi</SectionTitle>}
-          subtitle="Hạn nộp cố định 15 ngày kể từ khi BTC duyệt đề tài — nộp sớm hơn lúc nào cũng được"
+          subtitle="Hạn nộp là ngày chung của đợt bạn đăng ký, xem ở mục Lịch cuộc thi — nộp sớm hơn lúc nào cũng được"
         />
         <div className="space-y-4">
-          {/* Bỏ ô "Hạn nộp mong muốn": mọi thí sinh đều có 15 ngày kể từ khi đề tài được duyệt.
-              Cho tự chọn ít hơn chỉ tạo ra một quyết định không ai được lợi — nộp sớm lúc nào cũng
-              được, và chọn nhầm số nhỏ là tự siết hạn của chính mình. */}
+          {/* Bỏ ô "Hạn nộp mong muốn": hạn nộp nay là ngày chung của cả đợt, đúng theo lịch ban
+              tổ chức công bố. Cho tự chọn ít hơn chỉ tạo ra một quyết định không ai được lợi — nộp
+              sớm lúc nào cũng được, và chọn nhầm số nhỏ là tự siết hạn của chính mình. */}
           <Input
             label="Công cụ AI dự định dùng"
             hint="Liệt kê là đủ, không bắt buộc"

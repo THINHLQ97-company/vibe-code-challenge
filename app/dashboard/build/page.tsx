@@ -45,7 +45,7 @@ export default async function BuildPage() {
           <Empty
             icon={<HourglassIcon size={40} />}
             title="Đề tài chưa được duyệt"
-            description="Ban tổ chức duyệt đề tài theo từng đợt thi. Duyệt xong bạn mới nộp được sản phẩm, và đó cũng là mốc bắt đầu tính hạn nộp 15 ngày."
+            description="Ban tổ chức duyệt đề tài theo từng đợt thi. Duyệt xong bạn mới nộp được sản phẩm. Hạn nộp là ngày chung của đợt, xem ở mục Lịch cuộc thi."
             action={
               <Link href="/dashboard">
                 <Button variant="ghost">Về tổng quan</Button>

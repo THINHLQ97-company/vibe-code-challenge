@@ -47,7 +47,7 @@ const registerSchema = z.object({
   dataUsed: z.string().optional(),
   riskSelfAssessment: z.string().optional(),
   /**
-   * NGƯNG thu thập từ form (11/09/2026) — mọi thí sinh đều 15 ngày kể từ khi duyệt. Vẫn nhận nếu
+   * NGƯNG thu thập từ form (11/09/2026) — hạn nộp nay là hạn chung của đợt. Vẫn nhận nếu
    * có để bản ghi cũ và công cụ ngoài không gãy, nhưng không còn là lựa chọn của thí sinh.
    */
   requestedDeadlineDays: z.number().int().min(1).max(15).default(15),

@@ -136,7 +136,7 @@ export default async function RegisterPage() {
           icon={CalendarIcon}
           label={approved ? "Hạn nộp" : "Hạn nộp xin"}
           value={
-            deadline ? formatDateVN(deadline) : `${submission.requestedDeadlineDays} ngày sau duyệt`
+            deadline ? formatDateVN(deadline) : "theo hạn chung của đợt"
           }
         />
       </div>

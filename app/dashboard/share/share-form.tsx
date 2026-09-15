@@ -15,6 +15,7 @@ import {
   MegaphoneIcon,
 } from "@/components/dsvh/icons";
 import { ENGAGEMENT_TIERS } from "@/lib/scoring-rubric";
+import { SlotPicker, type PickerSlot } from "./slot-picker";
 
 // Bảng bậc lấy từ barem chung. Gõ lại ở đây là cách chắc chắn nhất để một ngày nào đó màn này
 // hứa với thí sinh một thang điểm khác thang mà hệ thống thật sự cộng.
@@ -23,7 +24,8 @@ const TIERS = ENGAGEMENT_TIERS;
 type StepState = "done" | "current" | "waiting";
 
 /**
- * Bước lan tỏa là một CHUỖI ba việc nối nhau: dán link → BGK duyệt → đếm 7 ngày ra bậc điểm.
+ * Bước lan tỏa là một CHUỖI nối nhau: đặt khung giờ → đăng bài và dán link → ban tổ chức duyệt cho
+ * bài lên nhóm đúng khung đã đặt → đếm 7 ngày ra bậc điểm.
  *
  * Bản trước đổ cả ba thành một form cộng ba hàng nhãn↔giá trị phẳng, nên nhìn vào không biết mình
  * đang ở đâu trong chuỗi, việc nào đang chờ mình và việc nào đang chờ BTC. Nay mỗi bước là một
@@ -36,6 +38,9 @@ export function ShareForm({
   approvedAt,
   engagementCount,
   engagementTier,
+  slots,
+  selectedSlotId,
+  selectedSlotLabel,
 }: {
   submissionId: number;
   initialUrl: string;
@@ -43,6 +48,9 @@ export function ShareForm({
   approvedAt: string | null;
   engagementCount: number | null;
   engagementTier: number | null;
+  slots: PickerSlot[];
+  selectedSlotId: number | null;
+  selectedSlotLabel: string | null;
 }) {
   const router = useRouter();
   const [url, setUrl] = useState(initialUrl);
@@ -74,23 +82,62 @@ export function ShareForm({
 
   const posted = !!initialUrl;
   const scored = engagementTier != null;
-  const done = [posted, approved, scored].filter(Boolean).length;
+
+  /**
+   * Đợt chưa có cửa sổ đăng bài thì KHÔNG hiện bước đặt khung giờ.
+   *
+   * Hiện một bước rỗng nói "chưa có khung nào" chỉ làm thí sinh tưởng mình đang bị chặn, trong khi
+   * thứ còn thiếu nằm ở phía ban tổ chức.
+   */
+  const hasSlots = slots.length > 0;
+  const booked = selectedSlotId != null;
+  const steps = hasSlots ? [booked, posted, approved, scored] : [posted, approved, scored];
+  const done = steps.filter(Boolean).length;
+  const total = steps.length;
+  let n = 0;
 
   return (
     <div className="space-y-4">
       <div>
         <div className="flex items-baseline justify-between text-caption">
           <span className="text-ink-2">Tiến độ bước lan tỏa</span>
-          <span className="font-semibold tabular-nums text-ink">{done}/3</span>
+          <span className="font-semibold tabular-nums text-ink">
+            {done}/{total}
+          </span>
         </div>
-        <Progress value={(done / 3) * 100} tone="teal" className="mt-1.5" />
+        <Progress value={(done / total) * 100} tone="teal" className="mt-1.5" />
       </div>
 
+      {hasSlots && (
+        <Step
+          index={++n}
+          title="Đặt khung giờ đăng bài"
+          state={booked ? "done" : "current"}
+          hint="Ban tổ chức duyệt bài lên nhóm theo từng khung giờ. Đặt trước một khung để bài của bạn có chỗ."
+        >
+          {booked && selectedSlotLabel && (
+            <p className="mb-2.5 text-caption text-ink-2">
+              Khung đã đặt: <b className="text-ink">{selectedSlotLabel}</b>
+            </p>
+          )}
+          <SlotPicker
+            submissionId={submissionId}
+            slots={slots}
+            selectedSlotId={selectedSlotId}
+            locked={posted && booked}
+          />
+        </Step>
+      )}
+
       <Step
-        index={1}
-        title="Dán link bài đăng"
-        state={posted ? "done" : "current"}
-        hint='Đăng ẩn danh lên nhóm "Vibe Coding chưa?" rồi dán link vào đây.'
+        index={++n}
+        title="Đăng bài rồi dán link vào đây"
+        state={posted ? "done" : hasSlots && !booked ? "waiting" : "current"}
+        hint={
+          hasSlots
+            ? 'Đăng ẩn danh lên nhóm "Vibe Coding chưa?" — bài sẽ nằm chờ duyệt — rồi dán link vào đây.'
+            : 'Đăng ẩn danh lên nhóm "Vibe Coding chưa?" rồi dán link vào đây.'
+        }
       >
         <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <Input
@@ -128,10 +175,10 @@ export function ShareForm({
       </Step>
 
       <Step
-        index={2}
-        title="BGK duyệt bài"
+        index={++n}
+        title="Ban tổ chức duyệt cho bài lên nhóm"
         state={approved ? "done" : posted ? "current" : "waiting"}
-        hint="BGK kiểm tra bài có đúng ràng buộc nội dung không. Duyệt xong mới bắt đầu đếm 7 ngày."
+        hint="Ban tổ chức kiểm tra bài có đúng ràng buộc nội dung không, rồi cho lên nhóm trong khung giờ bạn đã đặt. Từ lúc đó mới bắt đầu đếm 7 ngày."
       >
         {approved ? (
           <span className="flex flex-wrap items-center gap-2 text-caption text-ink-2">
@@ -149,7 +196,7 @@ export function ShareForm({
       </Step>
 
       <Step
-        index={3}
+        index={++n}
         title="Đếm tương tác & chốt bậc điểm"
         state={scored ? "done" : approved ? "current" : "waiting"}
         hint="Điểm lan tỏa chấm theo bậc, so trung vị các bài đăng cùng khung giờ trong tuần."

@@ -3,6 +3,7 @@ import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark, LogoSquare } from "@/components/brand";
 import { RUBRIC, PHASE_GROUPS, TOTAL_MAX } from "@/lib/scoring-rubric";
 import { WaveSchedule, type PublicWave } from "@/components/wave-schedule";
+import { ContestSchedule } from "@/components/contest-schedule";
 import { MAX_WAVE_BONUS } from "@/lib/wave-bonus";
 import { MicrosoftLoginButton } from "@/components/microsoft-login";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
@@ -67,6 +68,7 @@ const NAV_ANCHORS = [
   { href: "#giai-thuong", label: "Giải thưởng" },
   { href: "#quyen-loi", label: "Quyền lợi" },
   { href: "#hanh-trinh", label: "Hành trình" },
+  { href: "#lich-thi", label: "Lịch thi" },
   { href: "#cham-diem", label: "Cách chấm" },
   { href: "#bang-thi", label: "Bảng thi" },
   { href: "#faq", label: "Hỏi đáp" },
@@ -76,9 +78,9 @@ const FACTS = [
   { value: "5 đợt thi", label: "40 thí sinh mỗi đợt" },
   { value: "2 bảng", label: "Kỹ thuật · Văn phòng" },
   // Hai dòng này từng ghi "thời gian làm bài bạn tự chọn" và "30–40 đề tài duyệt mỗi tuần" —
-  // cả hai đều không còn đúng: hạn nộp nay cố định 15 ngày cho mọi người, và việc chia người theo
+  // cả hai đều không còn đúng: hạn nộp nay là ngày chung của từng đợt, và việc chia người theo
   // tuần lịch đã thay bằng đợt thi có lịch mở/đóng riêng.
-  { value: "15 ngày", label: "gồm cả làm bài, chấm và sửa lại" },
+  { value: "2 tuần", label: "gồm cả làm bài, chấm và sửa lại" },
   { value: "Theo đợt", label: "đăng ký sớm được cộng điểm thưởng" },
 ];
 
@@ -119,7 +121,7 @@ const BENEFITS = [
  *
  * Ví dụ là thứ quyết định người đọc có hình dung được hay không: "Quản lý / Vận hành" không gợi
  * ra điều gì cụ thể, còn "bảng theo dõi tiến độ công việc nhóm" thì hình dung được ngay. Cố ý
- * chọn ví dụ nhỏ, làm được trong 15 ngày, để không ai nghĩ phải dựng cả một hệ thống.
+ * chọn ví dụ nhỏ, làm được trong hai tuần, để không ai nghĩ phải dựng cả một hệ thống.
  */
 const TOPICS = [
   {
@@ -283,6 +285,12 @@ export default async function LandingPage() {
       orderIndex: w.orderIndex,
       registrationOpensAt: w.registrationOpensAt.toISOString(),
       registrationClosesAt: w.registrationClosesAt.toISOString(),
+      phase2OpensAt: w.phase2OpensAt?.toISOString() ?? null,
+      phase2ClosesAt: w.phase2ClosesAt?.toISOString() ?? null,
+      judgingDates: w.judgingDates,
+      postingOpensAt: w.postingOpensAt?.toISOString() ?? null,
+      postingClosesAt: w.postingClosesAt?.toISOString() ?? null,
+      completedAt: w.completedAt?.toISOString() ?? null,
       capacity: w.capacity,
       capacityKyThuat: w.capacityKyThuat,
       capacityVanPhong: w.capacityVanPhong,
@@ -501,23 +509,24 @@ export default async function LandingPage() {
         >
           <JourneyTrain />
 
-          {/* Cảnh báo về cách CHIA 15 ngày.
-              Lỗi hay gặp nhất và tốn kém nhất: người ta đọc "15 ngày" rồi hiểu là 15 ngày để làm
-              bài, nên tới ngày 13–14 mới bắt tay, nộp ngày 15, bị trả về và lúc đó không còn ngày
-              nào để sửa. Nói con số thôi không đủ — phải nói luôn con số đó gồm những gì. */}
+          {/* Cảnh báo về cách CHIA kỳ làm bài.
+              Lỗi hay gặp nhất và tốn kém nhất: người ta đọc "hai tuần" rồi hiểu là hai tuần để làm
+              bài, nên tới ngày áp chót mới bắt tay, nộp sát hạn, bị trả về và lúc đó không còn
+              ngày nào để sửa. Nói con số thôi không đủ — phải nói luôn con số đó gồm những gì. */}
           <GlassCard className="mt-5 p-5">
             <h3 className="text-title font-semibold text-cream">
-              15 ngày gồm cả chấm và sửa — không phải 15 ngày để làm bài
+              Kỳ làm bài gồm cả chấm và sửa — không phải toàn bộ để làm bài
             </h3>
             <p className="mt-2 text-body leading-relaxed text-cream/70">
-              Thời gian được tính từ khi đề tài của bạn được duyệt, và bao gồm ba phần nối tiếp:
-              thực hiện sản phẩm, ban giám khảo chấm, và chỉnh sửa nếu bài được trả về. Ban giám
-              khảo trả kết quả theo lịch cố định —{" "}
-              <b className="text-cream">chiều thứ Bảy hằng tuần</b>.
+              Mỗi đợt có một hạn nộp chung, ghi rõ trong lịch đợt thi, và khoảng thời gian từ lúc
+              mở đợt tới hạn nộp bao gồm ba phần nối tiếp: thực hiện sản phẩm, ban giám khảo chấm,
+              và chỉnh sửa nếu bài được trả về.
             </p>
             <p className="mt-3 text-body leading-relaxed text-cream/70">
-              Vì vậy, bạn nên hoàn thành và nộp bài trong khoảng một tuần đầu để kịp lượt chấm gần
-              nhất, đồng thời giữ lại quỹ thời gian cho việc chỉnh sửa nếu cần.
+              Ban giám khảo trả kết quả theo lịch cố định —{" "}
+              <b className="text-cream">ba lượt mỗi đợt</b>: hai lượt vào thứ Bảy trong kỳ làm bài
+              và một lượt vào đúng ngày đóng đợt. Vì vậy, bạn nên hoàn thành và nộp bài trước lượt
+              chấm đầu tiên, để nếu bài được trả về thì vẫn còn hai lượt phía sau cho bản sửa.
             </p>
             <p className="mt-3 text-body leading-relaxed text-cream/70">
               Mỗi đợt có số suất riêng cho Bảng Kỹ thuật và Bảng Văn phòng, và giải thưởng theo
@@ -533,6 +542,12 @@ export default async function LandingPage() {
             </div>
           </GlassCard>
         </Band>
+
+        {/* ── LỊCH ĐỢT THI ───────────────────────────────────────────────────────────────── */}
+        {/* Đặt NGAY SAU hành trình: hành trình nói có những chặng nào, lịch nói các chặng đó rơi
+            vào ngày nào. Đảo thứ tự thì người đọc thấy một loạt ngày tháng trước khi biết chúng
+            là ngày của việc gì. */}
+        <ContestSchedule waves={waves} />
 
         {/* ── CHẤM ĐIỂM ──────────────────────────────────────────────────────────────────── */}
         <Band

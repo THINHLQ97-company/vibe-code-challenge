@@ -7,6 +7,7 @@ import { Badge } from "@/components/dsvh/ui/Badge";
 import { Textarea } from "@/components/dsvh/ui/form/Textarea";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Input } from "@/components/dsvh/ui/Input";
+import { Select } from "@/components/dsvh/ui/form/Select";
 import { Modal } from "@/components/dsvh/ui/overlay/Modal";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
@@ -29,6 +30,9 @@ export type PostRowData = {
   published: boolean;
   finalScore: number | null;
   missing: string[];
+  /** Khung giờ thí sinh đã đặt để ban tổ chức cho bài lên nhóm; `null` khi họ chưa đặt. */
+  slotLabel: string | null;
+  slotOrder: number;
 };
 
 export function PostsTable({ rows }: { rows: PostRowData[] }) {
@@ -40,14 +44,30 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
   const [error, setError] = useState<string | null>(null);
   const [rejectNote, setRejectNote] = useState("");
 
+  const [slotFilter, setSlotFilter] = useState<string>("all");
+
+  // Danh sách khung có bài, giữ nguyên thứ tự thời gian đã sắp ở phía máy chủ.
+  const slotOptions = useMemo(() => {
+    const seen: string[] = [];
+    for (const r of rows) if (r.slotLabel && !seen.includes(r.slotLabel)) seen.push(r.slotLabel);
+    return [
+      { value: "all", label: "Tất cả khung giờ" },
+      ...seen.map((s) => ({ value: s, label: s })),
+      { value: "none", label: "Chưa đặt khung" },
+    ];
+  }, [rows]);
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return rows;
-    return rows.filter(
-      (r) =>
+    return rows.filter((r) => {
+      if (slotFilter === "none" && r.slotLabel) return false;
+      if (slotFilter !== "all" && slotFilter !== "none" && r.slotLabel !== slotFilter) return false;
+      if (!needle) return true;
+      return (
         r.productName.toLowerCase().includes(needle) || r.userName.toLowerCase().includes(needle)
-    );
-  }, [rows, q]);
+      );
+    });
+  }, [rows, q, slotFilter]);
 
   function open(row: PostRowData) {
     setActive(row);
@@ -107,6 +127,17 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
           Mở <ArrowSquareOutIcon size={13} />
         </a>
       ),
+    },
+    {
+      key: "slot",
+      header: "Khung giờ đăng",
+      align: "center",
+      render: (r) =>
+        r.slotLabel ? (
+          <span className="text-caption tabular-nums text-ink-2">{r.slotLabel}</span>
+        ) : (
+          <span className="text-caption text-ink-3">chưa đặt</span>
+        ),
     },
     {
       key: "cp5",
@@ -170,6 +201,14 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
 
   return (
     <div className="space-y-3">
+      <div className="sm:max-w-xs">
+        <Select
+          value={slotFilter}
+          onChange={setSlotFilter}
+          options={slotOptions}
+          placeholder="Lọc theo khung giờ"
+        />
+      </div>
       <Input
         placeholder="Tìm theo tên sản phẩm hoặc thí sinh"
         value={q}

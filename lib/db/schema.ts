@@ -37,6 +37,7 @@ export const recheckStatusEnum = pgEnum("recheck_status", [
   "failed",
 ]);
 export const waveStatusEnum = pgEnum("wave_status", ["draft", "open", "closed"]);
+export const postingPeriodEnum = pgEnum("posting_period", ["sang", "chieu", "toi"]);
 export const scoreSourceEnum = pgEnum("score_source", ["external_ai", "judge"]);
 export const securityStatusEnum = pgEnum("security_status", [
   "pending",
@@ -176,10 +177,75 @@ export const waves = pgTable("waves", {
    * cứng trong mã vì BTC có thể muốn một wave nào đó khác lệ thường.
    */
   bonusPoints: integer("bonus_points").notNull().default(0),
+
+  /**
+   * ── LỊCH CỦA ĐỢT ───────────────────────────────────────────────────────────────────────────
+   *
+   * Cả năm mốc dưới đây đều CÓ THỂ RỖNG, vì đợt do ban tổ chức tự tạo trong giao diện quản lý có
+   * thể chưa điền xong lịch. Mọi màn hình đọc chúng phải chịu được `null` chứ không được coi là
+   * chắc chắn có — hiện một ngày sai còn tệ hơn không hiện ngày nào.
+   */
+
+  /** Ngày bắt đầu làm bài (Phase 2) — ngay sau khi đóng đăng ký. */
+  phase2OpensAt: timestamp("phase2_opens_at"),
+  /**
+   * HẠN NỘP của cả đợt.
+   *
+   * Trước đây hạn nộp tính riêng cho từng người: ngày được duyệt cộng 15. Cách đó cho ra 40 hạn
+   * nộp lệch nhau trong cùng một đợt, trong khi ban giám khảo chỉ chấm vào ba mốc cố định — nên
+   * có người hết hạn sau lượt chấm cuối, không ai chấm kịp. Nay cả đợt chung một hạn, đúng theo
+   * lịch đã công bố.
+   */
+  phase2ClosesAt: timestamp("phase2_closes_at"),
+  /**
+   * Các mốc ban giám khảo trả kết quả, dạng ["2026-09-26", ...].
+   *
+   * Lưu danh sách chứ không lưu "thứ Bảy hằng tuần": lịch thật của mùa 1 là hai lượt thứ Bảy cộng
+   * một lượt vào đúng ngày đóng đợt, nên một quy tắc lặp theo tuần diễn đạt không nổi.
+   */
+  judgingDates: jsonb("judging_dates").$type<string[]>().notNull().default([]),
+  /** Ngày đầu và ngày cuối của cửa sổ đăng bài Phase 3. */
+  postingOpensAt: timestamp("posting_opens_at"),
+  postingClosesAt: timestamp("posting_closes_at"),
+  /** Ngày đợt khép lại — sau khi bài đăng cuối đếm đủ bảy ngày tương tác. */
+  completedAt: timestamp("completed_at"),
+
   status: waveStatusEnum("status").notNull().default("draft"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+/**
+ * KHUNG GIỜ ĐĂNG BÀI của Phase 3.
+ *
+ * Bài đăng lên nhóm cộng đồng phải qua ban tổ chức duyệt mới hiện. Nếu bốn mươi bài cùng chờ
+ * duyệt trong một buổi thì chúng đè nhau trên bảng tin: bài lên trước được đọc, bài lên sau trôi
+ * mất — và điểm lan tỏa so theo trung vị sẽ phản ánh thứ tự duyệt chứ không phản ánh chất lượng
+ * bài. Chia sẵn hạn mức theo từng khung giờ là cách giữ cho mọi bài có cơ hội ngang nhau.
+ *
+ * Một hàng = một khung của một ngày trong một đợt.
+ */
+export const postingSlots = pgTable(
+  "posting_slots",
+  {
+    id: serial("id").primaryKey(),
+    waveId: integer("wave_id")
+      .notNull()
+      .references(() => waves.id),
+    /** 1, 2, 3 — ngày thứ mấy trong cửa sổ đăng bài. */
+    dayIndex: integer("day_index").notNull(),
+    /** Mốc bắt đầu của khung, đã tính sẵn để sắp xếp và so với hiện tại mà không phải dựng lại. */
+    startsAt: timestamp("starts_at").notNull(),
+    period: postingPeriodEnum("period").notNull(),
+    capacity: integer("capacity").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    // Một đợt chỉ có đúng một khung "sáng ngày 2". Khoá này là thứ khiến việc dựng lại khung giờ
+    // sau khi ban tổ chức dời lịch trở thành cập nhật chứ không đẻ ra bản sao.
+    waveDayPeriod: unique("posting_slots_wave_day_period").on(t.waveId, t.dayIndex, t.period),
+  })
+);
 
 export const submissions = pgTable("submissions", {
   id: serial("id").primaryKey(),
@@ -302,6 +368,16 @@ export const submissions = pgTable("submissions", {
   recheckNote: text("recheck_note"),
 
   // Phase 3 — lan tỏa
+  /**
+   * Khung giờ thí sinh đã đặt để ban tổ chức duyệt cho bài lên nhóm.
+   *
+   * Đặt chỗ là việc TIÊU HAO: đặt rồi thì suất đó trừ khỏi hạn mức của khung, và bài bị từ chối
+   * cũng không trả suất lại (ban tổ chức chốt 15/09/2026) — suất đó bỏ trống. Trả lại suất cho
+   * người khác nghĩa là phải xếp lại lịch duyệt giữa chừng, đúng vào lúc ban tổ chức đang bận
+   * nhất trong đợt.
+   */
+  postingSlotId: integer("posting_slot_id").references(() => postingSlots.id),
+  postingSlotBookedAt: timestamp("posting_slot_booked_at"),
   facebookPostUrl: text("facebook_post_url"),
   facebookApprovedAt: timestamp("facebook_approved_at"),
   /**
@@ -420,12 +496,22 @@ export const seasonsRelations = relations(seasons, ({ many }) => ({
 export const wavesRelations = relations(waves, ({ one, many }) => ({
   season: one(seasons, { fields: [waves.seasonId], references: [seasons.id] }),
   submissions: many(submissions),
+  postingSlots: many(postingSlots),
+}));
+
+export const postingSlotsRelations = relations(postingSlots, ({ one, many }) => ({
+  wave: one(waves, { fields: [postingSlots.waveId], references: [waves.id] }),
+  submissions: many(submissions),
 }));
 
 export const submissionsRelations = relations(submissions, ({ one, many }) => ({
   user: one(users, { fields: [submissions.userId], references: [users.id] }),
   season: one(seasons, { fields: [submissions.seasonId], references: [seasons.id] }),
   wave: one(waves, { fields: [submissions.waveId], references: [waves.id] }),
+  postingSlot: one(postingSlots, {
+    fields: [submissions.postingSlotId],
+    references: [postingSlots.id],
+  }),
   ideaScores: many(ideaScores),
   productScores: many(productScores),
   appeals: many(appeals),
@@ -469,6 +555,8 @@ export type Season = typeof seasons.$inferSelect;
 export type Wave = typeof waves.$inferSelect;
 export type NewWave = typeof waves.$inferInsert;
 export type NewSeason = typeof seasons.$inferInsert;
+export type PostingSlot = typeof postingSlots.$inferSelect;
+export type NewPostingSlot = typeof postingSlots.$inferInsert;
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
 export type IdeaScore = typeof ideaScores.$inferSelect;

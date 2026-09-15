@@ -6,6 +6,7 @@ import { users } from "@/lib/db/schema";
 import { AppShell, type NavItem } from "@/components/app-shell";
 import {
   HouseIcon,
+  CalendarIcon,
   NotepadIcon,
   RocketIcon,
   MegaphoneIcon,
@@ -16,6 +17,7 @@ import {
 
 const NAV: NavItem[] = [
   { href: "/dashboard", label: "Tổng quan", icon: <HouseIcon size={17} /> },
+  { href: "/dashboard/lich", label: "Lịch cuộc thi", icon: <CalendarIcon size={17} /> },
   { href: "/dashboard/register", label: "Đề tài của tôi", icon: <NotepadIcon size={17} /> },
   { href: "/dashboard/build", label: "Nộp bài", icon: <RocketIcon size={17} /> },
   { href: "/dashboard/share", label: "Chia sẻ & lan tỏa", icon: <MegaphoneIcon size={17} /> },

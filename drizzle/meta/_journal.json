@@ -120,6 +120,20 @@
       "when": 1789452424140,
       "tag": "0016_wave_board_capacity",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789456609224,
+      "tag": "0017_schedule_and_posting_slots",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789456699224,
+      "tag": "0018_season1_real_schedule",
+      "breakpoints": true
     }
   ]
 }

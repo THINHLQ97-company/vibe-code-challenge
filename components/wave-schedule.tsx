@@ -1,4 +1,4 @@
-import { GlassCard, Pill } from "@/components/landing-ui";
+import { GlassCard } from "@/components/landing-ui";
 import { WaveCountdown } from "@/components/wave-countdown";
 import { formatDateTimeVN } from "@/lib/datetime";
 
@@ -8,6 +8,13 @@ export type PublicWave = {
   orderIndex: number;
   registrationOpensAt: string;
   registrationClosesAt: string;
+  /** Các mốc lịch phía sau có thể chưa được ban tổ chức điền — mọi nơi đọc phải chịu được `null`. */
+  phase2OpensAt: string | null;
+  phase2ClosesAt: string | null;
+  judgingDates: string[];
+  postingOpensAt: string | null;
+  postingClosesAt: string | null;
+  completedAt: string | null;
   capacity: number;
   capacityKyThuat: number;
   capacityVanPhong: number;
@@ -30,7 +37,6 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
 
   const open = waves.find((w) => w.state === "open");
   const next = waves.find((w) => w.state === "upcoming");
-  const closedBefore = waves.some((w) => w.state === "closed");
 
   /**
    * Đợt kế tiếp chỉ bị loại khỏi danh sách khi NÓ ĐANG ĐƯỢC ĐẾM NGƯỢC ở phía trên.
@@ -44,6 +50,15 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
     (w) => w.state === "upcoming" && !(nextIsCounted && w.id === next?.id)
   );
 
+  /**
+   * Đợt đang được nói tới — đang mở, hoặc đợt kế tiếp nếu chưa đợt nào mở.
+   *
+   * Khung bên phải bám theo đợt này chứ không chỉ bám đợt ĐANG MỞ. Trước đây trong lúc đếm ngược
+   * tới đợt đầu tiên thì nửa phải trống trơn, đúng lúc người đọc đang muốn biết đợt sắp mở có bao
+   * nhiêu suất và cộng mấy điểm — hai con số quyết định họ có canh giờ đăng ký hay không.
+   */
+  const focus = open ?? next ?? null;
+
   return (
     <section id="dot-thi" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-7 sm:px-6">
       <GlassCard className="p-5">
@@ -51,68 +66,86 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
           <div className="min-w-60">
             {open ? (
               <>
-                <Pill tone="accent">{open.name} đang mở đăng ký</Pill>
-                <p className="mt-2 text-caption text-cream/60">Còn lại trước khi đóng đăng ký</p>
+                <p className="text-body font-semibold text-cream">{open.name} đang mở đăng ký</p>
+                <p className="mt-1 text-caption text-cream/60">Còn lại trước khi đóng đăng ký</p>
                 <div className="mt-2">
                   <WaveCountdown to={open.registrationClosesAt} />
                 </div>
               </>
             ) : next ? (
               <>
-                {/* "Đang giữa hai đợt" chỉ đúng khi ĐÃ có đợt đóng trước đó. Ở đợt đầu tiên thì
-                    chưa có đợt nào phía trước để mà nằm giữa — câu đó vừa sai vừa làm người đọc
-                    tưởng mình đã lỡ mất một đợt. */}
-                <Pill tone="neutral">{closedBefore ? "Đang giữa hai đợt" : "Sắp mở đăng ký"}</Pill>
-                <p className="mt-2 text-caption text-cream/60">{next.name} mở đăng ký sau</p>
+                <p className="text-body font-semibold text-cream">{next.name} sắp mở đăng ký</p>
+                <p className="mt-1 text-caption text-cream/60">Mở sau</p>
                 <div className="mt-2">
                   <WaveCountdown to={next.registrationOpensAt} tone="muted" />
                 </div>
+                <p className="mt-2 text-meta text-cream/50">
+                  Mở lúc {formatDateTimeVN(next.registrationOpensAt)}
+                </p>
               </>
             ) : (
               <>
-                <Pill tone="neutral">Đã đóng toàn bộ đợt đăng ký</Pill>
-                <p className="mt-2 text-caption text-cream/60">
+                <p className="text-body font-semibold text-cream">Đã đóng toàn bộ đợt đăng ký</p>
+                <p className="mt-1 text-caption text-cream/60">
                   Chương trình không còn nhận đăng ký mới trong mùa này.
                 </p>
               </>
             )}
           </div>
 
-          {open && (
+          {focus && (
             <div className="min-w-60 flex-1 sm:max-w-xs">
               <div className="flex items-baseline justify-between gap-3">
-                <p className="text-caption text-cream/55">thí sinh đã đăng ký đợt này</p>
+                <p className="text-caption text-cream/55">
+                  {open ? "thí sinh đã đăng ký đợt này" : `số suất của ${focus.name}`}
+                </p>
                 <div className="text-kpi font-bold tabular-nums leading-none text-cream">
-                  {open.registered}
-                  <span className="text-title text-cream/40">/{open.capacity}</span>
+                  {open ? (
+                    <>
+                      {focus.registered}
+                      <span className="text-title text-cream/40">/{focus.capacity}</span>
+                    </>
+                  ) : (
+                    focus.capacity
+                  )}
                 </div>
               </div>
 
-              {/* Thanh tiến độ: con số "18/40" phải đọc rồi mới so được, còn thanh thì liếc là
-                  thấy đợt sắp đầy tới đâu — thứ quyết định người ta đăng ký ngay hay để mai. */}
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-cream/10">
-                <div
-                  className={`h-full rounded-full transition-[width] ${
-                    open.registered >= open.capacity ? "bg-orange-bright" : "bg-orange/80"
-                  }`}
-                  style={{
-                    width: `${Math.min(100, (open.registered / open.capacity) * 100)}%`,
-                  }}
-                />
-              </div>
+              {/* Thanh tiến độ chỉ có nghĩa khi đợt ĐANG NHẬN người: một thanh 0% trong lúc chưa
+                  mở đăng ký trông như đợt ế, trong khi thật ra chưa ai được phép đăng ký. */}
+              {open && (
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-cream/10">
+                  <div
+                    className={`h-full rounded-full transition-[width] ${
+                      focus.registered >= focus.capacity ? "bg-orange-bright" : "bg-orange/80"
+                    }`}
+                    style={{
+                      width: `${Math.min(100, (focus.registered / focus.capacity) * 100)}%`,
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Tách theo bảng: giải thưởng tuần trao theo từng bảng, nên con số thật sự quan
                   trọng với người đang cân nhắc đăng ký là bảng CỦA HỌ còn bao nhiêu suất. */}
               <div className="mt-2.5 grid grid-cols-2 gap-2">
                 {[
-                  { t: "Kỹ thuật", n: open.registeredKyThuat, c: open.capacityKyThuat },
-                  { t: "Văn phòng", n: open.registeredVanPhong, c: open.capacityVanPhong },
+                  { t: "Kỹ thuật", n: focus.registeredKyThuat, c: focus.capacityKyThuat },
+                  { t: "Văn phòng", n: focus.registeredVanPhong, c: focus.capacityVanPhong },
                 ].map((b) => (
                   <div key={b.t} className="rounded-lg border border-cream/12 bg-cream/5 px-2.5 py-2">
                     <p className="text-meta text-cream/50">Bảng {b.t}</p>
                     <p className="text-caption font-semibold tabular-nums text-cream/90">
-                      {b.n}
-                      <span className="font-normal text-cream/45">/{b.c}</span>
+                      {open ? (
+                        <>
+                          {b.n}
+                          <span className="font-normal text-cream/45">/{b.c}</span>
+                        </>
+                      ) : (
+                        <>
+                          {b.c} <span className="font-normal text-cream/45">suất</span>
+                        </>
+                      )}
                     </p>
                   </div>
                 ))}
@@ -120,13 +153,15 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
 
               <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-meta text-cream/50">
-                  {open.registered >= open.capacity
-                    ? "Đợt này đã đầy — chờ đợt kế tiếp"
-                    : `Còn ${open.capacity - open.registered} suất`}
+                  {open
+                    ? focus.registered >= focus.capacity
+                      ? "Đợt này đã đầy — chờ đợt kế tiếp"
+                      : `Còn ${focus.capacity - focus.registered} suất`
+                    : "Chưa mở, chưa ai đăng ký"}
                 </p>
-                {open.bonusPoints > 0 && (
+                {focus.bonusPoints > 0 && (
                   <p className="text-meta text-orange-bright">
-                    +{open.bonusPoints} điểm thưởng khi đăng ký đợt này
+                    +{focus.bonusPoints} điểm thưởng khi đăng ký đợt này
                   </p>
                 )}
               </div>

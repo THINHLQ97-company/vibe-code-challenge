@@ -46,15 +46,15 @@ export const JOURNEY_STEPS: JourneyStep[] = [
   {
     code: "CP2",
     title: "Đề tài được duyệt",
-    lead: "Ban tổ chức xét đề tài của bạn có làm được trong thời gian bạn xin hay không. Duyệt xong, đồng hồ làm bài mới bắt đầu chạy.",
+    lead: "Ban tổ chức xét đề tài của bạn có làm kịp trong kỳ làm bài của đợt hay không. Duyệt xong bạn mới nộp được sản phẩm.",
     icon: <StepApproved size={20} />,
     carriage: "middle",
     you: [
       "Viết tài liệu PRD mô tả sản phẩm: bài toán, người dùng, phạm vi, luồng chính, dữ liệu, tiêu chí hoàn thành.",
       "Điền form đăng ký và đính tài liệu PRD ở dạng .md.",
-      "Chọn thời gian làm bài, tối đa 15 ngày.",
+      "Đối chiếu hạn nộp chung của đợt để liệu sức — xem ở mục Lịch cuộc thi.",
     ],
-    gate: "Đề tài được duyệt — từ giây phút đó thời gian làm bài của bạn bắt đầu đếm.",
+    gate: "Đề tài được duyệt — từ lúc này bạn nộp được sản phẩm, hạn nộp là hạn chung của đợt.",
     fallback:
       "Bị trả về thì vẫn nộp lại được, nhưng điểm đã chấm được ghi nhận ngay tại thời điểm bạn nộp bài. Ban giám khảo chỉ ra chỗ chưa đạt để bạn sửa và bước vào vòng kế tiếp.",
   },
