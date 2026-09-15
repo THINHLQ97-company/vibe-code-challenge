@@ -47,9 +47,9 @@ type Band = "dang-ky" | "lam-bai" | "dang-bai";
 type Mark = "cham" | "han-nop" | "khep-lai";
 
 const BAND_CLASS: Record<Band, string> = {
-  "dang-ky": "bg-orange/18 text-ink",
+  "dang-ky": "bg-orange/20 text-ink",
   "lam-bai": "bg-stroke-soft text-ink",
-  "dang-bai": "bg-teal/18 text-ink",
+  "dang-bai": "bg-teal/20 text-ink",
 };
 
 const MARK_CLASS: Record<Mark, string> = {
