@@ -30,6 +30,7 @@ export type CandidateRow = {
 export function CandidatesTable({ rows }: { rows: CandidateRow[] }) {
   const [search, setSearch] = useState("");
   const [wave, setWave] = useState("all");
+  const [board, setBoard] = useState("all");
 
   /**
    * Các đợt suy TỪ DỮ LIỆU của bảng, không truyền riêng từ ngoài: bộ lọc chỉ nên liệt kê những đợt
@@ -50,6 +51,9 @@ export function CandidatesTable({ rows }: { rows: CandidateRow[] }) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
+      // Bảng thi lưu dạng nhãn tiếng Việt ("Bảng Kỹ thuật"), nên so theo chuỗi con thay vì bằng
+      // nhau — nhãn đổi cách viết hoa hay thêm chữ là bộ lọc gãy im lặng.
+      if (board !== "all" && !r.board.toLowerCase().includes(board)) return false;
       if (wave === "none" && r.waveId != null) return false;
       if (wave !== "all" && wave !== "none" && String(r.waveId) !== wave) return false;
       if (!q) return true;
@@ -59,7 +63,7 @@ export function CandidatesTable({ rows }: { rows: CandidateRow[] }) {
         r.department.toLowerCase().includes(q)
       );
     });
-  }, [rows, search, wave]);
+  }, [rows, search, wave, board]);
 
   return (
     <div className="space-y-3">
@@ -72,6 +76,16 @@ export function CandidatesTable({ rows }: { rows: CandidateRow[] }) {
           className="max-w-sm"
         />
         {/* Chỉ hiện bộ lọc khi thật sự có đợt để lọc — một dải nút chỉ có mỗi "Tất cả" là nhiễu. */}
+        <SegmentedControl
+          options={[
+            { value: "all", label: "Cả hai bảng" },
+            { value: "kỹ thuật", label: "Kỹ thuật" },
+            { value: "văn phòng", label: "Văn phòng" },
+          ]}
+          value={board}
+          onChange={setBoard}
+          size="sm"
+        />
         {waveTabs.length > 1 && (
           <SegmentedControl options={waveTabs} value={wave} onChange={setWave} size="sm" />
         )}
@@ -79,7 +93,7 @@ export function CandidatesTable({ rows }: { rows: CandidateRow[] }) {
       <Table<CandidateRow>
         data={filtered}
         getRowId={(r) => r.id}
-        emptyText={search || wave !== "all" ? "Không có thí sinh nào khớp" : "Chưa có thí sinh nào đăng ký"}
+        emptyText={search || wave !== "all" || board !== "all" ? "Không có thí sinh nào khớp" : "Chưa có thí sinh nào đăng ký"}
         emptySubtext={
           search
             ? "Thử từ khoá khác hoặc xoá ô tìm kiếm."

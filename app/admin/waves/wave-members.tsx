@@ -13,6 +13,7 @@ export type Member = {
   productName: string;
   userName: string;
   department: string;
+  board: "ky_thuat" | "van_phong" | null;
   registrationStatus: string;
 };
 
@@ -85,6 +86,19 @@ export function WaveMembers({
 
   const others = waveOptions.filter((o) => Number(o.value) !== currentWaveId);
 
+  /**
+   * Tách danh sách theo BẢNG THI.
+   *
+   * Trần số lượng và giải thưởng đều tính riêng từng bảng, nên một danh sách trộn chung buộc BTC
+   * phải tự đếm bằng mắt để biết bảng nào đang thiếu người — đúng việc mà màn này sinh ra để khỏi
+   * phải làm.
+   */
+  const groups: Array<{ key: string; label: string; list: Member[] }> = [
+    { key: "ky_thuat", label: "Bảng Kỹ thuật", list: members.filter((m) => m.board === "ky_thuat") },
+    { key: "van_phong", label: "Bảng Văn phòng", list: members.filter((m) => m.board === "van_phong") },
+    { key: "none", label: "Chưa xác định bảng", list: members.filter((m) => !m.board) },
+  ].filter((g) => g.list.length > 0);
+
   return (
     <div className="mt-3 border-t border-stroke pt-3">
       <button
@@ -96,11 +110,16 @@ export function WaveMembers({
       </button>
 
       {open && (
-        <div className="mt-3 space-y-2">
+        <div className="mt-3 space-y-4">
           {error && <Alert tone="error">{error}</Alert>}
           {warn && <Alert tone="warning">{warn}</Alert>}
 
-          {members.map((m) => (
+          {groups.map((g) => (
+            <div key={g.key} className="space-y-2">
+              <p className="text-caption font-medium text-ink-2">
+                {g.label} · {g.list.length} thí sinh
+              </p>
+              {g.list.map((m) => (
             <div
               key={m.submissionId}
               className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-stroke bg-surface px-3 py-2"
@@ -137,6 +156,8 @@ export function WaveMembers({
                   </>
                 )}
               </div>
+            </div>
+              ))}
             </div>
           ))}
         </div>

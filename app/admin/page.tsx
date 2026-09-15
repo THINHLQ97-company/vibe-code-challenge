@@ -125,13 +125,6 @@ export default async function AdminDashboardPage() {
   return (
     <PageShell
       title="Dashboard BTC"
-      subtitle={
-        season
-          ? openWave
-            ? `${season.name} · ${openWave.name} đang mở · Kỹ thuật ${openWaveCounts?.ky_thuat ?? 0}/${openWave.capacityKyThuat} · Văn phòng ${openWaveCounts?.van_phong ?? 0}/${openWave.capacityVanPhong}`
-            : `${season.name} · không có đợt nào đang mở đăng ký`
-          : "Chưa mở mùa thi"
-      }
     >
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={NotepadIcon} label="Tổng đăng ký" value={submissions.length} desc="toàn mùa thi" />

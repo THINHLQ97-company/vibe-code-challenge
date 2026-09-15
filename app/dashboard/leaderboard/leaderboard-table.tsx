@@ -18,7 +18,7 @@ export type LeaderboardRow = {
  *
  * Đây là bảng ĐIỂM của một đợt đang thi, không phải bảng vinh danh: đợt chưa chấm xong nên gắn số
  * hạng lên là công bố một thứ tự chưa chốt, và người đứng "hạng 1" hôm nay có thể tụt khi những
- * bài còn lại được chấm. Giải và thứ hạng do BTC chốt cuối tháng, không phải do màn này suy ra.
+ * bài còn lại được chấm. Giải và thứ hạng do BTC chốt khi đợt thi kết thúc, không phải do màn này suy ra.
  * Ở đây chỉ sắp điểm từ cao xuống thấp.
  */
 export function LeaderboardTable({ rows }: { rows: LeaderboardRow[] }) {

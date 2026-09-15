@@ -89,7 +89,7 @@ export default async function LeaderboardPage() {
       <Card>
         <CardHeader
           title={`${rows.length} bài trong đợt · ${published.length} đã công bố điểm`}
-          subtitle="Sắp theo điểm từ cao xuống thấp. Bảng này không xếp hạng — thứ hạng và giải do BTC chốt cuối tháng."
+          subtitle="Sắp theo điểm từ cao xuống thấp. Bảng này không xếp hạng — thứ hạng và giải do ban tổ chức chốt khi đợt thi kết thúc."
         />
         <LeaderboardTable
           rows={rows.map((r) => ({

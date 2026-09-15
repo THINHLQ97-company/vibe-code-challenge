@@ -46,6 +46,7 @@ export default async function ScoringPage() {
       productName: s.productName,
       userName: s.user.name ?? "",
       department: s.user.department ?? "",
+      board: s.user.board,
       currentPhase: s.currentPhase,
       isPrebuiltRepo: s.isPrebuiltRepo,
       hasPrd: !!s.prdContent,

@@ -420,7 +420,7 @@ export default async function LandingPage() {
               Hơn 45 triệu đồng
             </p>
             <p className="mx-auto mt-2.5 max-w-2xl text-body text-cream/65">
-              Bao gồm giải thưởng tiền mặt theo tháng và giải chung cuối chương trình, khoản hoàn
+              Bao gồm giải thưởng tiền mặt theo từng đợt thi và giải chung cuối chương trình, khoản hoàn
               phí công cụ AI chi trả qua lương cho toàn bộ thí sinh đậu, cùng quà mốc dành cho
               người vượt ngưỡng sàn kỹ thuật.
             </p>
@@ -428,9 +428,9 @@ export default async function LandingPage() {
 
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
             <PrizeCard
-              title="Giải tháng"
+              title="Giải theo đợt thi"
               meta="Trao riêng từng bảng"
-              desc="Kết thúc mỗi tháng, ban tổ chức chốt bảng xếp hạng của từng bảng thi và trao đủ bộ giải dưới đây cho mỗi bảng."
+              desc="Kết thúc mỗi đợt thi, ban tổ chức chốt bảng xếp hạng của từng bảng thi và trao đủ bộ giải dưới đây cho mỗi bảng."
               prizes={MONTHLY_PRIZES}
             />
             <PrizeCard
@@ -438,7 +438,7 @@ export default async function LandingPage() {
               meta="Giữa hai bảng thi"
               desc="Khép lại 2,5 tháng tranh tài, hội đồng chọn ra những sản phẩm xuất sắc nhất trong toàn chương trình, không phân biệt bảng thi."
               prizes={FINAL_PRIZES}
-              footer="Cơ cấu và mức giải căn cứ thể lệ đã công bố; số đợt giải tháng phụ thuộc lịch chương trình và sẽ được ban tổ chức chốt chính thức."
+              footer="Cơ cấu và mức giải căn cứ thể lệ đã công bố; số đợt thi phụ thuộc lịch chương trình và sẽ được ban tổ chức chốt chính thức."
             />
           </div>
           </div>
@@ -676,7 +676,7 @@ export default async function LandingPage() {
           </div>
           <div className="mt-3">
             <DarkNote>
-              Giải tháng và giải Yêu thích được trao riêng cho từng bảng thi. Giải chung cuộc chỉ
+              Giải theo đợt và giải Yêu thích được trao riêng cho từng bảng thi. Giải chung cuộc chỉ
               xét một lần vào cuối chương trình, giữa những sản phẩm xuất sắc nhất của cả hai bảng.
             </DarkNote>
           </div>

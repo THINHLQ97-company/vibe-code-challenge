@@ -23,6 +23,7 @@ export type ScoringRowData = {
   productName: string;
   userName: string;
   department: string;
+  board: "ky_thuat" | "van_phong" | null;
   currentPhase: number;
   isPrebuiltRepo: boolean;  // BTC gắn cờ vi phạm
   hasPrd: boolean;
@@ -91,6 +92,7 @@ export function ScoringTable({
 }) {
   const router = useRouter();
   const [q, setQ] = useState("");
+  const [board, setBoard] = useState("all");
   const [selected, setSelected] = useState<(string | number)[]>([]);
   const [target, setTarget] = useState<"1" | "2" | "final">("1");
   const [undo, setUndo] = useState(false);
@@ -143,14 +145,16 @@ export function ScoringTable({
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return rows;
-    return rows.filter(
-      (r) =>
+    return rows.filter((r) => {
+      if (board !== "all" && r.board !== board) return false;
+      if (!needle) return true;
+      return (
         r.productName.toLowerCase().includes(needle) ||
         r.userName.toLowerCase().includes(needle) ||
         r.department.toLowerCase().includes(needle)
-    );
-  }, [rows, q]);
+      );
+    });
+  }, [rows, q, board]);
 
   const columns: ColumnDef<ScoringRowData>[] = [
     {
@@ -167,6 +171,7 @@ export function ScoringTable({
           </Link>
           <div className="truncate text-meta text-ink-3">
             {r.userName} · {r.department}
+          {r.board ? ` · ${r.board === "ky_thuat" ? "Kỹ thuật" : "Văn phòng"}` : ""}
           </div>
         </div>
       ),
@@ -340,12 +345,41 @@ export function ScoringTable({
 
   return (
     <div className="space-y-3">
-      <Input
-        placeholder="Tìm theo tên sản phẩm, thí sinh hoặc phòng ban"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        leftIcon={<MagnifyingGlassIcon size={16} />}
-      />
+      {/* Lọc theo bảng thi: giải thưởng trao riêng từng bảng, nên giám khảo thường chấm gọn một
+          bảng một lượt thay vì nhảy qua lại. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <SegmentedControl
+          options={[
+            { value: "all", label: "Cả hai bảng" },
+            { value: "ky_thuat", label: "Kỹ thuật" },
+            { value: "van_phong", label: "Văn phòng" },
+          ]}
+          value={board}
+          onChange={setBoard}
+          size="sm"
+        />
+      </div>
+      {/* Lọc theo bảng thi: giải thưởng trao riêng từng bảng, nên giám khảo thường chấm gọn một
+          bảng một lượt thay vì nhảy qua lại giữa hai nhóm. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Input
+          placeholder="Tìm theo tên sản phẩm, thí sinh hoặc phòng ban"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          leftIcon={<MagnifyingGlassIcon size={16} />}
+          className="max-w-sm"
+        />
+        <SegmentedControl
+          options={[
+            { value: "all", label: "Cả hai bảng" },
+            { value: "ky_thuat", label: "Kỹ thuật" },
+            { value: "van_phong", label: "Văn phòng" },
+          ]}
+          value={board}
+          onChange={setBoard}
+          size="sm"
+        />
+      </div>
       {report && (
         <Alert
           tone={report.failed > 0 ? "warning" : "success"}

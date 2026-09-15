@@ -43,6 +43,7 @@ export default async function AdminWavesPage() {
       productName: m.productName,
       userName: m.user.name ?? m.user.email,
       department: m.user.department ?? "—",
+      board: m.user.board,
       registrationStatus: m.registrationStatus,
     })),
   }));
