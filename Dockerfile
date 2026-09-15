@@ -22,7 +22,10 @@ WORKDIR /app
 # "Connection refused" → container báo unhealthy suốt dù app hoàn toàn bình thường.
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
-COPY --from=builder /app/public ./public
+# `--chown` cho CẢ thư mục public: ba dòng COPY còn lại đều có, riêng dòng này thiếu nên thư mục
+# thuộc về root trong khi tiến trình chạy bằng người dùng `nextjs`. Next standalone quét thư mục
+# này lúc khởi động để dựng danh sách tệp tĩnh — không đọc được là chết ngay, lặp thành crash-loop.
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Bản standalone chỉ gói mã JS được truy vết, KHÔNG gói file .sql. Mà `instrumentation.ts` chạy
