@@ -232,7 +232,7 @@ const FAQ = [
   },
   {
     q: "Tôi ngại công khai danh tính khi đăng bài chia sẻ.",
-    a: "Đăng bài lên nhóm cộng đồng là nghĩa vụ bắt buộc, nhưng danh tính thì không. Bạn có thể sử dụng chế độ ẩn danh của nhóm hoặc một tài khoản phụ. Điểm lan tỏa được chấm trên chính bài đăng đó, không phụ thuộc việc ai đứng tên.",
+    a: "Đăng bài là nghĩa vụ bắt buộc nếu bạn tham gia Phase 3 — phần thi lan tỏa — nhưng công khai danh tính thì không. Bạn có thể sử dụng chế độ ẩn danh của nhóm hoặc một tài khoản phụ. Điểm lan tỏa được chấm trên chính bài đăng đó, không phụ thuộc việc ai đứng tên. Nếu chọn không tham gia Phase 3, bài của bạn vẫn được ghi nhận, chỉ không có điểm phần này.",
   },
   {
     q: "Bài bị trả về ở vòng kiểm tra thì có bị loại không?",
@@ -502,19 +502,19 @@ export default async function LandingPage() {
               15 ngày gồm cả chấm và sửa — không phải 15 ngày để làm bài
             </h3>
             <p className="mt-2 text-body leading-relaxed text-cream/70">
-              Đồng hồ bắt đầu chạy từ lúc đề tài của bạn được duyệt. Trong 15 ngày đó có ba việc nối
-              nhau: bạn làm sản phẩm, ban giám khảo chấm, và bạn sửa nếu bị trả về. Ban giám khảo
-              trả kết quả theo lịch cố định — <b className="text-cream">chiều thứ Bảy hằng tuần</b>,
-              không chấm lẻ từng bài.
+              Thời gian được tính từ khi đề tài của bạn được duyệt, và bao gồm ba phần nối tiếp:
+              thực hiện sản phẩm, ban giám khảo chấm, và chỉnh sửa nếu bài được trả về. Ban giám
+              khảo trả kết quả theo lịch cố định —{" "}
+              <b className="text-cream">chiều thứ Bảy hằng tuần</b>.
             </p>
             <p className="mt-3 text-body leading-relaxed text-cream/70">
-              Nghĩa là bạn nên nhắm làm xong và nộp trong khoảng một tuần đầu, để kịp lượt chấm thứ
-              Bảy và vẫn còn nguyên quãng sau cho việc sửa nếu bị trả về.
+              Vì vậy, bạn nên hoàn thành và nộp bài trong khoảng một tuần đầu để kịp lượt chấm gần
+              nhất, đồng thời giữ lại quỹ thời gian cho việc chỉnh sửa nếu cần.
             </p>
             <div className="mt-4">
               <DarkNote>
-                Để tới ngày 13–14 mới bắt tay là tự bỏ mất lượt sửa: nộp ngày 15 mà bị trả về thì
-                không còn ngày nào để nộp lại.
+                Bắt đầu quá muộn đồng nghĩa với việc mất cơ hội chỉnh sửa: bài nộp sát hạn nếu được
+                trả về sẽ không còn thời gian để hoàn thiện lại.
               </DarkNote>
             </div>
           </GlassCard>

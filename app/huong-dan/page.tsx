@@ -366,32 +366,32 @@ const STEPS = [
     id: "buoc-5-github",
     icon: <StepDeploy size={22} />,
     title: "Đưa mã nguồn lên GitHub",
-    lead: "Ban tổ chức chấm cả mã nguồn, không chỉ sản phẩm chạy được — nên bài nộp bắt buộc có một kho mã trên GitHub. Phần này chỉ nói bạn cần làm gì; cách làm từng bước thì hỏi chính công cụ AI bạn đang dùng để thi.",
+    lead: "Bài dự thi được chấm trên cả sản phẩm chạy thực tế lẫn mã nguồn, vì vậy mỗi bài nộp cần có một kho mã trên GitHub. Phần dưới đây nêu những việc cần hoàn thành; các thao tác chi tiết bạn chủ động tìm hiểu thêm.",
     content: (
       <div className="space-y-4">
         <div className="grid gap-3 md:grid-cols-2">
           <GlassCard className="p-4">
-            <h3 className="text-body font-semibold text-cream">Bốn việc cần xong</h3>
+            <h3 className="text-body font-semibold text-cream">Bốn việc cần hoàn thành</h3>
             <ol className="mt-2.5 space-y-1.5 text-caption text-cream/65">
-              <li>1. Có tài khoản GitHub — dùng tài khoản cá nhân cũng được</li>
-              <li>2. Tạo một kho mã mới, đặt ở chế độ <b className="text-cream">Private</b></li>
-              <li>3. Đẩy toàn bộ mã nguồn sản phẩm lên kho đó</li>
+              <li>1. Có tài khoản GitHub — tài khoản cá nhân được chấp nhận</li>
+              <li>2. Tạo kho mã mới và đặt ở chế độ <b className="text-cream">Private</b></li>
+              <li>3. Đẩy toàn bộ mã nguồn sản phẩm lên kho</li>
               <li>4. Vào Settings → Collaborators, thêm tài khoản ban tổ chức với quyền chỉ đọc</li>
             </ol>
             <DarkNote>
-              Chưa thêm cộng tác viên thì bước xác minh báo lỗi, và bài chưa được tính là đã nộp.
+              Nếu chưa thêm cộng tác viên, bước xác minh sẽ không thành công và bài dự thi chưa được
+              ghi nhận là đã nộp.
             </DarkNote>
           </GlassCard>
           <GlassCard className="p-4">
-            <h3 className="text-body font-semibold text-cream">Không biết làm thì hỏi AI</h3>
+            <h3 className="text-body font-semibold text-cream">Công cụ AI có thể giúp bạn</h3>
             <p className="mt-2 text-caption text-cream/65">
-              Chương trình cố ý không hướng dẫn từng cú bấm. Đây là cuộc thi vibe code — tự hỏi
-              được công cụ AI một câu như <i>&quot;hướng dẫn tôi đẩy thư mục dự án này lên một kho
-              GitHub riêng tư&quot;</i> chính là kỹ năng đang được rèn.
+              Bạn có thể tìm hiểu thêm về GitHub một cách chủ động, hoặc đặt cho công cụ AI đã làm ra
+              sản phẩm của bạn một câu hỏi đơn giản:{" "}
+              <i className="text-cream/80">Hướng dẫn tôi đẩy thư mục dự án này lên GitHub.</i>
             </p>
             <p className="mt-2 text-caption text-cream/65">
-              Công cụ AI bạn dùng để dựng sản phẩm đều làm được việc này, và phần lớn còn chạy lệnh
-              giúp bạn. Tìm trên mạng cũng ra ngay.
+              Phần lớn công cụ AI hiện nay đều hỗ trợ được thao tác này.
             </p>
           </GlassCard>
         </div>
@@ -406,8 +406,8 @@ const STEPS = [
         </div>
 
         <DarkNote>
-          Nhớ quy định dữ liệu giả: mã nguồn đẩy lên GitHub không được chứa chuỗi kết nối thật, khoá
-          API thật hay dữ liệu khách hàng. Đây là chỗ hay lộ nhất vì người ta đẩy cả tệp cấu hình.
+          Bảo mật là một điểm quan trọng trong cuộc thi. Hãy đảm bảo mã nguồn đưa lên GitHub không
+          chứa thông tin nhạy cảm.
         </DarkNote>
       </div>
     ),
@@ -433,13 +433,13 @@ const STEPS = [
           <GlassCard className="p-4">
             <h3 className="text-body font-semibold text-cream">Chuẩn bị kho mã nguồn</h3>
             <p className="mt-2 text-caption text-cream/65">
-              Đặt kho mã ở chế độ riêng tư, sau đó thêm tài khoản của ban tổ chức làm cộng tác viên
-              với quyền chỉ đọc. Hệ thống dùng tài khoản đó để xác minh bạn thật sự sở hữu kho mã,
-              không dùng vào việc gì khác. <b className="text-cream">Ban tổ chức sẽ công bố tài
-              khoản cần thêm</b> — chưa có thì cứ để kho riêng tư và chờ.
+              Kho mã đặt ở chế độ riêng tư, đồng thời thêm tài khoản của ban tổ chức làm cộng tác
+              viên với quyền chỉ đọc. Tài khoản này chỉ dùng để xác minh quyền sở hữu kho mã.{" "}
+              <b className="text-cream">Ban tổ chức sẽ công bố tài khoản cần thêm.</b>
             </p>
             <DarkNote>
-              Chưa thêm cộng tác viên thì bước xác minh sẽ báo lỗi, và bài chưa được tính là đã nộp.
+              Nếu chưa thêm cộng tác viên, bước xác minh sẽ không thành công và bài dự thi chưa
+              được ghi nhận là đã nộp.
             </DarkNote>
           </GlassCard>
         </div>
