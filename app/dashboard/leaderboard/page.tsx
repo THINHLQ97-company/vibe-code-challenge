@@ -14,6 +14,10 @@ import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { Note } from "@/components/dsvh/ui/data/Note";
+import { Empty } from "@/components/dsvh/ui/data/Empty";
+import { Button } from "@/components/dsvh/ui/Button";
+import { TrophyIcon } from "@/components/dsvh/icons";
+import Link from "next/link";
 import { LeaderboardTable } from "./leaderboard-table";
 import { getWave } from "@/lib/db/queries/waves";
 
@@ -35,6 +39,33 @@ export default async function LeaderboardPage() {
   const mine = session ? await getCurrentSubmissionForUser(session.userId) : null;
   const myWave = mine?.waveId != null ? await getWave(mine.waveId) : null;
 
+  /**
+   * CHƯA đăng ký đề tài thì chưa thuộc đợt nào — nói thẳng như vậy.
+   *
+   * Bản trước rơi về cách cắt theo tuần lịch và lấy TUẦN HIỆN TẠI làm mốc, nên người chưa nộp gì
+   * vẫn thấy một dòng như "được duyệt đề tài trong tuần 14/09 – 20/09" — một khoảng thời gian
+   * chẳng liên quan gì tới họ, kèm bảng trống. Vừa sai vừa làm người đọc tưởng mình đã lỡ mất một
+   * đợt nào đó.
+   */
+  if (!mine) {
+    return (
+      <PageShell title="Bảng điểm đợt của bạn">
+        <Card>
+          <Empty
+            icon={<TrophyIcon size={40} />}
+            title="Bạn chưa thuộc đợt thi nào"
+            description="Bảng điểm so bạn với những người cùng đợt. Đăng ký đề tài trước — đăng ký xong bạn vào đợt đang mở và bảng này sẽ hiện những người thi cùng."
+            action={
+              <Link href="/dashboard/register">
+                <Button variant="solid">Đăng ký đề tài</Button>
+              </Link>
+            }
+          />
+        </Card>
+      </PageShell>
+    );
+  }
+
   const anchor = mine?.approvedAt ?? new Date();
   const weekStart = startOfWeek(anchor);
   const weekEnd = endOfWeek(anchor);
@@ -50,7 +81,8 @@ export default async function LeaderboardPage() {
       subtitle={
         myWave
           ? `Những người cùng ${BOARD_LABEL[board].toLowerCase()} trong ${myWave.name}${myWave.bonusPoints > 0 ? ` · đợt này được cộng ${myWave.bonusPoints} điểm thưởng đăng ký sớm` : ""}`
-          : `Những người cùng ${BOARD_LABEL[board].toLowerCase()} được duyệt đề tài trong tuần ${formatDateVN(weekStart)} – ${formatDateVN(new Date(weekEnd.getTime() - 86_400_000))}`
+          : // Bài tạo TRƯỚC khi có cơ chế đợt thi — chưa gắn đợt nào, vẫn so theo tuần duyệt như cũ.
+            `Những người cùng ${BOARD_LABEL[board].toLowerCase()} được duyệt đề tài trong tuần ${formatDateVN(weekStart)} – ${formatDateVN(new Date(weekEnd.getTime() - 86_400_000))}`
       }
       action={<Badge tone="accent">{BOARD_LABEL[board]}</Badge>}
     >

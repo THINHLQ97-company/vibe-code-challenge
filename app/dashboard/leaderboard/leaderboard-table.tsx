@@ -77,7 +77,7 @@ export function LeaderboardTable({ rows }: { rows: LeaderboardRow[] }) {
       stickyHeader={false}
       rowClassName={(r) => (r.isMe ? "bg-orange/5" : undefined)}
       emptyText="Chưa có ai trong đợt này"
-      emptySubtext="Đề tài được BTC duyệt trong tuần nào thì vào bảng điểm của tuần đó."
+      emptySubtext="Khi có người khác cùng đợt được duyệt đề tài, họ sẽ hiện ở đây."
     />
   );
 }

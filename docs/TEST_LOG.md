@@ -105,8 +105,10 @@ công mỗi lần sửa luồng. Ghi lại đây để lần sau còn biết k�
 ## Trường hợp đặc biệt
 - [x] Candidate bị `returned` (trả về) đăng ký lại → tạo submission MỚI thành công (không
   chặn bởi check "đã có đề tài đang xử lý" vì status cũ là `returned`).
-- [x] `isPrebuiltRepo=true` (seed candidate SALES) → trần kỹ thuật 20đ dù nhập điểm gốc
-  cao hơn — verify: `computeFinalScore` áp đúng `Math.min(technicalRaw, 20)`.
+- [~] ~~`isPrebuiltRepo=true` → trần kỹ thuật 20đ~~ — **case này đã lỗi thời**. Luật đổi:
+  dùng repo/mẫu có sẵn nay là VI PHẠM, chặn thẳng ở Phase 2 (`lib/publish-one.ts` trả
+  "Bị gắn cờ dùng repo/mẫu có sẵn"), không còn là lựa chọn hợp lệ bị trừ điểm. Cần viết
+  lại case: `isPrebuiltRepo=true` → `publishOne` từ chối công bố.
 - [x] Chưa công bố (`publishedAt=null`) → `/dashboard/results` hiện "đang chờ", KHÔNG lộ
   điểm — đúng business rule bắt buộc trong PRD.
 

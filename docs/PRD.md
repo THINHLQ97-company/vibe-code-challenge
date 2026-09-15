@@ -4,10 +4,10 @@
 **Team**: mk
 **Status**: Approved
 **Created**: 2026-09-09
-**Nguồn tham chiếu**: `The-le-Cuoc-thi-Vibe-Coding-Noi-bo-v3.html` (thể lệ chính thức — nguồn chân lý cho barem/mốc/luật), `Bo-Giao-dien-Cuoc-thi-Vibe-Coding (1).html` (tham khảo bố cục UI), `dsvh.zip` (design system Vibe Host — copy trực tiếp component/token vì cùng stack Next.js)
+**Nguồn chân lý (cập nhật 15/09/2026)**: mã nguồn trong repo này + trang công bố https://vibecodechallenge.matbao.ai/. `docs/reference/the-le-v3.html` là **bản cũ, chỉ để tham khảo lịch sử** — đã lệch ở ít nhất 4 chỗ (repo có sẵn, phòng ban bảng Kỹ thuật, số mốc, cơ chế đợt thi); xem `docs/reference/README.md`. Tham chiếu khác, `Bo-Giao-dien-Cuoc-thi-Vibe-Coding (1).html` (tham khảo bố cục UI), `dsvh.zip` (design system Vibe Host — copy trực tiếp component/token vì cùng stack Next.js)
 
 ## 1. Problem Statement
-Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, 4 tháng, ~200–250 bài, để nhân sự tự tay làm sản phẩm & deploy Vibe Host, hiểu sản phẩm từ bên trong để tư vấn/bán/hỗ trợ khách tốt hơn. Vận hành thủ công qua Excel/Form rời rạc không kham nổi quy mô này (30–40 bài/tuần, chấm cuốn chiếu, nhiều mốc bắt buộc CP1–CP7, cơ chế phản biện có SLA 48h) — cần một nền tảng quản lý trọn luồng.
+Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, chạy tới hết 2026, ~190 nhân sự (toàn bộ công ty, tham gia là bắt buộc), để nhân sự tự tay làm sản phẩm & deploy Vibe Host, hiểu sản phẩm từ bên trong để tư vấn/bán/hỗ trợ khách tốt hơn. Vận hành thủ công qua Excel/Form rời rạc không kham nổi quy mô này (đăng ký theo đợt 30–40 suất, chấm cuốn chiếu, sáu mốc bắt buộc CP1–CP6, cơ chế phản biện có SLA 48h) — cần một nền tảng quản lý trọn luồng.
 
 ## 2. Target Users
 - **Thí sinh**: toàn bộ nhân sự, 2 bảng — Kỹ thuật (TS, DE) và Văn phòng (OP, MK, FI, HR, Kinh Doanh).
@@ -15,7 +15,7 @@ Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, 4 thán
 - **BGK/Hội đồng**: duyệt case bị máy gắn cờ (ngưỡng sàn/bảo mật), duyệt bài Facebook, xử case phản biện mờ. (MVP gộp chung role `judge`/`admin`, tách vai chi tiết hơn ở Phase 2 nếu cần.)
 - **Hệ chấm điểm AI ngoài**: không phải user UI — đẩy điểm vào qua API.
 
-## 3. User Journeys (theo mốc CP1–CP7 + 3 phase chấm điểm)
+## 3. User Journeys (theo mốc CP1–CP6 + 3 phase chấm điểm)
 1. **CP1** — Thí sinh xem landing công khai (giới thiệu + thể lệ) → Đăng nhập → đăng ký trong tuần.
 2. **CP2** — Nộp form đăng ký đề tài (đủ 3 phần theo thể lệ mục Q) → BTC duyệt cuốn chiếu (trần 30–40/tuần) → chọn hạn nộp ≤15 ngày.
 3. **Phase 1 · Điểm ý tưởng** — Ngay sau duyệt, thí sinh đã nộp kèm **PRD** (nội dung
@@ -24,17 +24,17 @@ Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, 4 thán
    điểm ý tưởng về qua `POST /api/integrations/scores` → hiển thị cho thí sinh sau khi hội
    đồng xác nhận (`lib/score-visibility.ts`). Không gate — ai cũng tiến tiếp.
 4. **CP3** — Thí sinh tự đăng ký Vibe Host ở vibehost.matbao.ai (ngoài hệ thống), làm sản phẩm đạt đủ 6 tiêu chí ngưỡng sàn.
-5. **Phase 2 · Điểm sản phẩm & mã nguồn** — Nộp link Vibe Host + link Git private, thêm machine-user GitHub (`matbao-vibe-bot`) làm collaborator → hệ thống tự verify qua GitHub API → hệ chấm ngoài chấm Chất lượng kỹ thuật + Hoàn thiện → BTC xem, ghi feedback cụ thể → thí sinh sửa & nộp lại → BTC xác nhận đạt → app đánh dấu trạng thái "đạt 90% Ứng dụng AI KPI 3P" (không đẩy đi đâu, hệ HRM tự đọc).
+5. **Phase 2 · Điểm sản phẩm & mã nguồn** — Nộp link Vibe Host + link Git private, thêm machine-user GitHub (`matbao-vibe-bot`) làm collaborator → hệ thống tự verify qua GitHub API → hệ chấm ngoài chấm Chất lượng kỹ thuật + Hoàn thiện → BTC xem, ghi feedback cụ thể → thí sinh sửa & nộp lại → BTC xác nhận đạt → app đánh dấu bài được tính vào **KPI mục 5.2 Đề xuất cải tiến / sáng kiến** (không đẩy đi đâu, hệ HRM tự đọc — nhãn duy nhất khai ở `lib/kpi.ts`).
 6. **CP4** — Qua cổng rà soát an toàn (7 điều cấm) — tự động là chính, người chỉ xử case bị gắn cờ.
 7. **Phase 3 · Điểm lan tỏa** — Đăng bài ẩn danh lên Group "Vibe Coding chưa?" theo lịch/khung giờ → dán link (CP5) → BGK tick duyệt → đếm tương tác 7 ngày (nhập tay MVP) → hệ thống tự tính bậc điểm 1–4 theo % so với trung vị cùng khung giờ/tuần.
 8. **CP6** — Nộp phiếu trải nghiệm sản phẩm (form nhập trực tiếp: 6 câu chung + 4 câu riêng theo bảng).
 9. BTC xác nhận tổng điểm (Phase 1+2+3+gate) → công bố → Bảng xếp hạng theo bảng/tháng.
-10. **CP7 (tuỳ chọn)** — Gửi phản biện ≤48h, 1 vòng, kèm bằng chứng; MVP: admin đọc & quyết định thủ công (không có AI sàng lọc tự động).
+10. **Phản biện (quyền, không phải mốc)** — Gửi ≤48h sau khi có điểm, 1 vòng, kèm bằng chứng; MVP: admin đọc & quyết định thủ công (không có AI sàng lọc tự động). Thể lệ cũ đánh số việc này là "CP7"; bản hiện hành chỉ có sáu mốc CP1–CP6 (xem `lib/checkpoints.ts`).
 
 ## 4. Functional Requirements
-- **Auth**: email/password nội bộ (JWT tự viết trong Next.js API/route handlers), seed user test; schema có sẵn `oauth_provider`/`oauth_subject` để sau swap MS365 OAuth (không dùng NextAuth để dễ kiểm soát swap).
+- **Auth**: **đăng nhập Microsoft (Entra ID) — đã chạy thật**, là đường đăng nhập chính của thí sinh (migration `0010_ms_login_and_settings`; biến môi trường `AZURE_AD_*`). Hồ sơ nhân sự (họ tên, email, phòng ban) lấy thẳng từ Entra nên thí sinh không phải tự khai; phòng ban quyết định bảng thi qua `departmentToBoard`. Đường email/password + JWT tự viết vẫn giữ cho tài khoản BTC/giám khảo và seed test.
 - **Landing công khai**: giới thiệu + thể lệ đầy đủ + nút "Đăng nhập" — không form đăng ký công khai.
-- **User portal**: đăng ký đề tài (đủ field Phần 1–3 theo thể lệ, kèm **nộp PRD** — nội dung markdown/text 200–200 000 ký tự, căn cứ chấm Phase 1) · theo dõi CP1–CP7 · xem điểm ý tưởng (Phase 1, chỉ sau khi hội đồng xác nhận) · nộp Phase 2 (link Vibe Host + link Git + xác nhận add collaborator, app tự verify) · xem & phản hồi feedback BTC · nộp Phase 3 (link bài Facebook) · nộp phiếu trải nghiệm (form) · gửi phản biện (CP7) · xem kết quả (ẩn tới khi công bố) · bảng xếp hạng theo bảng.
+- **User portal**: đăng ký đề tài (đủ field Phần 1–3 theo thể lệ, kèm **nộp PRD** — nội dung markdown/text 200–200 000 ký tự, căn cứ chấm Phase 1) · theo dõi CP1–CP6 · xem điểm ý tưởng (Phase 1, chỉ sau khi hội đồng xác nhận) · nộp Phase 2 (link Vibe Host + link Git + xác nhận add collaborator, app tự verify) · xem & phản hồi feedback BTC · nộp Phase 3 (link bài Facebook) · nộp phiếu trải nghiệm (form) · gửi phản biện · xem kết quả (ẩn tới khi công bố) · bảng xếp hạng theo bảng.
 - **Admin/BGK portal**: duyệt đề tài cuốn chiếu (kèm điểm ý tưởng Phase 1) · xem điểm Phase 2 từ hệ ngoài + ghi feedback + xác nhận đạt (set flag KPI 3P) · duyệt case gắn cờ · duyệt bài Facebook (tick) + nhập tay engagement count → hệ tự tính bậc điểm lan tỏa · xử phản biện thủ công · xác nhận & công bố kết quả · dashboard thống kê · quản lý thí sinh.
 - **API cho hệ chấm ngoài**: hai chiều — `GET /api/integrations/submissions/:id` để hệ
   ngoài ĐỌC bài + PRD (không trả danh tính thí sinh), và `POST /api/integrations/scores`
@@ -68,10 +68,10 @@ Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, 4 thán
 - **HRM/KPI 3P**: không tích hợp — hệ ngoài tự đọc từ DB/báo cáo của app này.
 
 ## 8. Out of Scope (iMVP)
-Tự động cấp Vibe Host qua API · AI chấm điểm trong app này · tự động đọc Facebook Graph API · OAuth MS365 thật · verify Git trên GitLab (chỉ GitHub) · AI sàng lọc phản biện tự động · tự động đẩy dữ liệu sang hệ KPI 3P · đăng ký theo team nhiều người.
+Tự động cấp Vibe Host qua API · AI chấm điểm trong app này · tự động đọc Facebook Graph API · verify Git trên GitLab (chỉ GitHub) · AI sàng lọc phản biện tự động · tự động đẩy dữ liệu sang hệ KPI 3P · đăng ký theo team nhiều người.
 
 ## 9. Success Criteria (iMVP)
-- Luồng CP1→CP7 chạy được end-to-end trên UI, không qua Excel/Zalo thủ công.
+- Luồng CP1→CP6 chạy được end-to-end trên UI, không qua Excel/Zalo thủ công.
 - BTC/BGK có dashboard duyệt đề tài + theo dõi Phase 1/2/3 + công bố kết quả.
 - Nhận & hiển thị đúng điểm từ API ngoài (demo qua curl/Postman) cho cả Phase 1 và Phase 2.
 - Verify GitHub collaborator hoạt động đúng (demo với repo test).
@@ -79,5 +79,5 @@ Tự động cấp Vibe Host qua API · AI chấm điểm trong app này · tự
 
 ## 10. Phase Plan
 - **Phase 1 (this PRD — iMVP)**: như trên, stack Next.js 15 + Drizzle ORM + PostgreSQL (template `next-fullstack-starter`), UI dùng trực tiếp design system `dsvh`.
-- **Phase 2**: MS365 OAuth thật, verify GitLab, AI sàng lọc phản biện, tự động hoá Facebook Graph API, tự động đẩy KPI 3P nếu cần, đa mùa thi.
+- **Phase 2**: verify GitLab, AI sàng lọc phản biện, tự động hoá Facebook Graph API, tự động đẩy dữ liệu sang hệ KPI nếu cần, đa mùa thi. (MS365 OAuth đã làm xong ở Phase 1 — xem mục 4.)
 - **Phase 3**: mở rộng nền tảng dùng lại cho các cuộc thi/chương trình nội bộ khác.

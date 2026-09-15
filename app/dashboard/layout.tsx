@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -35,6 +36,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const user = session
     ? await db.query.users.findFirst({ where: eq(users.id, session.userId) })
     : null;
+
+  /**
+   * Khu thí sinh CHỈ dành cho thí sinh.
+   *
+   * Thể lệ chốt giám khảo không dự thi, và route đăng ký đề tài đã chặn đúng theo vai trò — nhưng
+   * trang thì vẫn mở, nên giám khảo và ban tổ chức thấy màn hình mời "Đăng ký đề tài" rồi bấm vào
+   * mới ăn lỗi. Mời người ta làm một việc họ không được phép làm là lỗi thiết kế, không phải tiện.
+   *
+   * Vai trò đọc từ database chứ không từ cookie — cookie có thể ghi vai trò cũ tới bảy ngày.
+   */
+  if (user && user.role !== "candidate") redirect("/admin");
 
   return (
     <AppShell
