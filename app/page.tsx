@@ -73,7 +73,7 @@ const NAV_ANCHORS = [
 ];
 
 const FACTS = [
-  { value: "2,5 tháng", label: "toàn bộ chương trình" },
+  { value: "5 đợt thi", label: "40 thí sinh mỗi đợt" },
   { value: "2 bảng", label: "Kỹ thuật · Văn phòng" },
   // Hai dòng này từng ghi "thời gian làm bài bạn tự chọn" và "30–40 đề tài duyệt mỗi tuần" —
   // cả hai đều không còn đúng: hạn nộp nay cố định 15 ngày cho mọi người, và việc chia người theo
