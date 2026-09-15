@@ -56,7 +56,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
     ],
     gate: "Đề tài được duyệt — từ lúc này bạn nộp được sản phẩm, hạn nộp là hạn chung của đợt.",
     fallback:
-      "Bị trả về thì vẫn nộp lại được, nhưng điểm đã chấm được ghi nhận ngay tại thời điểm bạn nộp bài. Ban giám khảo chỉ ra chỗ chưa đạt để bạn sửa và bước vào vòng kế tiếp.",
+      "Bị trả về thì vẫn nộp lại được, không giới hạn số lần, miễn còn trong Phase 1. Góp ý của ban giám khảo là yêu cầu phải hoàn thiện chứ không phải gợi ý: hết Phase 1 mà chưa sửa xong thì bạn dự lại ở đợt sau. Điểm được ghi nhận tại thời điểm bạn nộp.",
   },
   {
     code: "CP3",
@@ -72,7 +72,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
     ],
     gate: "Xác minh mã nguồn thành công và sản phẩm đạt đủ sáu tiêu chí ngưỡng sàn.",
     fallback:
-      "Bị trả về thì vẫn nộp lại được, nhưng điểm đã chấm được ghi nhận ngay tại thời điểm bạn nộp bài. Ban giám khảo chỉ ra chỗ chưa đạt để bạn sửa và bước vào vòng kế tiếp.",
+      "Bị trả về thì vẫn sửa và nộp lại được trong thời hạn Phase 2. Nộp muộn tới mức không còn lượt chấm nào trước khi đợt đóng thì bài dừng ở Phase 2, không vào được phần thi lan tỏa. Bài đã trượt một lần thì bản sửa chỉ được rà thêm một vòng duy nhất.",
   },
   {
     code: "CP4",
@@ -92,7 +92,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
   {
     code: "CP5",
     title: "Đăng bài & BGK duyệt",
-    lead: "Chia sẻ lại quá trình làm cho cộng đồng. Bắt buộc có bài, nhưng không bắt buộc lộ danh tính.",
+    lead: "Chia sẻ lại quá trình làm cho cộng đồng. Đây là phần thi tự chọn — nhưng đã tham gia thì phải có bài đăng đạt chuẩn, còn danh tính thì không bắt buộc lộ.",
     icon: <MarkBroadcast size={20} />,
     carriage: "middle",
     you: [
@@ -101,7 +101,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
       "Bài phải kể được quá trình làm — chỗ vấp và cách xử lý — không phải một dòng khoe kèm link.",
       "Dán đường dẫn bài đăng vào hệ thống.",
     ],
-    gate: "Mốc TUỲ CHỌN — bỏ qua thì mất 20 điểm lan tỏa, bài vẫn được ghi nhận. Bài đăng bị ban giám khảo từ chối cũng tính 0 điểm phần này và không được đăng lại.",
+    gate: "Mốc TUỲ CHỌN — bỏ qua thì mất 20 điểm lan tỏa, bài vẫn được ghi nhận. Nhưng đã đăng thì bài phải đạt ràng buộc nội dung: bài bị ban tổ chức từ chối duyệt là mất toàn bộ điểm lan tỏa và không được đăng lại, vì các điều cấm đã nêu sẵn trước khi bạn đăng.",
   },
   {
     code: "CP6",

@@ -32,7 +32,18 @@ export type TimelineWave = {
  * Mốc nào đợt chưa điền thì BỎ QUA, không hiện dòng trống — một dòng "chưa có ngày" giữa hai dòng
  * có ngày làm người đọc tưởng lịch bị đứt đoạn.
  */
-export function buildWaveTimeline(wave: TimelineWave, now: Date = new Date()): Milestone[] {
+export function buildWaveTimeline(
+  wave: TimelineWave,
+  now: Date = new Date(),
+  /**
+   * Khung giờ đăng bài thí sinh ĐÃ đặt, nếu có.
+   *
+   * Chỉ truyền vào khi đã đặt thật. Việc đặt khung nằm ở bước lan tỏa, không phải ở trang lịch —
+   * trang lịch chỉ nói ngày giờ, còn mời người ta đi đặt chỗ cho một phần thi họ chưa tới là làm
+   * họ tưởng mình đang chậm một việc nào đó.
+   */
+  bookedSlot: { at: Date; label: string } | null = null
+): Milestone[] {
   const raw: Omit<Milestone, "state">[] = [];
 
   raw.push({
@@ -105,6 +116,16 @@ export function buildWaveTimeline(wave: TimelineWave, now: Date = new Date()): M
       title: "Đợt khép lại",
       detail: `${formatDateVN(wave.completedAt)} — đủ bảy ngày đếm tương tác cho bài đăng cuối cùng`,
       actor: "ban-to-chuc",
+    });
+  }
+
+  if (bookedSlot) {
+    raw.push({
+      key: "my-slot",
+      at: bookedSlot.at,
+      title: "Khung giờ đăng bài của bạn",
+      detail: `${bookedSlot.label} — ban tổ chức duyệt cho bài lên nhóm trong khung này`,
+      actor: "thi-sinh",
     });
   }
 

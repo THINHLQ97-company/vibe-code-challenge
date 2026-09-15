@@ -357,6 +357,14 @@ function WaveCard({
             Đóng đăng ký
           </Button>
         )}
+        {/* Đưa về NHÁP = ẩn khỏi trang chủ mà không xoá gì.
+            Cần vì đợt tạo nhầm hoặc trùng vẫn nằm trên lịch công khai, trong khi xoá hẳn thì kéo
+            theo cả bài dự thi đang trỏ vào đợt đó. Ẩn đi là việc đảo ngược được; xoá thì không. */}
+        {wave.status !== "draft" && wave.registered === 0 && (
+          <Button variant="ghost" size="sm" loading={busy} onClick={() => onPatch({ status: "draft" })}>
+            Ẩn khỏi trang chủ
+          </Button>
+        )}
       </div>
 
       <WaveMembers members={wave.members} waveOptions={waveOptions} currentWaveId={wave.id} />

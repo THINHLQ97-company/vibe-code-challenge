@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { postingSlots } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { buildWaveTimeline } from "@/lib/wave-timeline";
+import { WaveCalendarButton, type CalendarWave } from "@/components/wave-calendar";
 import { periodLabel, periodTimeLabel } from "@/lib/contest-schedule";
 import { formatDateVN, formatDeadlineDistance } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
@@ -15,7 +16,7 @@ import { Badge } from "@/components/dsvh/ui/Badge";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Empty } from "@/components/dsvh/ui/data/Empty";
 import { Note } from "@/components/dsvh/ui/data/Note";
-import { CalendarIcon, CheckCircleIcon, CircleIcon, MegaphoneIcon } from "@/components/dsvh/icons";
+import { CalendarIcon, CheckCircleIcon, CircleIcon } from "@/components/dsvh/icons";
 
 export const metadata = { title: "Lịch cuộc thi" };
 export const dynamic = "force-dynamic";
@@ -64,7 +65,28 @@ export default async function SchedulePage() {
     );
   }
 
-  const timeline = buildWaveTimeline(myWave);
+  const calendarWave: CalendarWave = {
+    name: myWave.name,
+    registrationOpensAt: myWave.registrationOpensAt.toISOString(),
+    registrationClosesAt: myWave.registrationClosesAt.toISOString(),
+    phase2OpensAt: myWave.phase2OpensAt?.toISOString() ?? null,
+    phase2ClosesAt: myWave.phase2ClosesAt?.toISOString() ?? null,
+    judgingDates: myWave.judgingDates,
+    postingOpensAt: myWave.postingOpensAt?.toISOString() ?? null,
+    postingClosesAt: myWave.postingClosesAt?.toISOString() ?? null,
+    completedAt: myWave.completedAt?.toISOString() ?? null,
+  };
+
+  const timeline = buildWaveTimeline(
+    myWave,
+    new Date(),
+    mySlot
+      ? {
+          at: mySlot.startsAt,
+          label: `${periodLabel(mySlot.period)} ${formatDateVN(mySlot.startsAt)}, ${periodTimeLabel(mySlot.period)}`,
+        }
+      : null
+  );
   const next = timeline.find((m) => m.state === "current");
 
   return (
@@ -98,6 +120,10 @@ export default async function SchedulePage() {
         <CardHeader
           title="Dòng thời gian của bạn"
           subtitle="Mốc đã qua làm mờ, mốc kế tiếp làm nổi — đọc từ trên xuống là biết còn những gì"
+          /* Tờ lịch tháng nằm sau một nút bấm chứ không mở sẵn: dòng thời gian trả lời "việc kế
+             tiếp là gì", còn tờ lịch trả lời "rơi vào thứ mấy" — câu hỏi thứ hai chỉ hỏi khi
+             người ta đang xếp lịch cá nhân, không phải mỗi lần mở trang. */
+          action={<WaveCalendarButton wave={calendarWave} label="Xem dạng lịch tháng" tone="light" />}
         />
         <ol className="mt-1">
           {timeline.map((m, i) => (
@@ -140,34 +166,6 @@ export default async function SchedulePage() {
             </li>
           ))}
         </ol>
-      </Card>
-
-      <Card>
-        <CardHeader
-          title="Khung giờ đăng bài của bạn"
-          subtitle="Ban tổ chức duyệt cho bài lên nhóm theo khung giờ đã đặt trước"
-        />
-        {mySlot ? (
-          <p className="flex flex-wrap items-center gap-2 text-body text-ink">
-            <MegaphoneIcon size={17} className="text-teal" />
-            <b>
-              {periodLabel(mySlot.period)} {formatDateVN(mySlot.startsAt)}
-            </b>
-            <span className="text-caption text-ink-2">{periodTimeLabel(mySlot.period)}</span>
-          </p>
-        ) : (
-          <p className="text-body text-ink-2">
-            Bạn chưa đặt khung giờ. Đặt trước ở mục Chia sẻ &amp; lan tỏa — mỗi khung có hạn mức
-            riêng, đặt sớm thì còn nhiều khung để chọn.
-          </p>
-        )}
-        <div className="mt-3">
-          <Link href="/dashboard/share">
-            <Button variant={mySlot ? "ghost" : "solid"} size="sm">
-              {mySlot ? "Xem lại bước lan tỏa" : "Đặt khung giờ"}
-            </Button>
-          </Link>
-        </div>
       </Card>
 
       <AllWaves waves={allWaves} highlightId={myWave.id} />

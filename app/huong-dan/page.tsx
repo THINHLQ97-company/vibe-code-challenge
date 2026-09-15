@@ -316,7 +316,7 @@ const STEPS = [
           ratio="1261/859"
         />
         <DarkNote>
-          Bị trả về thì vẫn nộp lại được, nhưng điểm đã chấm được ghi nhận ngay tại thời điểm bạn nộp bài. Ban giám khảo chỉ ra chỗ chưa đạt để bạn sửa và bước vào vòng kế tiếp. Thời gian làm bài chỉ bắt đầu tính từ thời điểm đề tài được duyệt.
+          Bị trả về thì vẫn nộp lại được, không giới hạn số lần, miễn còn trong Phase 1. Góp ý của ban giám khảo là yêu cầu phải hoàn thiện: hết Phase 1 mà chưa sửa xong thì bạn dự lại ở đợt sau. Điểm được ghi nhận tại thời điểm bạn nộp. Bạn chỉ nộp được sản phẩm sau khi đề tài được duyệt; hạn nộp là hạn chung của đợt.
         </DarkNote>
       </div>
     ),

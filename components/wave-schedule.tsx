@@ -1,4 +1,5 @@
 import { GlassCard } from "@/components/landing-ui";
+import { WaveCalendarButton } from "@/components/wave-calendar";
 import { WaveCountdown } from "@/components/wave-countdown";
 import { formatDateTimeVN } from "@/lib/datetime";
 
@@ -71,6 +72,9 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
                 <div className="mt-2">
                   <WaveCountdown to={open.registrationClosesAt} />
                 </div>
+                <div className="mt-2.5">
+                  <WaveCalendarButton wave={open} />
+                </div>
               </>
             ) : next ? (
               <>
@@ -82,6 +86,9 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
                 <p className="mt-2 text-meta text-cream/50">
                   Mở lúc {formatDateTimeVN(next.registrationOpensAt)}
                 </p>
+                <div className="mt-2.5">
+                  <WaveCalendarButton wave={next} />
+                </div>
               </>
             ) : (
               <>
@@ -152,13 +159,15 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
               </div>
 
               <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-meta text-cream/50">
-                  {open
-                    ? focus.registered >= focus.capacity
+                {/* Số suất còn lại chỉ có nghĩa khi đợt ĐANG nhận người. Lúc chưa mở thì câu
+                    "chưa ai đăng ký" không nói thêm được gì mà lại đọc như một lời chê. */}
+                {open && (
+                  <p className="text-meta text-cream/50">
+                    {focus.registered >= focus.capacity
                       ? "Đợt này đã đầy — chờ đợt kế tiếp"
-                      : `Còn ${focus.capacity - focus.registered} suất`
-                    : "Chưa mở, chưa ai đăng ký"}
-                </p>
+                      : `Còn ${focus.capacity - focus.registered} suất`}
+                  </p>
+                )}
                 {focus.bonusPoints > 0 && (
                   <p className="text-meta text-orange-bright">
                     +{focus.bonusPoints} điểm thưởng khi đăng ký đợt này
@@ -179,9 +188,10 @@ export function WaveSchedule({ waves }: { waves: PublicWave[] }) {
                   className="flex flex-wrap items-baseline justify-between gap-2 text-caption text-cream/60"
                 >
                   <span className="text-cream/80">{w.name}</span>
-                  <span className="tabular-nums">
+                  <span className="flex flex-wrap items-center gap-2 tabular-nums">
                     mở {formatDateTimeVN(w.registrationOpensAt)} · {w.capacity} suất
                     {w.bonusPoints > 0 ? ` · +${w.bonusPoints} điểm` : " · không có điểm thưởng"}
+                    <WaveCalendarButton wave={w} label="Xem lịch" />
                   </span>
                 </li>
               ))}

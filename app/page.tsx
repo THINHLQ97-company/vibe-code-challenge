@@ -3,7 +3,6 @@ import { Button } from "@/components/dsvh/ui/Button";
 import { LogoWideDark, LogoSquare } from "@/components/brand";
 import { RUBRIC, PHASE_GROUPS, TOTAL_MAX } from "@/lib/scoring-rubric";
 import { WaveSchedule, type PublicWave } from "@/components/wave-schedule";
-import { ContestSchedule } from "@/components/contest-schedule";
 import { MAX_WAVE_BONUS } from "@/lib/wave-bonus";
 import { MicrosoftLoginButton } from "@/components/microsoft-login";
 import { getActiveSeason } from "@/lib/db/queries/seasons";
@@ -68,7 +67,6 @@ const NAV_ANCHORS = [
   { href: "#giai-thuong", label: "Giải thưởng" },
   { href: "#quyen-loi", label: "Quyền lợi" },
   { href: "#hanh-trinh", label: "Hành trình" },
-  { href: "#lich-thi", label: "Lịch thi" },
   { href: "#cham-diem", label: "Cách chấm" },
   { href: "#bang-thi", label: "Bảng thi" },
   { href: "#faq", label: "Hỏi đáp" },
@@ -238,7 +236,7 @@ const FAQ = [
   },
   {
     q: "Bài bị trả về ở vòng kiểm tra thì có bị loại không?",
-    a: "Không bị loại. Cả hai cổng kiểm tra — ngưỡng sàn kỹ thuật và rà soát an toàn — đều cho phép chỉnh sửa và nộp lại trong thời hạn của bạn. Lưu ý: điểm đã chấm được ghi nhận ngay tại thời điểm bạn nộp bài; ban giám khảo chỉ ra chỗ chưa đạt để bạn sửa và bước vào vòng kế tiếp.",
+    a: "Không bị loại ngay. Ở cả hai cổng kiểm tra — ngưỡng sàn kỹ thuật và rà soát an toàn — ban giám khảo chỉ rõ chỗ chưa đạt để bạn sửa và nộp lại. Điều cần để ý là thời hạn, vì nó có thật: hết Phase 1 mà đề tài chưa hoàn thiện theo góp ý thì bạn dự lại ở đợt sau; hết Phase 2 mà bản sửa vẫn chưa đạt, hoặc nộp muộn tới mức không còn lượt chấm nào, thì bài dừng lại ở Phase 2 và không vào được phần thi lan tỏa. Nộp sớm là cách duy nhất để chắc chắn còn thời gian sửa. Một lưu ý nữa: điểm được ghi nhận tại thời điểm bạn nộp — sửa để qua cổng thì đi tiếp được, nhưng ban giám khảo không chấm lại điểm.",
   },
   {
     q: "Không đăng bài chia sẻ thì có bị trượt không?",
@@ -543,12 +541,6 @@ export default async function LandingPage() {
           </GlassCard>
         </Band>
 
-        {/* ── LỊCH ĐỢT THI ───────────────────────────────────────────────────────────────── */}
-        {/* Đặt NGAY SAU hành trình: hành trình nói có những chặng nào, lịch nói các chặng đó rơi
-            vào ngày nào. Đảo thứ tự thì người đọc thấy một loạt ngày tháng trước khi biết chúng
-            là ngày của việc gì. */}
-        <ContestSchedule waves={waves} />
-
         {/* ── CHẤM ĐIỂM ──────────────────────────────────────────────────────────────────── */}
         <Band
           id="cham-diem"
@@ -560,7 +552,8 @@ export default async function LandingPage() {
             <GlassCard className="p-4">
               <h3 className="text-body font-semibold text-cream">Ngưỡng sàn — 6 tiêu chí</h3>
               <p className="mt-0.5 text-caption text-cream/50">
-                Nhị phân: đạt hoặc không. Chưa đạt thì được sửa và nộp lại, không loại ai.
+                Nhị phân: đạt hoặc không. Chưa đạt thì được sửa và nộp lại trong thời hạn của
+                đợt — nhưng hết hạn mà vẫn chưa đạt thì bài dừng tại đây.
               </p>
               <ul className="mt-3 space-y-2">
                 {FLOOR.map((f) => (

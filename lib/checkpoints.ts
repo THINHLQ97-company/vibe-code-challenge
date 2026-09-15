@@ -26,6 +26,13 @@ export type Checkpoint = {
   reason?: string | null;
   /** Câu báo khi mốc này chặn việc công bố. */
   blocker: string;
+  /**
+   * Mốc này có CHẶN việc công bố kết quả không.
+   *
+   * Tách khỏi `done` vì hai câu hỏi khác nhau: "thí sinh đã qua mốc chưa" dùng để vẽ dải mốc, còn
+   * "có được công bố điểm chưa" là cổng của ban tổ chức. Mốc tự chọn thì chưa qua vẫn công bố được.
+   */
+  blocking: boolean;
 };
 
 type CheckpointInput = Pick<
@@ -45,13 +52,14 @@ type CheckpointInput = Pick<
 
 export function getCheckpoints(s: CheckpointInput): Checkpoint[] {
   const raw: Omit<Checkpoint, "state">[] = [
-    { code: "CP1", label: "CP1 · Đăng ký dự thi", done: true, blocker: "chưa đăng ký dự thi" },
+    { code: "CP1", label: "CP1 · Đăng ký dự thi", done: true, blocking: true, blocker: "chưa đăng ký dự thi" },
     {
       code: "CP2",
       label: "CP2 · Đề tài được duyệt",
       done: s.registrationStatus === "approved",
       reason: s.registrationStatus === "returned" ? (s.registrationNote ?? "Đề tài bị trả về") : null,
       blocker: "đề tài chưa được duyệt (CP2)",
+      blocking: true,
     },
     {
       code: "CP3",
@@ -61,6 +69,7 @@ export function getCheckpoints(s: CheckpointInput): Checkpoint[] {
         ? (s.prebuiltNote ?? "Bị gắn cờ dùng repo/mẫu có sẵn")
         : s.githubVerifyError || null,
       blocker: "chưa xác minh mã nguồn (CP3)",
+      blocking: true,
     },
     {
       code: "CP4",
@@ -69,6 +78,7 @@ export function getCheckpoints(s: CheckpointInput): Checkpoint[] {
       reason:
         s.securityStatus === "flagged" ? (s.securityNote ?? "Bị gắn cờ ở cổng an toàn") : null,
       blocker: "chưa qua cổng rà soát an toàn (CP4)",
+      blocking: true,
     },
     {
       code: "CP5",
@@ -81,13 +91,23 @@ export function getCheckpoints(s: CheckpointInput): Checkpoint[] {
        * khoá luôn phần điểm thí sinh đã làm được ở hai phase trước — trái hẳn với điều vừa chốt.
        */
       done: !!s.facebookApprovedAt || !!s.postRejectedAt,
-      blocker: "chưa duyệt bài đăng (CP5)",
+      /**
+       * CP5 chỉ chặn công bố khi CÓ bài đang chờ ban tổ chức quyết.
+       *
+       * Không đăng gì cả nghĩa là thí sinh chọn bỏ phần lan tỏa — điều thể lệ cho phép — nên chặn
+       * họ lại là khoá luôn phần điểm hai phase trước, đúng điều vừa bỏ đi. Nhưng đã dán link mà
+       * ban tổ chức chưa duyệt cũng chưa từ chối thì PHẢI chặn: công bố lúc đó là chốt 0 điểm lan
+       * tỏa cho một bài có thể đang sắp được duyệt.
+       */
+      blocking: !!s.facebookPostUrl && !s.facebookApprovedAt && !s.postRejectedAt,
+      blocker: "bài đăng còn chờ ban tổ chức duyệt (CP5)",
     },
     {
       code: "CP6",
       label: "CP6 · Phiếu trải nghiệm",
       done: !!s.surveySubmittedAt,
       blocker: "chưa nộp phiếu trải nghiệm (CP6)",
+      blocking: true,
     },
   ];
 
@@ -103,9 +123,9 @@ export function getCheckpoints(s: CheckpointInput): Checkpoint[] {
   });
 }
 
-/** Các mốc còn thiếu, dạng câu để ghép vào thông báo cho BTC. */
+/** Các mốc BẮT BUỘC còn thiếu, dạng câu để ghép vào thông báo cho BTC. */
 export function missingCheckpoints(s: CheckpointInput): string[] {
   return getCheckpoints(s)
-    .filter((c) => !c.done)
+    .filter((c) => !c.done && c.blocking)
     .map((c) => c.blocker);
 }

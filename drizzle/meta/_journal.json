@@ -134,6 +134,13 @@
       "when": 1789456699224,
       "tag": "0018_season1_real_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1789456789224,
+      "tag": "0019_fix_schedule_mapping",
+      "breakpoints": true
     }
   ]
 }
