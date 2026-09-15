@@ -32,6 +32,20 @@ const PHASE_STEPS = [
   { label: "Công bố", description: "Kết quả cuối" },
 ];
 
+/**
+ * Câu mô tả dưới mỗi ô điểm.
+ *
+ * Bản trước luôn ghi "Hội đồng đã chốt · trung bình N giám khảo", kể cả khi N bằng 0 — tức là bài
+ * mới chỉ có điểm máy. Câu "trung bình 0 giám khảo" vừa vô nghĩa vừa nói sai về cách điểm hình
+ * thành. Cố ý KHÔNG nêu cơ chế chấm với thí sinh: công bố cách vận hành nội bộ ra ngoài là biến
+ * nó thành cam kết phải giữ đúng từng chữ.
+ */
+function judgeNote(judgeCount: number): string {
+  if (judgeCount === 0) return "Ban tổ chức đã công bố điểm mục này.";
+  if (judgeCount === 1) return "Một giám khảo đã chấm và ban tổ chức đã công bố.";
+  return `Trung bình ${judgeCount} giám khảo chấm độc lập.`;
+}
+
 export const metadata = { title: { absolute: "Tổng quan · Khu thí sinh" } };
 
 export default async function DashboardOverviewPage() {
@@ -65,11 +79,21 @@ export default async function DashboardOverviewPage() {
 
   // Cùng nguồn tổng hợp với màn chấm điểm bên BTC — hai bên không được nói hai con số khác nhau.
   const scores = await getAggregatedScores(submission.id);
-  const ideaView = candidateScoreView(scores.giaTriUngDung);
+  const ideaView = candidateScoreView({
+    agg: scores.giaTriUngDung,
+    submitted: submission.registrationStatus === "approved" && !!submission.prdContent,
+    publishedAt: submission.phase1PublishedAt,
+    notSubmittedHint: "Đăng ký đề tài kèm tài liệu PRD và chờ ban tổ chức duyệt.",
+  });
   const productView = candidateScoreView({
-    value: scores.chatLuongKyThuat.value + scores.hoanThien.value,
-    basis: scores.chatLuongKyThuat.basis,
-    judgeCount: scores.chatLuongKyThuat.judgeCount,
+    agg: {
+      value: scores.chatLuongKyThuat.value + scores.hoanThien.value,
+      basis: scores.chatLuongKyThuat.basis,
+      judgeCount: scores.chatLuongKyThuat.judgeCount,
+    },
+    submitted: !!submission.vibehostUrl && !!submission.githubRepoUrl,
+    publishedAt: submission.phase2PublishedAt,
+    notSubmittedHint: "Nộp link sản phẩm trên Vibe Host và link mã nguồn ở mục Nộp bài.",
   });
 
   const checklist = getCheckpoints(submission);
@@ -161,9 +185,7 @@ export default async function DashboardOverviewPage() {
               value={ideaView.visible ? `${ideaView.value}/25` : ideaView.label}
             />
             <p className="mt-1 px-1 text-caption text-ink-2">
-              {ideaView.visible
-                ? `Hội đồng đã chốt · trung bình ${ideaView.judgeCount} giám khảo`
-                : ideaView.hint}
+              {ideaView.visible ? judgeNote(ideaView.judgeCount) : ideaView.hint}
             </p>
           </div>
           <div>
@@ -173,9 +195,7 @@ export default async function DashboardOverviewPage() {
               value={productView.visible ? `${productView.value}/55` : productView.label}
             />
             <p className="mt-1 px-1 text-caption text-ink-2">
-              {productView.visible
-                ? `Hội đồng đã chốt · trung bình ${productView.judgeCount} giám khảo`
-                : productView.hint}
+              {productView.visible ? judgeNote(productView.judgeCount) : productView.hint}
             </p>
           </div>
         </div>

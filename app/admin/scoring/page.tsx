@@ -62,6 +62,8 @@ export default async function ScoringPage() {
       waveBonus: s.waveId != null ? (waveById.get(s.waveId)?.bonusPoints ?? 0) : 0,
       waveName: s.waveId != null ? (waveById.get(s.waveId)?.name ?? null) : null,
       published: !!s.publishedAt,
+      phase1Published: !!s.phase1PublishedAt,
+      phase2Published: !!s.phase2PublishedAt,
       ballots: ballotCounts.get(s.id) ?? { phase1: 0, phase2: 0 },
       iScored: o.myIdea != null || o.myProduct != null,
       stageLabel: stage.label,

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
+import { SegmentedControl } from "@/components/dsvh/ui/SegmentedControl";
+import { Checkbox } from "@/components/dsvh/ui/form/Checkbox";
 import { Table, type ColumnDef } from "@/components/dsvh/ui/Table";
 import { Badge } from "@/components/dsvh/ui/Badge";
 import { Input } from "@/components/dsvh/ui/Input";
@@ -36,12 +38,26 @@ export type ScoringRowData = {
   waveBonus: number;
   waveName: string | null;
   published: boolean;
+  phase1Published: boolean;
+  phase2Published: boolean;
   /** Số phiếu giám khảo đã có ở từng phase — để biết bài nào còn suất chấm. */
   ballots: { phase1: number; phase2: number };
   iScored: boolean;
   stageLabel: string;
   stageTone: "neutral" | "success" | "warning" | "danger";
 };
+
+/** Một chấm cho một lần gửi điểm — sáng là đã gửi, mờ là chưa. Tên đầy đủ nằm ở thuộc tính title. */
+function PublishDot({ on, label, strong }: { on: boolean; label: string; strong?: boolean }) {
+  return (
+    <span
+      title={`${label}: ${on ? "đã gửi" : "chưa gửi"}`}
+      className={`size-2.5 rounded-full ${
+        on ? (strong ? "bg-teal-strong" : "bg-teal") : "bg-stroke"
+      }`}
+    />
+  );
+}
 
 /** Ô điểm: số + nguồn điểm, để BTC nhìn phát biết đang là điểm máy hay điểm hội đồng. */
 function ScoreCell({
@@ -76,10 +92,15 @@ export function ScoringTable({
   const router = useRouter();
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<(string | number)[]>([]);
+  const [target, setTarget] = useState<"1" | "2" | "final">("1");
+  const [undo, setUndo] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [report, setReport] = useState<{ published: number; failed: number; lines: string[] } | null>(
-    null
-  );
+  const [report, setReport] = useState<{
+    published: number;
+    failed: number;
+    lines: string[];
+    label?: string;
+  } | null>(null);
 
   async function publishSelected() {
     setReport(null);
@@ -88,11 +109,19 @@ export function ScoringTable({
       const res = await fetch("/api/admin/submissions/publish-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selected.map(Number) }),
+        body: JSON.stringify({
+          ids: selected.map(Number),
+          target: target === "final" ? "final" : Number(target),
+          undo,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setReport({ published: 0, failed: selected.length, lines: [data.error ?? "Không công bố được"] });
+        setReport({
+          published: 0,
+          failed: selected.length,
+          lines: [data.error ?? "Không gửi được"],
+        });
         return;
       }
       // Liệt kê TỪNG bài không công bố được kèm lý do. Một lô mấy chục bài mà chỉ báo "xong" thì
@@ -101,7 +130,7 @@ export function ScoringTable({
       const lines = (data.results as Array<{ id: number; ok: boolean; error?: string }>)
         .filter((r) => !r.ok)
         .map((r) => `${byId.get(r.id) ?? `Bài #${r.id}`}: ${r.error}`);
-      setReport({ published: data.published, failed: data.failed, lines });
+      setReport({ published: data.published, failed: data.failed, lines, label: data.label });
       setSelected([]);
       router.refresh();
     } catch {
@@ -276,11 +305,21 @@ export function ScoringTable({
       render: (r) => <Badge tone={r.stageTone}>{r.stageLabel}</Badge>,
     },
     {
+      /**
+       * Ba chấm cho ba lần gửi điểm. Gộp thành một cột "đã công bố chưa" thì không trả lời được
+       * câu hỏi thật của ban tổ chức vào chiều thứ Bảy: bài này đã gửi điểm ý tưởng chưa, còn sản
+       * phẩm thì sao.
+       */
       key: "published",
-      header: "Công bố",
+      header: "Đã gửi điểm",
       align: "center",
-      render: (r) =>
-        r.published ? <Badge tone="success">Đã công bố</Badge> : <Badge tone="neutral">Chưa</Badge>,
+      render: (r) => (
+        <span className="flex items-center justify-center gap-1">
+          <PublishDot on={r.phase1Published} label="Ý tưởng" />
+          <PublishDot on={r.phase2Published} label="Sản phẩm" />
+          <PublishDot on={r.published} label="Kết quả cuối" strong />
+        </span>
+      ),
     },
     {
       key: "open",
@@ -310,7 +349,7 @@ export function ScoringTable({
       {report && (
         <Alert
           tone={report.failed > 0 ? "warning" : "success"}
-          title={`Công bố ${report.published} bài${report.failed > 0 ? `, ${report.failed} bài chưa ra` : ""}`}
+          title={`${undo ? "Gỡ" : "Gửi"} ${report.label ?? "điểm"} cho ${report.published} bài${report.failed > 0 ? `, ${report.failed} bài không thực hiện được` : ""}`}
         >
           {report.lines.length > 0 && (
             <ul className="mt-1 space-y-0.5">
@@ -326,7 +365,22 @@ export function ScoringTable({
 
       {canPublish && selected.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-stroke bg-surface-2 px-3 py-2">
-          <span className="text-caption text-ink-2">Đã chọn {selected.length} bài</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-caption text-ink-2">Đã chọn {selected.length} bài</span>
+            {/* Chọn gửi phần nào TRƯỚC khi bấm. Ban tổ chức gửi điểm theo đợt vào cuối tuần, và
+                phần lớn lần bấm là "gửi điểm Ý tưởng cho tất cả ai vừa xong" — nên để nó mặc định. */}
+            <SegmentedControl
+              options={[
+                { value: "1", label: "Ý tưởng" },
+                { value: "2", label: "Sản phẩm" },
+                { value: "final", label: "Kết quả cuối" },
+              ]}
+              value={target}
+              onChange={(v) => setTarget(v as "1" | "2" | "final")}
+              size="sm"
+            />
+            <Checkbox checked={undo} onChange={setUndo} label="Gỡ điểm đã gửi" />
+          </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={() => setSelected([])}>
               Bỏ chọn
@@ -337,7 +391,7 @@ export function ScoringTable({
               loading={publishing}
               onClick={() => void publishSelected()}
             >
-              Công bố {selected.length} bài
+              {undo ? "Gỡ" : "Gửi"} {selected.length} bài
             </Button>
           </div>
         </div>

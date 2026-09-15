@@ -287,6 +287,18 @@ export const submissions = pgTable("submissions", {
   // Làm tròn về số nguyên sẽ tạo đồng hạng giả ở bảng xếp hạng (87.5 và 88 cùng thành 88).
   finalScore: real("final_score"),
   publishedAt: timestamp("published_at"),
+  /**
+   * Mốc ban tổ chức GỬI điểm từng phase cho thí sinh.
+   *
+   * Tách khỏi `publishedAt` (kết quả cuối) vì đó là hai việc khác nhau: gửi điểm ý tưởng cho một
+   * người mới nộp PRD hoàn toàn khác với chốt tổng điểm và mở cửa phản biện.
+   *
+   * Điểm từng mục CHỈ hiện cho thí sinh khi cột tương ứng có giá trị. Trước đây điểm hiện ngay khi
+   * có phiếu giám khảo, tức là ban tổ chức không cầm quyền gửi điểm dù thể lệ nói vậy — giám khảo
+   * chấm xong là thí sinh thấy luôn.
+   */
+  phase1PublishedAt: timestamp("phase1_published_at"),
+  phase2PublishedAt: timestamp("phase2_published_at"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
