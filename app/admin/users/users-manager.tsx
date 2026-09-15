@@ -12,7 +12,7 @@ import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { Avatar } from "@/components/dsvh/ui/data/Avatar";
 import { SegmentedControl } from "@/components/dsvh/ui/SegmentedControl";
-import { MagnifyingGlassIcon, PlusIcon } from "@/components/dsvh/icons";
+import { MagnifyingGlassIcon, PlusIcon, TrashIcon } from "@/components/dsvh/icons";
 
 export type UserRow = {
   id: number;
@@ -84,6 +84,39 @@ export function UsersManager({ initial, meId }: { initial: UserRow[]; meId: numb
         setError(data.error ?? "Không đổi được vai trò");
         return;
       }
+      router.refresh();
+    } catch {
+      setError("Không kết nối được máy chủ, thử lại sau");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function removeUser(u: UserRow) {
+    // Hỏi lại trước khi xoá, và nói rõ hệ quả: xoá người là mất luôn phiếu chấm của họ.
+    const warn =
+      u.submissionCount > 0
+        ? "Tài khoản này đang có bài dự thi nên không xoá được."
+        : `Xoá ${u.email}? Mọi phiếu chấm của người này cũng bị xoá theo.`;
+    if (u.submissionCount > 0) {
+      setError(warn);
+      return;
+    }
+    if (!window.confirm(warn)) return;
+
+    setError(null);
+    setOk(null);
+    setBusy(u.id);
+    try {
+      const res = await fetch(`/api/admin/users/${u.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error ?? "Không xoá được tài khoản");
+        return;
+      }
+      setOk(
+        `Đã xoá ${u.email}${data.ballotsRemoved > 0 ? ` và ${data.ballotsRemoved} phiếu chấm của họ` : ""}.`
+      );
       router.refresh();
     } catch {
       setError("Không kết nối được máy chủ, thử lại sau");
@@ -184,7 +217,7 @@ export function UsersManager({ initial, meId }: { initial: UserRow[]; meId: numb
       header: "Đổi vai trò",
       align: "right",
       render: (u) => (
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end gap-2">
           <div className="w-36">
             <Select
               options={ROLE_OPTIONS}
@@ -193,6 +226,19 @@ export function UsersManager({ initial, meId }: { initial: UserRow[]; meId: numb
               onChange={(v) => void changeRole(u.id, v)}
             />
           </div>
+          {/* Không hiện nút xoá cho chính mình và cho người đã có bài dự thi — hai trường hợp
+              máy chủ đằng nào cũng từ chối, bày nút ra chỉ để người ta bấm rồi ăn lỗi. */}
+          {u.id !== meId && u.submissionCount === 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={busy === u.id}
+              leftIcon={<TrashIcon size={14} />}
+              onClick={() => void removeUser(u)}
+            >
+              Xoá
+            </Button>
+          )}
         </div>
       ),
     },

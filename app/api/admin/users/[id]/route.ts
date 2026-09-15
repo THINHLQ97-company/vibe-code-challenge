@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireSession } from "@/lib/api-auth";
-import { setUserRole, countAdmins } from "@/lib/db/queries/users";
+import { setUserRole, countAdmins, deleteUserCascade } from "@/lib/db/queries/users";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -38,4 +38,28 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   return NextResponse.json({ user: await setUserRole(id, parsed.data.role) });
+}
+
+/** Xoá tài khoản. Chỉ admin, và không xoá được chính mình hay người quản trị cuối cùng. */
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireSession(["admin"]);
+  if ("error" in auth) return auth.error;
+
+  const id = Number((await params).id);
+  if (!Number.isInteger(id)) {
+    return NextResponse.json({ error: "Mã tài khoản không hợp lệ" }, { status: 400 });
+  }
+  if (id === auth.session.userId) {
+    return NextResponse.json({ error: "Không xoá được tài khoản của chính bạn" }, { status: 409 });
+  }
+
+  const target = await db.query.users.findFirst({ where: eq(users.id, id) });
+  if (!target) return NextResponse.json({ error: "Không tìm thấy tài khoản" }, { status: 404 });
+  if (target.role === "admin" && (await countAdmins()) <= 1) {
+    return NextResponse.json({ error: "Đây là tài khoản quản trị duy nhất" }, { status: 409 });
+  }
+
+  const result = await deleteUserCascade(id);
+  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 409 });
+  return NextResponse.json({ ok: true, ballotsRemoved: result.ballots });
 }

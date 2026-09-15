@@ -1,6 +1,6 @@
 import { asc, eq, sql } from "drizzle-orm";
 import { db } from "../index";
-import { users, submissions } from "../schema";
+import { users, submissions, ideaScores, productScores } from "../schema";
 
 export type ManagedUser = {
   id: number;
@@ -90,4 +90,49 @@ export async function countAdmins(): Promise<number> {
     .from(users)
     .where(eq(users.role, "admin"));
   return Number(row?.n ?? 0);
+}
+
+/**
+ * Xoá một tài khoản, kèm mọi phiếu chấm của họ.
+ *
+ * Phiếu chấm bị xoá theo, KHÔNG phải để cho tiện: cột `judge_id` trỏ tới `users`, giữ phiếu lại mà
+ * xoá người là để lại bản ghi trỏ vào hư không. Và một phiếu không còn ai chịu trách nhiệm thì
+ * cũng không nên tính vào điểm trung bình.
+ *
+ * KHÔNG xoá được người đã có bài dự thi — bài thi là dữ liệu của cuộc thi, không phải của một tài
+ * khoản; xoá người là mất luôn chủ của bài. Trường hợp đó phải hạ vai trò thay vì xoá.
+ */
+export async function deleteUserCascade(id: number): Promise<{ ok: true; ballots: number } | { ok: false; error: string }> {
+  const [sub] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(submissions)
+    .where(eq(submissions.userId, id));
+  if (Number(sub?.n ?? 0) > 0) {
+    return { ok: false, error: "Tài khoản này đang có bài dự thi — hạ vai trò thay vì xoá" };
+  }
+
+  const removed = await db.transaction(async (tx) => {
+    const a = await tx.delete(ideaScores).where(eq(ideaScores.judgeId, id)).returning({ id: ideaScores.id });
+    const b = await tx
+      .delete(productScores)
+      .where(eq(productScores.judgeId, id))
+      .returning({ id: productScores.id });
+    await tx.delete(users).where(eq(users.id, id));
+    return a.length + b.length;
+  });
+
+  return { ok: true, ballots: removed };
+}
+
+/** Đếm phiếu chấm của một người — để giao diện nói trước sẽ mất bao nhiêu phiếu khi xoá. */
+export async function countBallotsOf(id: number): Promise<number> {
+  const [a] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(ideaScores)
+    .where(eq(ideaScores.judgeId, id));
+  const [b] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(productScores)
+    .where(eq(productScores.judgeId, id));
+  return Number(a?.n ?? 0) + Number(b?.n ?? 0);
 }
