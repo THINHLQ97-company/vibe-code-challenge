@@ -92,6 +92,22 @@ export function resolveDepartmentCode(raw: string | null | undefined): string | 
   const exact = EXACT[text];
   if (exact) return exact;
 
+  /**
+   * Entra ghi phòng ban theo dạng "<Chức năng> - <MÃ>" — ĐO ĐƯỢC trên dữ liệu thật ngày
+   * 15/09/2026: hai tài khoản đăng nhập đầu tiên đều trả về "Marketing - MK", chuỗi KHÔNG có
+   * trong danh sách Odoo (Odoo ghi "Marketing - Macom" và "Maketing - VUX").
+   *
+   * Nghĩa là hai hệ thống ghi tên phòng ban khác nhau thật, đúng như đã lường. Thay vì chép tay
+   * từng chuỗi Entra — mà mình chưa nhìn thấy hết — lấy luôn quy luật: đoạn cuối sau dấu gạch mà
+   * trùng một mã đã biết thì chính là mã phòng ban.
+   *
+   * An toàn với các chuỗi Odoo: "Marketing - Macom" → "macom" không phải mã; "Finance - HN" →
+   * "hn" không phải mã; "Consultants - MBC - HCM" → "hcm" không phải mã. Còn "Technical Support
+   * - AI" → "ai" ĐÚNG là mã, và cũng đúng ý nghĩa.
+   */
+  const tail = text.split("-").pop()?.trim().toUpperCase();
+  if (tail && tail in departmentToBoard) return tail;
+
   // Một số hồ sơ ghi thẳng mã ("MK", "TS") thay vì tên phòng.
   const asCode = text.toUpperCase();
   if (asCode in departmentToBoard) return asCode;

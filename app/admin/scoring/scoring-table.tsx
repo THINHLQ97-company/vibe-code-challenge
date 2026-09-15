@@ -276,6 +276,13 @@ export function ScoringTable({
       render: (r) => <Badge tone={r.stageTone}>{r.stageLabel}</Badge>,
     },
     {
+      key: "published",
+      header: "Công bố",
+      align: "center",
+      render: (r) =>
+        r.published ? <Badge tone="success">Đã công bố</Badge> : <Badge tone="neutral">Chưa</Badge>,
+    },
+    {
       key: "open",
       header: "",
       align: "right",
