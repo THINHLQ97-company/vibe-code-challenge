@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Table, type ColumnDef } from "@/components/dsvh/ui/Table";
 import { Badge } from "@/components/dsvh/ui/Badge";
+import { Textarea } from "@/components/dsvh/ui/form/Textarea";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Input } from "@/components/dsvh/ui/Input";
 import { Modal } from "@/components/dsvh/ui/overlay/Modal";
@@ -21,6 +22,8 @@ export type PostRowData = {
   department: string;
   facebookPostUrl: string;
   approvedAt: string | null;
+  rejectedAt: string | null;
+  rejectNote: string | null;
   engagementCount: number | null;
   engagementTier: number | null;
   published: boolean;
@@ -35,6 +38,7 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
   const [count, setCount] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -213,17 +217,51 @@ export function PostsTable({ rows }: { rows: PostRowData[] }) {
               <div className="mt-2">
                 {active.approvedAt ? (
                   <Badge tone="success">Đã duyệt · {active.approvedAt}</Badge>
+                ) : active.rejectedAt ? (
+                  <div className="space-y-1.5">
+                    <Badge tone="danger">Đã từ chối · {active.rejectedAt}</Badge>
+                    <p className="text-caption text-ink-2">{active.rejectNote}</p>
+                    <p className="text-meta text-ink-3">
+                      Thí sinh mất toàn bộ điểm lan tỏa và không đăng lại được.
+                    </p>
+                  </div>
                 ) : (
-                  <Button
-                    variant="solid"
-                    size="sm"
-                    loading={loading}
-                    onClick={async () => {
-                      if (await call(active.id, "approve-post")) setActive(null);
-                    }}
-                  >
-                    Duyệt bài đăng
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      variant="solid"
+                      size="sm"
+                      loading={loading}
+                      onClick={async () => {
+                        if (await call(active.id, "approve-post")) setActive(null);
+                      }}
+                    >
+                      Duyệt bài đăng
+                    </Button>
+
+                    {/* Từ chối lấy mất 20 điểm của thí sinh và KHÔNG cho đăng lại, nên bắt buộc
+                        nêu lý do và hỏi lại trước khi ghi. Câu lý do hiện thẳng cho thí sinh. */}
+                    <Textarea
+                      label="Lý do từ chối"
+                      hint="Bắt buộc nếu từ chối — thí sinh đọc đúng câu này và không có cơ hội sửa"
+                      value={rejectNote}
+                      onChange={(e) => setRejectNote(e.target.value)}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      loading={loading}
+                      disabled={rejectNote.trim().length < 10}
+                      onClick={async () => {
+                        if (!window.confirm("Từ chối bài đăng? Thí sinh mất toàn bộ điểm lan tỏa và không được đăng lại.")) return;
+                        if (await call(active.id, "reject-post", { note: rejectNote })) {
+                          setRejectNote("");
+                          setActive(null);
+                        }
+                      }}
+                    >
+                      Từ chối bài đăng
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

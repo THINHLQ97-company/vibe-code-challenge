@@ -38,6 +38,7 @@ type CheckpointInput = Pick<
   | "securityNote"
   | "facebookPostUrl"
   | "facebookApprovedAt"
+  | "postRejectedAt"
   | "surveySubmittedAt"
 > &
   Partial<Pick<Submission, "isPrebuiltRepo" | "prebuiltNote" | "vibehostUrl">>;
@@ -72,7 +73,14 @@ export function getCheckpoints(s: CheckpointInput): Checkpoint[] {
     {
       code: "CP5",
       label: "CP5 · Đăng bài & BGK duyệt",
-      done: !!s.facebookApprovedAt,
+      /**
+       * Bị TỪ CHỐI cũng tính là xong mốc này — theo nghĩa "đã xử lý xong, không còn chờ ai".
+       *
+       * Từ 15/09/2026 bước chia sẻ là TUỲ CHỌN: bỏ qua hoặc bị từ chối thì mất 20 điểm lan tỏa
+       * nhưng bài vẫn được ghi nhận. Nếu mốc này vẫn chặn công bố thì một lỗi ở bước đăng bài sẽ
+       * khoá luôn phần điểm thí sinh đã làm được ở hai phase trước — trái hẳn với điều vừa chốt.
+       */
+      done: !!s.facebookApprovedAt || !!s.postRejectedAt,
       blocker: "chưa duyệt bài đăng (CP5)",
     },
     {

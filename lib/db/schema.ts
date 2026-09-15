@@ -30,6 +30,12 @@ export const appealStatusEnum = pgEnum("appeal_status", [
   "accepted",
   "rejected",
 ]);
+export const recheckStatusEnum = pgEnum("recheck_status", [
+  "none",
+  "pending",
+  "passed",
+  "failed",
+]);
 export const waveStatusEnum = pgEnum("wave_status", ["draft", "open", "closed"]);
 export const scoreSourceEnum = pgEnum("score_source", ["external_ai", "judge"]);
 export const securityStatusEnum = pgEnum("security_status", [
@@ -273,9 +279,29 @@ export const submissions = pgTable("submissions", {
   securityStatus: securityStatusEnum("security_status").notNull().default("pending"),
   securityNote: text("security_note"),
 
+  /**
+   * VÒNG RÀ LẠI sau khi bài bị trả về ở Phase 2.
+   *
+   * Không phải chấm lại: điểm Phase 2 đã chốt ở lần chấm đầu. Vòng này chỉ trả lời một câu — bản
+   * sửa đã đạt chuẩn để đi tiếp chưa. Cần cột riêng vì cổng API lọc bài theo "đã có điểm từ công
+   * cụ ngoài chưa", nên bài đã chấm một lần thì biến mất khỏi hàng đợi vĩnh viễn; sửa xong nộp lại
+   * thì công cụ chạy bao nhiêu lần cũng không thấy nữa.
+   */
+  recheckStatus: recheckStatusEnum("recheck_status").notNull().default("none"),
+  recheckNote: text("recheck_note"),
+
   // Phase 3 — lan tỏa
   facebookPostUrl: text("facebook_post_url"),
   facebookApprovedAt: timestamp("facebook_approved_at"),
+  /**
+   * BTC TỪ CHỐI bài đăng. Trạng thái thứ ba bên cạnh "chưa duyệt" và "đã duyệt" — thiếu nó thì một
+   * bài bị từ chối trông y hệt bài chưa ai xem, và thí sinh ngồi chờ mãi một câu trả lời đã có.
+   *
+   * Bị từ chối = mất toàn bộ điểm lan tỏa, không được đăng lại (BTC chốt 15/09/2026, vì đã có
+   * checklist hỗ trợ trước khi đăng). Bắt buộc kèm lý do.
+   */
+  postRejectedAt: timestamp("post_rejected_at"),
+  postRejectNote: text("post_reject_note"),
   engagementCount: integer("engagement_count"),
   engagementTier: integer("engagement_tier"), // 1-4
 

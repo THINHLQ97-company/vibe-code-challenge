@@ -385,3 +385,30 @@ export async function listWaveCohortByBoard(
     .where(and(eq(submissions.waveId, waveId), eq(users.board, board)))
     .orderBy(desc(submissions.finalScore));
 }
+
+/**
+ * BTC TỪ CHỐI bài đăng — thí sinh mất toàn bộ điểm lan tỏa và KHÔNG được đăng lại.
+ *
+ * Không cho đăng lại là quyết định của BTC (15/09/2026), có cơ sở: trước khi đăng, thí sinh đã đi
+ * qua một bảng checklist từng mục. Từ chối ở bước này nghĩa là họ tick qua loa chứ không phải
+ * không được cảnh báo.
+ *
+ * Bậc tương tác chốt ngay ở 0 thay vì để trống: để trống thì bài kẹt mãi ở trạng thái "chưa chốt
+ * điểm lan tỏa" và không công bố kết quả cuối được — tức một lỗi ở bước đăng bài lại chặn luôn cả
+ * phần điểm họ đã làm được ở hai phase trước.
+ */
+export async function rejectFacebookPost(id: number, note: string) {
+  const [row] = await db
+    .update(submissions)
+    .set({
+      postRejectedAt: new Date(),
+      postRejectNote: note,
+      facebookApprovedAt: null,
+      engagementTier: 0,
+      engagementCount: 0,
+      updatedAt: new Date(),
+    })
+    .where(eq(submissions.id, id))
+    .returning();
+  return row;
+}

@@ -23,6 +23,8 @@ export default async function PostsPage() {
     // GIỜ chứ không chỉ NGÀY: điểm lan tỏa so với trung vị của nhóm cùng khung đăng, nên khi đối
     // chiếu BTC cần thấy bài này được duyệt lúc mấy giờ. Chỉ hiện ngày thì không đối chiếu được.
     approvedAt: s.facebookApprovedAt ? formatDateTimeVN(s.facebookApprovedAt) : null,
+    rejectedAt: s.postRejectedAt ? formatDateTimeVN(s.postRejectedAt) : null,
+    rejectNote: s.postRejectNote,
     engagementCount: s.engagementCount,
     engagementTier: s.engagementTier,
     published: !!s.publishedAt,

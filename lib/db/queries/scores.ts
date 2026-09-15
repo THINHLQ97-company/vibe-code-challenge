@@ -92,6 +92,17 @@ export async function setProductFeedback(
       btcFeedback: feedback,
       feedbackStatus: status,
       kpi3pFlag: status === "approved",
+      /**
+       * Trả về sửa ⇒ bật vòng RÀ LẠI và đặt cổng an toàn về chưa rà.
+       *
+       * Bản sửa là mã nguồn khác với bản đã rà, nên kết quả rà cũ không còn nói gì về nó. Giữ
+       * nguyên "đã sạch" cho một bản chưa ai xem là cách nhanh nhất để lọt một bài vi phạm.
+       *
+       * Duyệt đạt ⇒ đóng vòng rà lại, vì không còn gì để rà.
+       */
+      ...(status === "needs_fix"
+        ? { recheckStatus: "pending" as const, recheckNote: null, securityStatus: "pending" as const }
+        : { recheckStatus: "none" as const }),
       updatedAt: new Date(),
     })
     .where(eq(submissions.id, submissionId))

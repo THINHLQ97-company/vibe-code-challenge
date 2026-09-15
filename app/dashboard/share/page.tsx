@@ -6,6 +6,7 @@ import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Button } from "@/components/dsvh/ui/Button";
 import { Empty } from "@/components/dsvh/ui/data/Empty";
+import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
 import { NotepadIcon, HourglassIcon } from "@/components/dsvh/icons";
 import { ShareForm } from "./share-form";
@@ -46,6 +47,54 @@ export default async function SharePage() {
             action={
               <Link href="/dashboard/build">
                 <Button variant="ghost">Xem trạng thái nộp bài</Button>
+              </Link>
+            }
+          />
+        </Card>
+      </PageShell>
+    );
+  }
+
+  /**
+   * Bài từng bị trả về ở Phase 2 phải qua VÒNG RÀ LẠI mới được đăng bài.
+   *
+   * Vòng này không chấm lại điểm — chỉ xác nhận bản sửa đã đạt chuẩn. Cho đăng khi chưa rà xong
+   * nghĩa là một bài còn lỗi nghiêm trọng vẫn được mang ra nhóm cộng đồng, và lúc đó gỡ xuống thì
+   * người ta đã đọc rồi.
+   */
+  if (submission.recheckStatus === "pending") {
+    return (
+      <PageShell title="Chia sẻ & lan tỏa">
+        <Card>
+          <Empty
+            icon={<HourglassIcon size={40} />}
+            title="Đang rà lại bản sửa của bạn"
+            description="Bài của bạn từng được yêu cầu chỉnh sửa. Hệ thống đang kiểm tra bản sửa xem đã đạt chuẩn chưa — xong bước này bạn mới đăng bài được. Thường mất không lâu."
+            action={
+              <Link href="/dashboard/build">
+                <Button variant="ghost">Xem lại bài đã nộp</Button>
+              </Link>
+            }
+          />
+        </Card>
+      </PageShell>
+    );
+  }
+
+  if (submission.recheckStatus === "failed") {
+    return (
+      <PageShell title="Chia sẻ & lan tỏa">
+        <Alert tone="error" title="Bản sửa chưa đạt — chưa vào được bước chia sẻ">
+          {submission.recheckNote ?? "Ban tổ chức chưa ghi rõ lý do — liên hệ ban tổ chức."}
+        </Alert>
+        <Card>
+          <Empty
+            icon={<HourglassIcon size={40} />}
+            title="Sửa tiếp rồi nộp lại"
+            description="Những điểm nêu ở trên vẫn chưa được xử lý. Sửa xong nộp lại ở mục Nộp bài, hệ thống sẽ rà lại."
+            action={
+              <Link href="/dashboard/build">
+                <Button variant="solid">Về mục nộp bài</Button>
               </Link>
             }
           />
