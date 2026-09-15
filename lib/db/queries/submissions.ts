@@ -129,7 +129,18 @@ export async function updatePhase2Info(
     .update(submissions)
     .set({
       ...data,
-      githubVerifiedAt: null,
+      /**
+       * `githubVerifiedAt` nay là mốc THÍ SINH NỘP ĐỦ HAI LINK, không còn là kết quả gọi GitHub.
+       *
+       * Việc gọi API GitHub để kiểm quyền cộng tác viên đã bỏ (15/09/2026): nó đòi một token máy
+       * chủ luôn phải còn hạn, và mỗi lần token hỏng thì mọi thí sinh đều thấy "chưa xác minh" —
+       * một lỗi phía hệ thống hiện ra như một lỗi của họ. Quyền truy cập kho mã nay ban tổ chức
+       * tự kiểm khi chấm, đằng nào cũng phải mở kho ra đọc.
+       *
+       * Giữ nguyên tên cột và trường `githubVerified` của API tích hợp để hợp đồng với công cụ
+       * chấm ngoài không đổi hình dạng giữa mùa thi.
+       */
+      githubVerifiedAt: new Date(),
       githubVerifyError: null,
       // Mốc nộp lần đầu chỉ ghi khi còn trống: nó xếp thứ tự lịch đăng bài, nên nộp lại để sửa
       // không được làm mất chỗ đứng của người đã nộp sớm.

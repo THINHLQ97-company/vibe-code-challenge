@@ -288,7 +288,7 @@ function getNextAction(s: {
     };
   if (!s.githubVerifiedAt)
     return {
-      desc: `Deploy sản phẩm lên Vibe Host rồi nộp link kèm kho mã GitHub — nhớ thêm ${BTC_GITHUB_ACCOUNT} làm cộng tác viên.`,
+      desc: `Deploy sản phẩm lên Vibe Host rồi nộp link kèm kho mã GitHub — nhớ thêm ${BTC_GITHUB_ACCOUNT} làm cộng tác viên để ban tổ chức mở được kho khi chấm.`,
       cta: "Nộp bài",
       href: "/dashboard/build",
     };

@@ -16,7 +16,6 @@ import {
   ArrowRightIcon,
   GlobeIcon,
   GitBranchIcon,
-  CheckCircleIcon,
   WarningIcon,
 } from "@/components/dsvh/icons";
 import { PhaseScoring } from "./phase-scoring";
@@ -106,18 +105,14 @@ export default async function ScoringDetailPage({
           ) : (
             <span className="text-ink-3">Chưa nộp mã nguồn</span>
           )}
-          {submission.githubRepoUrl &&
-            (submission.githubVerifiedAt ? (
-              <span className="flex items-center gap-1.5 text-teal-strong">
-                <CheckCircleIcon size={15} /> Đã xác minh quyền repo
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 text-amber-strong">
-                <WarningIcon size={15} />
-                Chưa xác minh
-                {submission.githubVerifyError ? `: ${submission.githubVerifyError}` : ""}
-              </span>
-            ))}
+          {/* Không còn xác minh tự động: mở kho mã ra là biết ngay có quyền đọc hay không, nên
+              một huy hiệu "đã xác minh" ở đây chỉ lặp lại điều cái link bên cạnh đã trả lời. */}
+          {submission.githubRepoUrl && (
+            <span className="flex items-center gap-1.5 text-ink-3">
+              <WarningIcon size={15} />
+              Mở kho mã để tự kiểm quyền đọc — chưa vào được thì báo thí sinh thêm cộng tác viên
+            </span>
+          )}
         </div>
 
         <dl className="mt-4 grid gap-x-6 gap-y-3 border-t border-stroke pt-4 sm:grid-cols-2">

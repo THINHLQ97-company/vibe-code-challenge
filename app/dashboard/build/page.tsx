@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
 import { getCurrentSubmissionForUser } from "@/lib/db/queries/submissions";
 import { getAggregatedScores } from "@/lib/db/queries/scores";
-import { formatDateTimeVN, formatDateVN } from "@/lib/datetime";
+import { formatDateVN } from "@/lib/datetime";
 import { PageShell } from "@/components/dsvh/ui/layout/PageShell";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Button } from "@/components/dsvh/ui/Button";
@@ -122,11 +122,6 @@ export default async function BuildPage() {
           submissionId={submission.id}
           initialVibehostUrl={submission.vibehostUrl ?? ""}
           initialGithubRepoUrl={submission.githubRepoUrl ?? ""}
-          githubVerified={!!submission.githubVerifiedAt}
-          initialError={submission.githubVerifyError}
-          lastCheckedAt={
-            submission.githubLastCheckedAt ? formatDateTimeVN(submission.githubLastCheckedAt) : null
-          }
           locked={locked}
         />
         {locked && (
@@ -137,8 +132,8 @@ export default async function BuildPage() {
         )}
         <Note className="mt-4">
           Kho mã để <b>private</b>, rồi vào Settings → Collaborators thêm{" "}
-          <b>{BTC_GITHUB_ACCOUNT}</b> với quyền Read. Hệ thống dùng tài khoản đó để xác minh mã
-          nguồn là của bạn, không đọc mã cho việc gì khác.
+          <b>{BTC_GITHUB_ACCOUNT}</b> với quyền Read. Ban tổ chức cần mở được kho mã khi chấm —
+          không thêm cộng tác viên thì bài của bạn không chấm được.
         </Note>
       </Card>
 

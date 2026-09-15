@@ -23,7 +23,6 @@ services:
       DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-app}@db:5432/matbao-vibe-challenge
       JWT_SECRET: ${JWT_SECRET:?cần đặt JWT_SECRET trong .env}
       SCORING_API_KEY: ${SCORING_API_KEY:-}
-      GITHUB_BOT_PAT: ${GITHUB_BOT_PAT:-}
     depends_on:
       db:
         condition: service_healthy

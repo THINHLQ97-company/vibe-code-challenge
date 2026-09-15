@@ -383,8 +383,8 @@ const STEPS = [
               </li>
             </ol>
             <DarkNote>
-              Đây là tài khoản duy nhất bạn cần thêm. Nếu chưa thêm cộng tác viên, bước xác minh sẽ
-              không thành công và bài dự thi chưa được ghi nhận là đã nộp.
+              Đây là tài khoản duy nhất bạn cần thêm. Chưa thêm cộng tác viên thì ban giám khảo
+              không mở được kho mã, và bài của bạn không chấm được ở Phase 2.
             </DarkNote>
           </GlassCard>
           <GlassCard className="p-4">
@@ -439,12 +439,11 @@ const STEPS = [
             <p className="mt-2 text-caption text-cream/65">
               Kho mã đặt ở chế độ riêng tư, đồng thời thêm{" "}
               <b className="text-cream">{BTC_GITHUB_ACCOUNT}</b> làm cộng tác viên với quyền chỉ
-              đọc. Tài khoản này chỉ dùng để xác minh quyền sở hữu kho mã, không dùng vào việc gì
-              khác.
+              đọc. Tài khoản này chỉ dùng để đọc mã nguồn khi chấm, không dùng vào việc gì khác.
             </p>
             <DarkNote>
-              Nếu chưa thêm cộng tác viên, bước xác minh sẽ không thành công và bài dự thi chưa
-              được ghi nhận là đã nộp.
+              Chưa thêm cộng tác viên thì ban giám khảo không mở được kho mã, và bài của bạn
+              không chấm được ở Phase 2.
             </DarkNote>
           </GlassCard>
         </div>

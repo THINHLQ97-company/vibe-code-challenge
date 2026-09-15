@@ -69,7 +69,7 @@ export function submissionStage(s: S): Stage {
     return stage("blocked", "Gắn cờ an toàn", "Vướng điều cấm ở cổng an toàn — đang chờ THÍ SINH sửa.");
   if (!s.vibehostUrl) return stage("idle", "Đang làm bài", "Thí sinh đang làm, chưa nộp sản phẩm.");
   if (!s.githubVerifiedAt)
-    return stage("blocked", "Chưa xác minh mã nguồn", "Chưa xác minh được quyền truy cập repo (CP3).");
+    return stage("idle", "Chưa nộp mã nguồn", "Đã có link sản phẩm nhưng chưa nộp đủ link mã nguồn (CP3).");
   if (s.securityStatus === "pending")
     return stage("waiting", "Chờ rà soát an toàn", "Đang chờ BTC rà soát cổng an toàn (CP4).");
   if (s.feedbackStatus === "needs_fix")

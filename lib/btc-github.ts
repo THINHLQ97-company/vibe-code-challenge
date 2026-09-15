@@ -1,6 +1,6 @@
 /**
  * Tài khoản GitHub của ban tổ chức — thứ thí sinh phải thêm làm cộng tác viên vào kho mã riêng tư
- * của mình để hệ thống xác minh được mã nguồn là của họ.
+ * của mình để ban giám khảo mở được kho ra chấm.
  *
  * MỘT hằng số cho cả hướng dẫn lẫn câu báo lỗi. Trước đây mỗi màn nói một kiểu — có chỗ ghi
  * "tài khoản ban tổ chức sẽ công bố sau", có chỗ ghi thẳng tên tài khoản máy — nên thí sinh đọc

@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireSession } from "@/lib/api-auth";
-import {
-  getSubmissionById,
-  updatePhase2Info,
-  markGithubVerified,
-  markGithubVerifyFailed,
-} from "@/lib/db/queries/submissions";
+import { getSubmissionById, updatePhase2Info } from "@/lib/db/queries/submissions";
 import { getAggregatedScores } from "@/lib/db/queries/scores";
-import { verifyGithubAccess } from "@/lib/github";
 
 const schema = z.object({
   vibehostUrl: z.string().url("Link Vibe Host không hợp lệ"),
@@ -41,15 +35,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     );
   }
 
-  await updatePhase2Info(submission.id, parsed.data);
-  const verify = await verifyGithubAccess(parsed.data.githubRepoUrl);
-  if (verify.ok) {
-    const row = await markGithubVerified(submission.id);
-    return NextResponse.json({ submission: row, githubVerified: true });
-  }
-  // Lưu lại lý do thất bại — phải sống sót qua reload để cả thí sinh lẫn BTC/BGK
-  // đều thấy được tại sao bài đang kẹt ở Phase 2, không chỉ hiện tạm trên UI lúc bấm nút
-  // (tham khảo pattern validation status của hackclub/podium).
-  const row = await markGithubVerifyFailed(submission.id, verify.reason ?? "Không xác định được lỗi");
-  return NextResponse.json({ submission: row, githubVerified: false, githubError: verify.reason });
+  const row = await updatePhase2Info(submission.id, parsed.data);
+  return NextResponse.json({ submission: row });
 }

@@ -168,13 +168,17 @@ ai viết bài nào, và không biết thì cũng không thiên vị được.
 `flaggedPrebuiltRepo = true` nghĩa là BTC đã xác định bài dùng lại repo có sẵn — vi phạm thể lệ,
 không phải mục để trừ điểm. Bài đó không qua được Phase 2 bất kể điểm kỹ thuật.
 
-Mã nguồn để **private**; tài khoản `matbao-vibe-bot` được thí sinh thêm làm collaborator quyền
-đọc. Công cụ cần đọc repo thì dùng khoá riêng của tài khoản đó — app này không cấp token GitHub
-qua API.
+Mã nguồn để **private**; thí sinh thêm `git@matbao.ai` làm collaborator quyền đọc. Công cụ cần
+đọc repo thì dùng khoá riêng của tài khoản đó — app này không cấp token GitHub qua API.
 
-> Lưu ý trạng thái hiện tại: biến `GITHUB_BOT_PAT` trên bản đang chạy vẫn là giá trị mẫu, nên
-> trường `githubVerified` chưa phản ánh việc xác minh thật. Sẽ đúng sau khi ban tổ chức cấp token
-> của tài khoản bot.
+> **Đổi ý nghĩa trường `githubVerified` (15/09/2026).** App đã BỎ việc tự gọi GitHub API kiểm
+> quyền collaborator. Trường này vẫn còn trong payload và vẫn là boolean, nhưng nay có nghĩa là
+> **thí sinh đã nộp đủ link sản phẩm và link mã nguồn**, không phải "đã xác minh được quyền đọc
+> repo". Công cụ chấm nào đang dựa vào nó để biết repo chắc chắn mở được thì phải tự thử `git
+> clone` thay vì tin trường này.
+>
+> Lý do bỏ: việc kiểm cần một token máy chủ luôn còn hạn, và mỗi lần token hỏng thì mọi thí sinh
+> đều thấy "chưa xác minh" — một lỗi phía hệ thống hiện ra như lỗi của họ, ngay giữa hạn nộp.
 
 ---
 

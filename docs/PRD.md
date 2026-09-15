@@ -24,7 +24,7 @@ Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, chạy 
    điểm ý tưởng về qua `POST /api/integrations/scores` → hiển thị cho thí sinh sau khi hội
    đồng xác nhận (`lib/score-visibility.ts`). Không gate — ai cũng tiến tiếp.
 4. **CP3** — Thí sinh tự đăng ký Vibe Host ở vibehost.matbao.ai (ngoài hệ thống), làm sản phẩm đạt đủ 6 tiêu chí ngưỡng sàn.
-5. **Phase 2 · Điểm sản phẩm & mã nguồn** — Nộp link Vibe Host + link Git private, thêm machine-user GitHub (`matbao-vibe-bot`) làm collaborator → hệ thống tự verify qua GitHub API → hệ chấm ngoài chấm Chất lượng kỹ thuật + Hoàn thiện → BTC xem, ghi feedback cụ thể → thí sinh sửa & nộp lại → BTC xác nhận đạt → app đánh dấu bài được tính vào **KPI mục 5.2 Đề xuất cải tiến / sáng kiến** (không đẩy đi đâu, hệ HRM tự đọc — nhãn duy nhất khai ở `lib/kpi.ts`).
+5. **Phase 2 · Điểm sản phẩm & mã nguồn** — Nộp link Vibe Host + link Git private, thêm `git@matbao.ai` làm collaborator để BGK mở được kho khi chấm → hệ chấm ngoài chấm Chất lượng kỹ thuật + Hoàn thiện → BTC xem, ghi feedback cụ thể → thí sinh sửa & nộp lại → BTC xác nhận đạt → app đánh dấu bài được tính vào **KPI mục 5.2 Đề xuất cải tiến / sáng kiến** (không đẩy đi đâu, hệ HRM tự đọc — nhãn duy nhất khai ở `lib/kpi.ts`).
 6. **CP4** — Qua cổng rà soát an toàn (7 điều cấm) — tự động là chính, người chỉ xử case bị gắn cờ.
 7. **Phase 3 · Điểm lan tỏa** — Đăng bài ẩn danh lên Group "Vibe Coding chưa?" theo lịch/khung giờ → dán link (CP5) → BGK tick duyệt → đếm tương tác 7 ngày (nhập tay MVP) → hệ thống tự tính bậc điểm 1–4 theo % so với trung vị cùng khung giờ/tuần.
 8. **CP6** — Nộp phiếu trải nghiệm sản phẩm (form nhập trực tiếp: 6 câu chung + 4 câu riêng theo bảng).
@@ -41,7 +41,7 @@ Mắt Bão tổ chức cuộc thi vibe coding nội bộ toàn công ty, chạy 
   để đẩy điểm vào, phân biệt `phase` (1/2), kèm `submission_id` + điểm từng module + tóm
   tắt + timestamp. Cả hai auth bằng `X-API-Key` (so khớp `timingSafeEqual`). (Payload chi
   tiết — cần chốt cùng đội build bộ chấm điểm, đánh dấu integration point.)
-- **GitHub verify (Phase 2)**: machine-user GitHub account (`matbao-vibe-bot`, do BTC/IT tạo & quản lý) + Personal Access Token lưu server-side secret. Thí sinh add account này làm collaborator (Read) vào repo private. Backend dùng PAT gọi GitHub API kiểm tra bot account truy cập được repo chưa (200 vs 404) → set `github_verified_at`. Action item trước launch: tạo tài khoản `matbao-vibe-bot` + sinh PAT.
+- **Quyền đọc mã nguồn (Phase 2)**: thí sinh add `git@matbao.ai` làm collaborator (Read) vào repo private. **Việc tự động verify qua GitHub API đã BỎ ngày 15/09/2026**: nó đòi một PAT máy chủ luôn còn hạn, và mỗi lần token hỏng thì mọi thí sinh đều thấy "chưa xác minh" — một lỗi phía hệ thống hiện ra như lỗi của họ, ngay giữa hạn nộp. BGK tự kiểm khi chấm, đằng nào cũng phải mở kho ra đọc. Cột `github_verified_at` giữ nguyên tên nhưng nay ghi mốc THÍ SINH NỘP ĐỦ HAI LINK.
 - **UI**: copy trực tiếp component + token CSS từ `dsvh` (cùng stack Next.js+Tailwind+shadcn/ui) vào project — Button, Card, Table, Stepper, StatTile, Badge, Progress, FileUpload...; giữ `docs/design.md` ghi chú các component đã dùng & mapping với các trang trong app.
 
 ## 5. Non-functional Requirements

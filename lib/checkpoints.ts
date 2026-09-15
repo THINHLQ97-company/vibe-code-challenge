@@ -40,7 +40,6 @@ type CheckpointInput = Pick<
   | "registrationStatus"
   | "registrationNote"
   | "githubVerifiedAt"
-  | "githubVerifyError"
   | "securityStatus"
   | "securityNote"
   | "facebookPostUrl"
@@ -65,10 +64,8 @@ export function getCheckpoints(s: CheckpointInput): Checkpoint[] {
       code: "CP3",
       label: "CP3 · Nộp Vibe Host + mã nguồn",
       done: !!s.githubVerifiedAt,
-      reason: s.isPrebuiltRepo
-        ? (s.prebuiltNote ?? "Bị gắn cờ dùng repo/mẫu có sẵn")
-        : s.githubVerifyError || null,
-      blocker: "chưa xác minh mã nguồn (CP3)",
+      reason: s.isPrebuiltRepo ? (s.prebuiltNote ?? "Bị gắn cờ dùng repo/mẫu có sẵn") : null,
+      blocker: "chưa nộp sản phẩm và mã nguồn (CP3)",
       blocking: true,
     },
     {

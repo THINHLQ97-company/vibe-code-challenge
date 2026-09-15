@@ -62,7 +62,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
   {
     code: "CP3",
     title: "Nộp Vibe Host + mã nguồn",
-    lead: "Sản phẩm phải chạy được trên một đường dẫn công khai và mã nguồn phải xác minh được là của bạn.",
+    lead: "Sản phẩm phải chạy được trên một đường dẫn công khai, và ban giám khảo phải mở được kho mã nguồn của bạn để chấm.",
     icon: <StepDeploy size={20} />,
     carriage: "middle",
     you: [
@@ -71,7 +71,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
       `Đặt kho mã ở chế độ private, rồi vào Settings → Collaborators thêm ${BTC_GITHUB_ACCOUNT} với quyền chỉ đọc.`,
       "Dán hai đường dẫn — sản phẩm upload lên Vibe Host và mã nguồn trên GitHub — vào tài khoản thi.",
     ],
-    gate: "Xác minh mã nguồn thành công và sản phẩm đạt đủ sáu tiêu chí ngưỡng sàn.",
+    gate: "Nộp đủ link sản phẩm và kho mã, và sản phẩm đạt đủ sáu tiêu chí ngưỡng sàn.",
     fallback:
       "Bị trả về thì vẫn sửa và nộp lại được trong thời hạn Phase 2. Bài đã trượt một lần thì bản sửa chỉ được rà thêm một vòng duy nhất. Hết thời hạn mà vẫn chưa đạt — hoặc nộp muộn tới mức không còn lượt chấm nào — thì bài dừng ở Phase 2: không vào phần thi lan tỏa, và không đăng ký lại được ở đợt sau.",
   },
