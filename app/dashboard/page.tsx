@@ -24,6 +24,7 @@ import {
   StarIcon,
 } from "@/components/dsvh/icons";
 import { getWave, countInWaveByBoard } from "@/lib/db/queries/waves";
+import { BTC_GITHUB_ACCOUNT } from "@/lib/btc-github";
 
 const PHASE_STEPS = [
   { label: "Ý tưởng", description: "Đăng ký & chấm điểm đề tài" },
@@ -287,7 +288,7 @@ function getNextAction(s: {
     };
   if (!s.githubVerifiedAt)
     return {
-      desc: "Deploy sản phẩm lên Vibe Host rồi nộp link kèm repo GitHub (nhớ thêm bot của BTC làm collaborator).",
+      desc: `Deploy sản phẩm lên Vibe Host rồi nộp link kèm kho mã GitHub — nhớ thêm ${BTC_GITHUB_ACCOUNT} làm cộng tác viên.`,
       cta: "Nộp bài",
       href: "/dashboard/build",
     };

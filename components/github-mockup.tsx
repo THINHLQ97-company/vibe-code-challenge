@@ -8,6 +8,8 @@
  * Cố ý dừng ở mức NHẬN RA MẶT giao diện. Hướng dẫn chi tiết từng nút là thứ AI và công cụ tìm kiếm
  * làm tốt hơn, và cũng là bài tập đầu tiên của một cuộc thi vibe code.
  */
+import { BTC_GITHUB_ACCOUNT } from "@/lib/btc-github";
+
 export function GithubRepoMockup({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -65,7 +67,7 @@ export function GithubRepoMockup({ className = "" }: { className?: string }) {
       </text>
       <rect x="330" y="108" width="52" height="17" rx="4" fill="none" stroke="#f0883e" />
       <text x="396" y="120" fill="#f0883e" fontSize="10" fontFamily="system-ui">
-        ← 3. Thêm ban tổ chức vào đây
+        ← 3. Thêm {BTC_GITHUB_ACCOUNT} vào đây
       </text>
       <line x1="24" y1="128" x2="616" y2="128" stroke="#21262d" />
 

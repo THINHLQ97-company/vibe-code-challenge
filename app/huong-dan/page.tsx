@@ -19,6 +19,7 @@ import {
   StepSurvey,
   MarkBroadcast,
 } from "@/components/landing-art";
+import { BTC_GITHUB_ACCOUNT } from "@/lib/btc-github";
 
 export const metadata = {
   title: { absolute: "Hướng dẫn dự thi Vibe Code Challenge" },
@@ -376,11 +377,14 @@ const STEPS = [
               <li>1. Có tài khoản GitHub — tài khoản cá nhân được chấp nhận</li>
               <li>2. Tạo kho mã mới và đặt ở chế độ <b className="text-cream">Private</b></li>
               <li>3. Đẩy toàn bộ mã nguồn sản phẩm lên kho</li>
-              <li>4. Vào Settings → Collaborators, thêm tài khoản ban tổ chức với quyền chỉ đọc</li>
+              <li>
+                4. Vào Settings → Collaborators, thêm{" "}
+                <b className="text-cream">{BTC_GITHUB_ACCOUNT}</b> với quyền chỉ đọc
+              </li>
             </ol>
             <DarkNote>
-              Nếu chưa thêm cộng tác viên, bước xác minh sẽ không thành công và bài dự thi chưa được
-              ghi nhận là đã nộp.
+              Đây là tài khoản duy nhất bạn cần thêm. Nếu chưa thêm cộng tác viên, bước xác minh sẽ
+              không thành công và bài dự thi chưa được ghi nhận là đã nộp.
             </DarkNote>
           </GlassCard>
           <GlassCard className="p-4">
@@ -433,9 +437,10 @@ const STEPS = [
           <GlassCard className="p-4">
             <h3 className="text-body font-semibold text-cream">Chuẩn bị kho mã nguồn</h3>
             <p className="mt-2 text-caption text-cream/65">
-              Kho mã đặt ở chế độ riêng tư, đồng thời thêm tài khoản của ban tổ chức làm cộng tác
-              viên với quyền chỉ đọc. Tài khoản này chỉ dùng để xác minh quyền sở hữu kho mã.{" "}
-              <b className="text-cream">Ban tổ chức sẽ công bố tài khoản cần thêm.</b>
+              Kho mã đặt ở chế độ riêng tư, đồng thời thêm{" "}
+              <b className="text-cream">{BTC_GITHUB_ACCOUNT}</b> làm cộng tác viên với quyền chỉ
+              đọc. Tài khoản này chỉ dùng để xác minh quyền sở hữu kho mã, không dùng vào việc gì
+              khác.
             </p>
             <DarkNote>
               Nếu chưa thêm cộng tác viên, bước xác minh sẽ không thành công và bài dự thi chưa

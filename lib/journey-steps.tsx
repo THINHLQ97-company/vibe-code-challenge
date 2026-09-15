@@ -7,6 +7,7 @@ import {
   StepSurvey,
   MarkBroadcast,
 } from "@/components/landing-art";
+import { BTC_GITHUB_ACCOUNT } from "@/lib/btc-github";
 
 /**
  * Nội dung SÁU MỐC, tách khỏi component để trang chủ và trang hướng dẫn dùng chung một bản.
@@ -67,7 +68,7 @@ export const JOURNEY_STEPS: JourneyStep[] = [
     you: [
       "Vibe code sản phẩm cùng công cụ AI, làm dứt điểm từng chức năng một.",
       "Triển khai lên Vibe Host bằng tài khoản được cấp miễn phí, khai một suất cơ sở dữ liệu.",
-      "Đặt GitHub ở chế độ private và thêm ban tổ chức vào quyền xem.",
+      `Đặt kho mã ở chế độ private, rồi vào Settings → Collaborators thêm ${BTC_GITHUB_ACCOUNT} với quyền chỉ đọc.`,
       "Dán hai đường dẫn — sản phẩm upload lên Vibe Host và mã nguồn trên GitHub — vào tài khoản thi.",
     ],
     gate: "Xác minh mã nguồn thành công và sản phẩm đạt đủ sáu tiêu chí ngưỡng sàn.",

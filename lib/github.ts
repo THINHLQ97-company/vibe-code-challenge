@@ -1,6 +1,7 @@
-// Verify machine-user (matbao-vibe-bot) đã được thí sinh add làm collaborator vào repo
+// Verify tài khoản ban tổ chức (xem lib/btc-github.ts) đã được thí sinh add làm collaborator vào repo
 // private của họ — xem docs/PRD.md mục 4 "GitHub verify". Chỉ hỗ trợ GitHub (đã chốt
 // với user); KHÔNG hỗ trợ GitLab trong iMVP.
+import { BTC_GITHUB_ACCOUNT } from "./btc-github";
 
 function parseGithubRepoUrl(url: string): { owner: string; repo: string } | null {
   try {
@@ -36,7 +37,7 @@ export async function verifyGithubAccess(
   if (res.status === 404) {
     return {
       ok: false,
-      reason: "matbao-vibe-bot chưa được add làm collaborator (hoặc repo không tồn tại)",
+      reason: `Chưa thêm ${BTC_GITHUB_ACCOUNT} làm cộng tác viên, hoặc kho mã không tồn tại`,
     };
   }
   return { ok: false, reason: `GitHub API trả lỗi ${res.status}` };

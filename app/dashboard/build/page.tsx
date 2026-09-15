@@ -12,6 +12,7 @@ import { Badge } from "@/components/dsvh/ui/Badge";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { NotepadIcon, HourglassIcon, ArrowRightIcon } from "@/components/dsvh/icons";
 import { BuildForm } from "./build-form";
+import { BTC_GITHUB_ACCOUNT } from "@/lib/btc-github";
 
 export const metadata = { title: "Nộp bài" };
 
@@ -135,9 +136,9 @@ export default async function BuildPage() {
           </Note>
         )}
         <Note className="mt-4">
-          Repo để <b>private</b> và thêm tài khoản GitHub của ban tổ chức làm collaborator (quyền
-          Read) — hệ thống dùng tài khoản đó để xác minh, không đọc mã nguồn của bạn cho việc gì
-          khác. Ban tổ chức sẽ công bố tài khoản cần thêm.
+          Kho mã để <b>private</b>, rồi vào Settings → Collaborators thêm{" "}
+          <b>{BTC_GITHUB_ACCOUNT}</b> với quyền Read. Hệ thống dùng tài khoản đó để xác minh mã
+          nguồn là của bạn, không đọc mã cho việc gì khác.
         </Note>
       </Card>
 
