@@ -29,7 +29,7 @@ export default async function ProfilePage() {
   return (
     <PageShell
       title="Hồ sơ của tôi"
-      subtitle="Ảnh đại diện và mật khẩu do bạn tự quản lý; thông tin nhân sự do BTC quản lý"
+      subtitle="Ảnh đại diện do bạn tự quản lý; thông tin nhân sự lấy từ tài khoản công ty"
     >
       <ProfileForm
         name={user.name ?? ""}
@@ -38,7 +38,6 @@ export default async function ProfilePage() {
         boardLabel={user.board ? BOARD_LABEL[user.board] : "—"}
         roleLabel={ROLE_LABEL[user.role] ?? user.role}
         avatarUrl={user.avatarUrl}
-        canChangePassword={!!user.passwordHash}
         departmentOptions={DEPARTMENT_OPTIONS}
       />
     </PageShell>

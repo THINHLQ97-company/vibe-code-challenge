@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader } from "@/components/dsvh/ui/Card";
 import { Button } from "@/components/dsvh/ui/Button";
-import { Input } from "@/components/dsvh/ui/Input";
-import { PasswordInput } from "@/components/dsvh/ui/auth/PasswordInput";
 import { Avatar } from "@/components/dsvh/ui/data/Avatar";
 import { Alert } from "@/components/dsvh/ui/overlay/Alert";
 import { Note } from "@/components/dsvh/ui/data/Note";
@@ -56,7 +54,6 @@ export function ProfileForm({
   boardLabel,
   roleLabel,
   avatarUrl,
-  canChangePassword,
   departmentOptions,
 }: {
   name: string;
@@ -65,8 +62,6 @@ export function ProfileForm({
   boardLabel: string;
   roleLabel: string;
   avatarUrl: string | null;
-  /** Tài khoản đăng nhập bằng Microsoft không có mật khẩu để đổi. */
-  canChangePassword: boolean;
   departmentOptions: Array<{ value: string; label: string }>;
 }) {
   const router = useRouter();
@@ -75,12 +70,6 @@ export function ProfileForm({
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [avatarOk, setAvatarOk] = useState<string | null>(null);
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [pwBusy, setPwBusy] = useState(false);
-  const [pwError, setPwError] = useState<string | null>(null);
-  const [pwOk, setPwOk] = useState(false);
 
   const [dept, setDept] = useState<string | null>(null);
   const [deptBusy, setDeptBusy] = useState(false);
@@ -152,35 +141,6 @@ export function ProfileForm({
     }
   }
 
-  async function changePassword() {
-    setPwError(null);
-    setPwOk(false);
-    if (newPassword !== confirmPassword) {
-      setPwError("Hai ô mật khẩu mới không khớp.");
-      return;
-    }
-    setPwBusy(true);
-    try {
-      const res = await fetch("/api/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "password", currentPassword, newPassword }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setPwError(data.error ?? "Không đổi được mật khẩu");
-        return;
-      }
-      setPwOk(true);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch {
-      setPwError("Không kết nối được máy chủ, thử lại sau");
-    } finally {
-      setPwBusy(false);
-    }
-  }
 
   return (
     <>
@@ -276,66 +236,6 @@ export function ProfileForm({
         )}
       </Card>
 
-      {/* Tài khoản đăng nhập bằng Microsoft không có mật khẩu nào để mà đổi — mật khẩu của họ do
-          hệ thống công ty giữ. Ẩn hẳn thẻ này thay vì hiện ra rồi báo lỗi khi bấm. */}
-      {canChangePassword ? (
-        <Card>
-          <CardHeader
-            title="Đổi mật khẩu"
-            subtitle="Bắt buộc nhập mật khẩu hiện tại — đổi mật khẩu là thao tác chiếm luôn tài khoản"
-          />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <PasswordInput
-              label="Mật khẩu hiện tại"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-            <div />
-            <PasswordInput
-              label="Mật khẩu mới"
-              hint="Tối thiểu 8 ký tự"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-            <Input
-              label="Nhập lại mật khẩu mới"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-          </div>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Button
-              variant="solid"
-              loading={pwBusy}
-              disabled={!currentPassword || newPassword.length < 8 || !confirmPassword}
-              onClick={() => void changePassword()}
-            >
-              Đổi mật khẩu
-            </Button>
-            {pwOk && <span className="text-caption text-teal-strong">Đã đổi mật khẩu.</span>}
-          </div>
-          {pwError && (
-            <div className="mt-3">
-              <Alert tone="error">{pwError}</Alert>
-            </div>
-          )}
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader
-            title="Mật khẩu"
-            subtitle="Tài khoản này đăng nhập bằng Microsoft của công ty"
-          />
-          <Note>
-            Mật khẩu do hệ thống tài khoản công ty quản lý, không đặt riêng ở đây. Cần đổi thì đổi
-            ở tài khoản Microsoft, lần đăng nhập sau sẽ dùng mật khẩu mới.
-          </Note>
-        </Card>
-      )}
     </>
   );
 }

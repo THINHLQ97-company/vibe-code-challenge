@@ -10,6 +10,7 @@ import {
   exchangeCode,
   verifyIdToken,
   fetchGraphProfile,
+  fetchGraphAvatar,
   getBaseUrl,
 } from "@/lib/auth/microsoft";
 
@@ -54,6 +55,7 @@ export async function GET(req: NextRequest) {
   let displayName: string | null;
   let departmentRaw: string | null = null;
   let employeeId: string | null = null;
+  let graphToken: string | null = null;
 
   try {
     const { idToken, accessToken } = await exchangeCode({
@@ -77,6 +79,7 @@ export async function GET(req: NextRequest) {
     displayName = profile?.displayName ?? claims.name ?? null;
     departmentRaw = profile?.department ?? null;
     employeeId = profile?.employeeId ?? null;
+    graphToken = accessToken;
   } catch {
     return fail(req, "ms_that_bai");
   }
@@ -95,6 +98,16 @@ export async function GET(req: NextRequest) {
   const bySubject = await db.query.users.findFirst({ where: eq(users.oauthSubject, subject) });
   const existing = bySubject ?? (await db.query.users.findFirst({ where: eq(users.email, email) }));
 
+  /**
+   * Ảnh đại diện chỉ lấy khi tài khoản CHƯA có ảnh.
+   *
+   * Hai lý do: người đã tự tải ảnh lên thì đó là lựa chọn của họ, ghi đè mỗi lần đăng nhập là xoá
+   * lựa chọn đó; và gọi Graph lấy ảnh ở mọi lượt đăng nhập là thêm một request mạng vào đúng
+   * đường mà ai cũng đi qua, đổi lại gần như không được gì.
+   */
+  const needAvatar = !existing?.avatarUrl;
+  const avatarUrl = needAvatar && graphToken ? await fetchGraphAvatar(graphToken) : null;
+
   let user;
   if (existing) {
     /**
@@ -110,6 +123,7 @@ export async function GET(req: NextRequest) {
         email,
         name: displayName ?? existing.name,
         departmentRaw: departmentRaw ?? existing.departmentRaw,
+        ...(avatarUrl ? { avatarUrl } : {}),
         ...(deptCode ? { department: deptCode, board } : {}),
         ...(employeeId && !existing.employeeCode ? { employeeCode: employeeId } : {}),
       })
@@ -127,6 +141,7 @@ export async function GET(req: NextRequest) {
         department: deptCode,
         board,
         departmentRaw,
+        avatarUrl,
         employeeCode: employeeId,
         role: "candidate",
       })

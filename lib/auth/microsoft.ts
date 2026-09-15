@@ -191,3 +191,40 @@ export async function fetchGraphProfile(accessToken: string): Promise<GraphProfi
   if (!res.ok) return null;
   return (await res.json()) as GraphProfile;
 }
+
+/**
+ * Ảnh đại diện từ Microsoft Graph, trả về dạng data URI để ghi thẳng vào cột `users.avatar_url`.
+ *
+ * Xin bản 240×240 chứ không phải `/me/photo/$value`: endpoint không kèm kích thước trả về ảnh GỐC,
+ * mà ảnh hồ sơ nhân sự thường là vài trăm KB tới vài MB — trong khi chỗ hiển thị lớn nhất trong app
+ * chỉ 40px. 240 là đủ nét cho màn hình retina và vẫn nhỏ.
+ *
+ * Rất nhiều người không đặt ảnh, Graph trả 404 cho họ. Đó là chuyện bình thường, không phải lỗi —
+ * trả `null` và app dùng chữ cái đầu của tên như trước.
+ */
+const AVATAR_MAX_BYTES = 1024 * 1024;
+
+export async function fetchGraphAvatar(accessToken: string): Promise<string | null> {
+  for (const path of ["/me/photos/240x240/$value", "/me/photo/$value"]) {
+    try {
+      const res = await fetch(`https://graph.microsoft.com/v1.0${path}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) continue;
+
+      const buf = await res.arrayBuffer();
+      // Chặn ảnh quá lớn: cột này nằm ngay trong bảng users, một ảnh vài MB nhân với vài trăm
+      // người là phình cả bảng và làm chậm mọi truy vấn đọc hồ sơ.
+      if (buf.byteLength === 0 || buf.byteLength > AVATAR_MAX_BYTES) continue;
+
+      const type = res.headers.get("content-type") ?? "image/jpeg";
+      if (!/^image\/(jpeg|png|gif)$/.test(type)) continue;
+
+      return `data:${type};base64,${Buffer.from(buf).toString("base64")}`;
+    } catch {
+      // Lỗi mạng khi lấy ảnh KHÔNG được làm hỏng việc đăng nhập — ảnh là thứ phụ.
+      continue;
+    }
+  }
+  return null;
+}
